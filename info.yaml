@@ -8,7 +8,7 @@ project:
   clock_hz:     0
   tiles:        "3x2"
   analog_pins:  6
-  uses_3v3:     true
+  uses_vapwr:   true
   top_module:   "tt_um_tnt_mosbius"
   source_files:        
     - "project.v"
@@ -43,9 +43,9 @@ pinout:
 
   ua[0]: "Reference Bias"
   ua[1]: "Bus 1A"
-  ua[2]: "Bus 2A"
-  ua[3]: "Bus 3A"
-  ua[4]: "Bus 4A"
-  ua[5]: "Bus 5A"
+  ua[2]: "Bus 3A"
+  ua[3]: "Bus 5A"
+  ua[4]: "Bus 2B"
+  ua[5]: "Bus 4B"
 
 yaml_version: 6

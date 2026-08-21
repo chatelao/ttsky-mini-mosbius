@@ -10,11 +10,13 @@ Skywater shuttles and a proposal by Andrew Kang was accepted. See the
 [attached document](./Mini_Mosbius_Proposal_Kang_Andrew_v2.pdf).
 
 Andrew completed the schematic design along with simulation end of August 2025
-but before he completed layout, I decided to use this as a base to build my
-own layout variant.
+but before he started the layout, I decided to use this as a base to build my
+own variant.
 
-The design of the analog part is pretty much unchanged, only minor adaptations
-guided by layout were made. The digital control part was adapted quite a bit.
+I left he design of the analog part is pretty much unchanged, only made minor
+adaptations. Some of those were guided by layout constraints, some other in an
+attempt to make more circuits possible. I did rewrite most of the digital control
+logic. And of course the layout is entirely mine.
 
 
 ## How to test
