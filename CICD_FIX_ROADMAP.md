@@ -86,26 +86,34 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 - [ ] **3.3 Trigger and Monitor GitHub Actions Pipeline Run**
   - [ ] **3.3.1 Confirm Automated Workflow Trigger**
     - Confirm pipeline execution is triggered on push or manually invoke `workflow_dispatch`.
-  - [ ] **3.3.2 Monitor Live Job Execution**
-    - Monitor real-time status of `check`, `gds`, `precheck`, `viewer`, and `docs` jobs in GitHub Actions tab.
-  - [ ] **3.3.3 Inspect Pipeline Execution Logs**
-    - Confirm all job steps run to completion without unhandled exceptions.
+  - [ ] **3.3.2 Monitor `check` and `gds` Job Execution**
+    - Monitor `check` job log output for `make check` completion.
+    - Monitor `gds` job for GDS and LEF artifact generation.
+  - [ ] **3.3.3 Monitor `precheck`, `viewer`, and `docs` Job Execution**
+    - Track concurrent execution of downstream jobs.
+  - [ ] **3.3.4 Inspect Pipeline Execution Logs for Warnings/Errors**
+    - Confirm all job steps run to completion without unhandled exceptions or fatal errors.
 
 - [ ] **3.4 Verify Precheck Job Execution & Output**
-  - [ ] **3.4.1 Verify DEF Template Resolution**
-    - Check precheck logs to confirm `../tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def` is found and loaded without `FileNotFoundError`.
-  - [ ] **3.4.2 Validate SG13G2 Boundary & Layer Checks**
-    - Confirm `prBoundary.boundary` layer `235/4` is correctly detected.
+  - [ ] **3.4.1 Verify DEF Template Path Resolution**
+    - Check precheck logs to confirm `../tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def` path is correctly expanded.
+  - [ ] **3.4.2 Confirm DEF Template Loading without FileNotFoundError**
+    - Verify template DEF file is parsed without `Errno 2` missing file errors.
+  - [ ] **3.4.3 Validate SG13G2 prBoundary Layer Detection**
+    - Confirm `prBoundary.boundary` layer `235/4` is correctly detected instead of sky130 `189/4`.
+  - [ ] **3.4.4 Validate SG13G2 Standard Layers**
     - Confirm standard SG13G2 layers (e.g. 64-71, 235) pass layer validation without false positive errors.
-  - [ ] **3.4.3 Confirm Analog Pin Placement Verification**
+  - [ ] **3.4.5 Confirm Analog Pin Placement Verification**
     - Verify analog pin location checks against template DEF pass for `tt_um_tnt_mosbius.gds`.
-  - [ ] **3.4.4 Confirm Precheck Job Green Status**
+  - [ ] **3.4.6 Confirm Precheck Job Green Status**
     - Verify overall precheck job completes with a successful green status check.
 
 - [ ] **3.5 Verify Pages & Documentation Deployment Jobs**
-  - [ ] **3.5.1 Confirm 3D Viewer Artifact & Pages Deployment**
-    - Verify `viewer` job generates 3D rendering and deploys to GitHub Pages without HTTP 404 errors.
-  - [ ] **3.5.2 Confirm Documentation Build Job**
+  - [ ] **3.5.1 Verify 3D Viewer Artifact Generation**
+    - Check viewer job log for gds_render artifact download and 3D web model build.
+  - [ ] **3.5.2 Confirm Pages Deployment API Call Success**
+    - Verify `actions/deploy-pages` succeeds with HTTP 200/201 without 404 Not Found error.
+  - [ ] **3.5.3 Confirm Documentation Build Job Output**
     - Verify `docs` job completes successfully and publishes documentation artifacts.
-  - [ ] **3.5.3 Validate Live Page URLs**
+  - [ ] **3.5.4 Validate Live Page Viewer URLs**
     - Access live GitHub Pages viewer URL and verify top module render displays correctly.
