@@ -72,6 +72,12 @@ The top-level wrapper conforms to the TinyTapeout IHP shuttle pinout specificati
 | **Capacitors** | `cap_mim_m3_1` | `cap_cmim` | MIM capacitors for frequency compensation / filtering. |
 | **SiGe HBT (Optional)** | N/A | `npn13G2` | High-speed SiGe NPN transistor available for RF/low-noise stages. |
 
+#### 4.1.1 BJT Model Derivative Strategy
+To derive an IHP-BJT model (`npn13G2` / `npn13G2v`) from the standard IHP-CMOS model (`nfet33`):
+1. **Terminal Equivalence:** Map CMOS 4-terminal pins $(G, D, S, B)$ to BJT 4-terminal pins $(B, C, E, SUB)$.
+2. **Device Sizing & Biasing:** Replace CMOS aspect ratio $(W/L)$ and overdrive $(V_{GS}-V_{th})$ with BJT emitter width/length ($W_e, L_e, N_e$) and base-emitter voltage bias ($V_{BE}$).
+3. **Schematic & LVS Integration:** Use `xschem/npn13G2.sym` and `xschem/diff_npn.sch` for Xschem capture and Netgen LVS extraction.
+
 ### 4.2 Standard Cell Mapping for Digital Control Logic
 
 Digital control subsystems (`ctrl_top`, `ctrl_block`) manage the 192-bit control array (`ctrl[191:0]`):

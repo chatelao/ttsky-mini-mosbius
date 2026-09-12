@@ -58,6 +58,16 @@ Below is the mapping for transistor primitives used in Mini-MOSbius schematic de
 | **Resistors** | `res_high_po` / `res_generic` | `rhigh` / `rsil` | High-sheet / Silicide Poly Resistors |
 | **Capacitors** | `cap_mim_m3_1` / `cap_mim_m3_2` | `cap_cmim` | Metal-Insulator-Metal (MIM) Capacitors |
 
+### 4.1 CMOS-to-BJT Primitive Conversion Rules
+When porting/converting CMOS sub-blocks (e.g. `nfet33`) to SiGe NPN BJT models (`npn13G2`/`npn13G2v`):
+* **Pin Mapping:** Gate $\to$ Base ($B$), Drain $\to$ Collector ($C$), Source $\to$ Emitter ($E$), Bulk $\to$ Substrate Tap ($SUB$).
+* **Electrical Parameter Scaling:**
+  * CMOS $W/L$ ratios and gate overdrive $(V_{GS} - V_{th})$ map to BJT emitter geometry ($W_e, L_e$) and collector bias current $I_C = I_S \cdot e^{V_{BE}/V_T}$.
+  * Transconductance relationship: BJT $g_m = \frac{I_C}{V_T}$ vs. FET $g_m = \sqrt{2 \mu C_{ox} \frac{W}{L} I_D}$.
+* **Physical Layout & Netlist Extraction:**
+  * BJT layout requires dedicated emitter finger geometries and guard-ring substrate taps extracted via Netgen LVS rules.
+  * Device primitive symbol `npn13G2.sym` and differential pair `diff_npn.sch` provide Xschem schematic integration.
+
 ---
 
 ## 5. Digital Standard Cell Library Mapping

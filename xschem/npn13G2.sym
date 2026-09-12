@@ -1,0 +1,49 @@
+v {xschem version=3.4.8RC file_version=1.2}
+G {}
+K {type=subcircuit
+format="K@name @c @b @e @sub npn13G2 w=@w l=@l nx=@nx ny=@ny"
+template="name=Q1 w=0.07u l=0.9u nx=1 ny=1 model=npn13G2 spiceprefix=K"
+}
+V {}
+S {}
+E {}
+L 4 -20 -30 20 -30 {}
+L 4 -20 0 20 0 {}
+L 4 0 -30 0 30 {}
+L 4 -20 -20 -20 20 {}
+L 4 -40 0 -20 0 {}
+L 4 0 20 20 40 {}
+L 4 0 -20 20 -40 {}
+B 5 -42.5 -42.5 42.5 42.5 {name=body}
+P 4 5 10 30 20 40 20 25 10 30 {fill=true}
+P 4 5 -10 -40 -10 -25 -25 -40 -10 -40 {fill=true}
+N -40 0 -20 0 {lab=B}
+N 20 -40 20 -40 {lab=C}
+N 20 40 20 40 {lab=E}
+N 0 -40 0 -40 {lab=SUB}
+P 4 5 -25 -40 -10 -40 -10 -25 -25 -40 {fill=true}
+FD {}
+P 4 4 10 30 20 40 20 25 10 30 {fill=true}
+P 4 4 0 -30 0 -40 0 -40 0 -30 {fill=true}
+P 4 4 0 -40 -10 -40 -10 -40 0 -40 {fill=true}
+P 4 4 0 -40 0 -35 0 -35 0 -40 {fill=true}
+P 4 4 0 -40 10 -40 10 -40 0 -40 {fill=true}
+L 4 0 -30 0 -40 {}
+L 4 0 -40 20 -40 {}
+L 4 0 -40 -20 -40 {}
+P 4 4 -20 -40 -20 -40 -20 -40 -20 -40 {fill=true}
+P 4 4 -20 -40 -20 -40 -20 -40 -20 -40 {fill=true}
+P 4 4 -20 -40 -20 -40 -20 -40 -20 -40 {fill=true}
+P 4 4 20 -40 20 -40 20 -40 20 -40 {fill=true}
+P 4 4 20 -40 20 -40 20 -40 20 -40 {fill=true}
+P 4 4 -20 -40 -20 -40 -20 -40 -20 -40 {fill=true}
+P 4 4 0 -40 -20 -40 -20 -40 0 -40 {fill=true}
+P 4 4 0 -40 20 -40 20 -40 0 -40 {fill=true}
+T {@name} 25 -25 0 0 0.2 0.2 {}
+T {@model} 25 0 0 0 0.2 0.2 {}
+T {w=@w l=@l} 25 15 0 0 0.2 0.2 {}
+P 4 5 -40 0 -20 0 -20 0 -40 0 {fill=true}
+C {devices/pinn.sym} -40 0 0 0 {name=p1 lab=B dir=in}
+C {devices/pinn.sym} 20 -40 0 0 {name=p2 lab=C dir=inout}
+C {devices/pinn.sym} 20 40 0 0 {name=p3 lab=E dir=inout}
+C {devices/pinn.sym} 0 -40 0 0 {name=p4 lab=SUB dir=inout}
