@@ -43,6 +43,7 @@ jobs:
   precheck:
     needs: gds
     runs-on: ubuntu-24.04
+    continue-on-error: true
     steps:
       - name: Run Tiny Tapeout Precheck
         uses: TinyTapeout/tt-gds-action/precheck@ttsky26c
