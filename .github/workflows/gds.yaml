@@ -32,7 +32,7 @@ jobs:
           echo TOP_MODULE=`yq '.project.top_module' info.yaml` | tee $GITHUB_OUTPUT
 
       - name: Create and publish the GDS artifact
-        uses: TinyTapeout/tt-gds-action/custom_gds@ttsky26c
+        uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b
         with:
           top_module: ${{ steps.top_module.outputs.TOP_MODULE }}
           gds_path: gds/${{ steps.top_module.outputs.TOP_MODULE }}.gds
@@ -46,7 +46,7 @@ jobs:
     continue-on-error: true
     steps:
       - name: Run Tiny Tapeout Precheck
-        uses: TinyTapeout/tt-gds-action/precheck@ttsky26c
+        uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
 
   viewer:
     needs: gds
@@ -56,4 +56,4 @@ jobs:
       pages: write      # to deploy to Pages
       id-token: write   # to verify the deployment originates from an appropriate source
     steps:
-      - uses: TinyTapeout/tt-gds-action/viewer@ttsky26c
+      - uses: TinyTapeout/tt-gds-action/viewer@ttihp26b

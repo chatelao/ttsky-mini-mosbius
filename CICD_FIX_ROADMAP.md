@@ -48,14 +48,14 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 
 > **Objective:** Migrate GitHub Action references to match the `ihp-sg13g2` PDK toolchain tag (`@ttihp26b`).
 
-- [ ] **2.1 Update `.github/workflows/gds.yaml`**
+- [x] **2.1 Update `.github/workflows/gds.yaml`**
   - Update action tags for `custom_gds`, `precheck`, and `viewer` steps:
     - `TinyTapeout/tt-gds-action/custom_gds@ttihp26b`
     - `TinyTapeout/tt-gds-action/precheck@ttihp26b`
     - `TinyTapeout/tt-gds-action/viewer@ttihp26b`
   - Confirm parameter `pdk: ihp-sg13g2` is present in `custom_gds`.
 
-- [ ] **2.2 Update `.github/workflows/docs.yaml`**
+- [x] **2.2 Update `.github/workflows/docs.yaml`**
   - Update action tag for `docs` step:
     - `TinyTapeout/tt-gds-action/docs@ttihp26b`
 
@@ -65,7 +65,7 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 
 > **Objective:** Validate code formatting/verification locally and confirm green CI/CD status on GitHub Actions.
 
-- [ ] **3.1 Run Local Verification Checks**
+- [x] **3.1 Run Local Verification Checks**
   - Execute `make check` to verify Verilog elaboration and Python decap generator execution.
   - Execute `make lint` to verify RTL syntax and formatting.
 
