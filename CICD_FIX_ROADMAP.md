@@ -27,7 +27,7 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 │  - Execute local verification (make check, make lint) │
 │  - Trigger GitHub Actions CI run                      │
 │  - Verify green status on precheck & viewer jobs       │
-└────────────────────────────────────────────────────────┘
+└───────────────────────────┬────────────────────────────┘
 ```
 
 ---
@@ -37,13 +37,16 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 > **Objective:** Ensure the GitHub Pages deployment API is accessible to the `viewer` action job.
 
 - [ ] **1.1 Navigate to GitHub Pages Settings**
-  - Open repository settings in GitHub: `https://github.com/<owner>/<repo>/settings/pages`.
+  - [ ] **1.1.1** Access `https://github.com/<owner>/<repo>/settings/pages` in web browser as repository admin.
+  - [ ] **1.1.2** Verify admin access permissions to repository configuration settings.
 
 - [ ] **1.2 Configure Deployment Source to GitHub Actions**
-  - Under **Build and deployment**, change **Source** from `Deploy from a branch` to **`GitHub Actions`**.
+  - [ ] **1.2.1** Locate the **Build and deployment** section in GitHub Pages settings.
+  - [ ] **1.2.2** Change **Source** dropdown selection from `Deploy from a branch` to **`GitHub Actions`**.
 
-- [ ] **1.3 Save Repository Pages Settings**
-  - Save changes and verify GitHub Pages is configured for Actions deployment.
+- [ ] **1.3 Save Repository Pages Settings & Verify API Accessibility**
+  - [ ] **1.3.1** Save settings and confirm GitHub Pages reflects "Build and deployment: GitHub Actions".
+  - [ ] **1.3.2** Confirm `/repos/{owner}/{repo}/pages/deployments` API endpoint is enabled for GitHub Actions workflow tokens.
 
 ---
 
@@ -73,12 +76,20 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
   - Execute `make lint` to verify RTL syntax and formatting.
 
 - [ ] **3.2 Commit and Push Workflow & Roadmap Updates**
-  - Stage updated workflow definitions and roadmap documentation.
-  - Commit changes with a descriptive commit message and push to repository.
+  - [ ] **3.2.1 Stage Updated Files**
+    - Stage modified `.github/workflows/gds.yaml`, `.github/workflows/docs.yaml`, and `CICD_FIX_ROADMAP.md`.
+  - [ ] **3.2.2 Create Commit with Conventional Message**
+    - Commit staged changes using a short subject line and detailed commit body describing toolchain migration.
+  - [ ] **3.2.3 Push Branch to Remote Repository**
+    - Push local branch to GitHub to trigger automated CI pipeline execution.
 
 - [ ] **3.3 Trigger and Monitor GitHub Actions Pipeline Run**
-  - Trigger workflow on push or via manual `workflow_dispatch`.
-  - Monitor live execution under the repository **Actions** tab.
+  - [ ] **3.3.1 Confirm Automated Workflow Trigger**
+    - Confirm pipeline execution is triggered on push or manually invoke `workflow_dispatch`.
+  - [ ] **3.3.2 Monitor Live Job Execution**
+    - Monitor real-time status of `check`, `gds`, `precheck`, `viewer`, and `docs` jobs in GitHub Actions tab.
+  - [ ] **3.3.3 Inspect Pipeline Execution Logs**
+    - Confirm all job steps run to completion without unhandled exceptions.
 
 - [ ] **3.4 Verify Precheck Job Execution & Output**
   - [ ] **3.4.1 Verify DEF Template Resolution**
