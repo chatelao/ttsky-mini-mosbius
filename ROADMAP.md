@@ -19,12 +19,12 @@ The top priority is establishing and maintaining a functioning **CI/CD pipeline 
 
 > **Objective:** Ensure automated build and check actions run early and continuously on all commits to prevent design drift.
 
-- [ ] **1.1 Update GitHub Workflows for IHP Target**
+- [x] **1.1 Update GitHub Workflows for IHP Target**
   - Update `.github/workflows/gds.yaml` and `docs.yaml` to reference IHP SG13G2 action templates / PDK configuration (`pdk: sg13g2` / tt-gds-action updates).
   - Ensure CI triggers properly on push and pull requests to catch breaking changes immediately.
-- [ ] **1.2 Update Metadata & Pinout Definition**
+- [x] **1.2 Update Metadata & Pinout Definition**
   - Update `info.yaml` to conform to TinyTapeout IHP shuttle pinout and voltage requirements (1.2V $V_{DPWR}$, 3.3V $V_{APWR}$).
-- [ ] **1.3 Establish Automated Verification Stubs**
+- [x] **1.3 Establish Automated Verification Stubs**
   - Add basic Makefile lint and synthesis check targets to be executed in CI.
 
 ---

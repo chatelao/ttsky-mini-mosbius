@@ -2,9 +2,22 @@ name: gds
 
 on:
   push:
+  pull_request:
   workflow_dispatch:
 
 jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run verification checks
+        run: |
+          make check
+
   gds:
     runs-on: ubuntu-24.04
     steps:
@@ -25,7 +38,7 @@ jobs:
           gds_path: gds/${{ steps.top_module.outputs.TOP_MODULE }}.gds
           lef_path: lef/${{ steps.top_module.outputs.TOP_MODULE }}.lef
           verilog_path: src/project.v
-          pdk: sky130A
+          pdk: sg13g2
 
   precheck:
     needs: gds

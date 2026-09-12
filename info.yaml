@@ -1,9 +1,9 @@
-# Tiny Tapeout project information
+# Tiny Tapeout project information (IHP SG13G2: 1.2V VDPWR, 3.3V VAPWR)
 project:
-  title:        "tnt's variant of SKY130 mini-MOSbius"
+  title:        "tnt's variant of Mini-MOSbius (IHP SG13G2)"
   author:       "Sylvain Munaut"
   discord:      "246tnt"
-  description:  "Alternative layout for Andrew Kang's mini-MOSbius for SKY130 TinyTapeout"
+  description:  "Alternative layout for Andrew Kang's mini-MOSbius ported to IHP SG13G2 TinyTapeout (1.2V VDPWR / 3.3V VAPWR)"
   language:     "Analog"
   clock_hz:     0
   tiles:        "3x2"
