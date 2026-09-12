@@ -74,6 +74,12 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
   - Monitor CI run progress under the **Actions** tab.
 
 - [ ] **3.3 Verify Precheck & Deployment Success**
-  - Confirm `precheck` job passes all checks (KLayout SG13G2 DRC, pin check, layer check, DEF template validation).
-  - Confirm `viewer` job successfully deploys the 3D GDS rendering viewer to GitHub Pages without 404 errors.
-  - Confirm `docs` job builds documentation successfully.
+  - [ ] **3.3.1 Resolve DEF Template File Path & Pin/Boundary Check**
+    - Ensure `../tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def` template DEF file path is correctly resolved in precheck action environment.
+  - [ ] **3.3.2 Validate SG13G2 Layer Map & Boundary Layers**
+    - Verify `prBoundary.boundary` (`235/4` for SG13G2) and GDS layer map checks pass without false positives.
+  - [ ] **3.3.3 Verify Analog Pin Placement & Precheck Execution**
+    - Confirm analog pin checks and overall KLayout checks pass on `tt_um_tnt_mosbius.gds`.
+  - [ ] **3.3.4 Confirm GitHub Pages Viewer & Docs Deployment**
+    - Confirm `viewer` job successfully deploys the 3D GDS rendering viewer to GitHub Pages without 404 errors.
+    - Confirm `docs` job builds documentation successfully.
