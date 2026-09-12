@@ -48,14 +48,14 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 
 > **Objective:** Migrate GitHub Action references to match the `ihp-sg13g2` PDK toolchain tag (`@ttihp26b`).
 
-- [ ] **2.1 Update `.github/workflows/gds.yaml`**
+- [x] **2.1 Update `.github/workflows/gds.yaml`**
   - Update action tags for `custom_gds`, `precheck`, and `viewer` steps:
     - `TinyTapeout/tt-gds-action/custom_gds@ttihp26b`
     - `TinyTapeout/tt-gds-action/precheck@ttihp26b`
     - `TinyTapeout/tt-gds-action/viewer@ttihp26b`
   - Confirm parameter `pdk: ihp-sg13g2` is present in `custom_gds`.
 
-- [ ] **2.2 Update `.github/workflows/docs.yaml`**
+- [x] **2.2 Update `.github/workflows/docs.yaml`**
   - Update action tag for `docs` step:
     - `TinyTapeout/tt-gds-action/docs@ttihp26b`
 
@@ -65,7 +65,7 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 
 > **Objective:** Validate code formatting/verification locally and confirm green CI/CD status on GitHub Actions.
 
-- [ ] **3.1 Run Local Verification Checks**
+- [x] **3.1 Run Local Verification Checks**
   - Execute `make check` to verify Verilog elaboration and Python decap generator execution.
   - Execute `make lint` to verify RTL syntax and formatting.
 
@@ -74,6 +74,12 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
   - Monitor CI run progress under the **Actions** tab.
 
 - [ ] **3.3 Verify Precheck & Deployment Success**
-  - Confirm `precheck` job passes all checks (KLayout SG13G2 DRC, pin check, layer check, DEF template validation).
-  - Confirm `viewer` job successfully deploys the 3D GDS rendering viewer to GitHub Pages without 404 errors.
-  - Confirm `docs` job builds documentation successfully.
+  - [ ] **3.3.1 Resolve DEF Template File Path & Pin/Boundary Check**
+    - Ensure `../tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def` template DEF file path is correctly resolved in precheck action environment.
+  - [ ] **3.3.2 Validate SG13G2 Layer Map & Boundary Layers**
+    - Verify `prBoundary.boundary` (`235/4` for SG13G2) and GDS layer map checks pass without false positives.
+  - [ ] **3.3.3 Verify Analog Pin Placement & Precheck Execution**
+    - Confirm analog pin checks and overall KLayout checks pass on `tt_um_tnt_mosbius.gds`.
+  - [ ] **3.3.4 Confirm GitHub Pages Viewer & Docs Deployment**
+    - Confirm `viewer` job successfully deploys the 3D GDS rendering viewer to GitHub Pages without 404 errors.
+    - Confirm `docs` job builds documentation successfully.
