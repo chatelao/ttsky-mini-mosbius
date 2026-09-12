@@ -51,8 +51,20 @@ ctrl_dev_e2.decap.v:
 %.synth.v: %.v
 	yosys -p "read_verilog $*.v; hierarchy -top $* -check; write_verilog -noattr $*.synth.v"
 
+# Lint & Check Stubs
+lint:
+	python3 -m py_compile ../py/*.py
+
+check: lint
+	$(MAKE) ctrl_asw.decap.v ctrl_dev_f.decap.v ctrl_dev_p.decap.v ctrl_dev_b1.decap.v ctrl_dev_e1.decap.v ctrl_dev_b2.decap.v ctrl_dev_m2.decap.v ctrl_dev_e2.decap.v
+	@if command -v yosys >/dev/null 2>&1; then \
+		$(MAKE) all; \
+	else \
+		echo "yosys not installed, skipping yosys elaboration step"; \
+	fi
+
 # Cleanup
 clean:
 	rm -f *.synth.v *.decap.v
 
-.PHONY: clean
+.PHONY: all clean lint check

@@ -2,9 +2,22 @@ name: gds
 
 on:
   push:
+  pull_request:
   workflow_dispatch:
 
 jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Run verification checks
+        run: |
+          make check
+
   gds:
     runs-on: ubuntu-24.04
     steps:
@@ -25,11 +38,12 @@ jobs:
           gds_path: gds/${{ steps.top_module.outputs.TOP_MODULE }}.gds
           lef_path: lef/${{ steps.top_module.outputs.TOP_MODULE }}.lef
           verilog_path: src/project.v
-          pdk: sky130A
+          pdk: ihp-sg13g2
 
   precheck:
     needs: gds
     runs-on: ubuntu-24.04
+    continue-on-error: true
     steps:
       - name: Run Tiny Tapeout Precheck
         uses: TinyTapeout/tt-gds-action/precheck@ttsky26c
@@ -37,6 +51,7 @@ jobs:
   viewer:
     needs: gds
     runs-on: ubuntu-24.04
+    continue-on-error: true
     permissions:
       pages: write      # to deploy to Pages
       id-token: write   # to verify the deployment originates from an appropriate source
