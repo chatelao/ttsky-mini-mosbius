@@ -9,9 +9,9 @@ This document provides a comprehensive mapping guide for porting the **Mini-MOSb
 | Feature / Parameter | SkyWater 130nm (`sky130`) | IHP 130nm (`sg13g2`) | Notes / Migration Impact |
 | :--- | :--- | :--- | :--- |
 | **Node / Feature Size** | 130nm CMOS | 130nm BiCMOS (SiGe:C) | IHP includes high-speed SiGe HBTs |
-| **Core Logic Voltage ($V_{DD}$)** | 1.8V | 1.2V | Standard digital logic runs at 1.2V in IHP vs 1.8V in SKY130 |
+| **Core Logic Voltage ($V_{DD}$ / $V_{DPWR}$)** | 1.8V | 1.2V | Standard digital logic runs at 1.2V in IHP vs 1.8V in SKY130 |
 | **Analog / IO Voltage ($V_{APWR}$)** | 3.3V / 5.0V ($5.0\text{V}$ extended) | 3.3V | IHP 3.3V HV MOS devices (`sg13g2_pr__nfet33`, `pfet33`) |
-| **Metal Layers** | 5 Metal Layers (Li, M1–M4 or M1–M5) | 5 Metal Layers (M1–M5 + TopMetal1/2) | Layer stack and rules differ in layout tools |
+| **Metal Layers** | 5 Metal Layers (Li, M1–M4 or M1–M5) | 5 Metal Layers (M1–M5 + TopMetal1/2) | Layer stack and rules differ in layout tools (`li` in sky130 vs `met1`–`met5` in IHP) |
 | **PDK Repository / License** | Apache 2.0 (`google/skywater-pdk`) | Apache 2.0 (`IHP-Open-PDK`) | Fully open-source PDKs |
 
 ---
@@ -79,6 +79,7 @@ Digital control logic in `ctrl_top.v` and `ctrl_block.v` relies on standard cell
 | **Decoupling Capacitors** | `decap_3`, `decap_4`, `decap_6`, `decap_12` | `sg13g2_decap_4`, `sg13g2_decap_8` |
 | **Fill Cells** | `fill_1`, `fill_2` | `sg13g2_fill_1`, `sg13g2_fill_2` |
 | **Substrate / Well Taps** | `tapvpwrvgnd_1` | Integrated in cells or `sg13g2_tap_1` |
+| **Antenna Protection Diode** | `diode_2` | `sg13g2_antenna_1` |
 
 ---
 
@@ -102,3 +103,53 @@ Below is the component-level mapping for all core analog and digital blocks in t
 | **Analog Switch (3.3V)** | `xschem/tt_asw_3v3.sch` | Transmission gate switch driven by level shifters | Implement using 3.3V `nfet33` / `pfet33` transmission gates |
 | **Level Shifter** | `mag/tt_lvl_shift.mag` | 1.8V to 3.3V level shifter cell | 1.2V to 3.3V level shifter cell |
 | **Switch Matrix Layout** | `mag/asw_matrix.mag` | Reconfigurable crossbar switch array layout | Re-layout using SG13G2 design rules and layer pitch |
+
+---
+
+## 7. TinyTapeout CI & GitHub Actions Workflow Setup
+
+When deploying or building TinyTapeout GitHub Actions workflows for IHP SG13G2, the action tags, parameters, and metadata must reflect the IHP PDK toolchain:
+
+| Configuration Item | SKY130 Setting | IHP SG13G2 Setting | File Location |
+| :--- | :--- | :--- | :--- |
+| **Action Tag** | `@ttsky26c` | `@ttihp26b` | `.github/workflows/gds.yaml`, `docs.yaml` |
+| **PDK Parameter** | `sky130A` | `ihp-sg13g2` | `.github/workflows/gds.yaml` (`pdk: ihp-sg13g2`) |
+| **Project Title** | "... (SKY130)" | "... (IHP SG13G2)" | `info.yaml` (`project.title`) |
+| **Top-Level Description** | "... Skywater TinyTapeout" | "... IHP SG13G2 TinyTapeout" | `info.yaml` (`project.description`) |
+| **Digital Power (`VDPWR`)** | 1.8V | 1.2V | `info.yaml` (comments & pin specs) |
+| **Analog Power (`VAPWR`)** | 3.3V | 3.3V (`uses_vapwr: true`) | `info.yaml` |
+
+---
+
+## 8. Scripted Placement & Decap Generator Adaptation (`py/`)
+
+The Python layout helper scripts in `py/` procedurally generate standard cell layout placements and decap Verilog stubs (`ctrl_asw.decap.v`, `ctrl_dev_*.decap.v`):
+
+### 8.1 Grid Parameters and Layers (`py/common.py`)
+
+| Parameter / Data Structure | SKY130 Definition | IHP SG13G2 Adaptation Target | Notes |
+| :--- | :--- | :--- | :--- |
+| **`ROW_PITCH`** | 2720 nm (2.72 $\mu$m) | Matches `sg13g2_stdcell` height (3.78 $\mu$m or standard cell pitch) | Standard cell row height |
+| **`COL_PITCH`** | 460 nm (0.46 $\mu$m) | Matches `sg13g2_stdcell` site width (0.48 $\mu$m) | Standard cell site width |
+| **`LAYERS` Stack** | `li` (local interconnect), `met1`, `met2` | `met1` (Metal 1), `met2`, `met3` | IHP SG13G2 layer stack does not use `li` |
+| **Via Stack (`VIAS`)** | `viali`, `m2c` | `via1`, `via2`, `via3` | Use SG13G2 via definitions |
+| **`Grid.FILL` Dictionary** | `sky130_fd_sc_hd__fill_*` / `decap_*` | `sg13g2_fill_*` / `sg13g2_decap_*` | Map widths to SG13G2 cell widths |
+| **`Grid.TAP` Cell** | `sky130_fd_sc_hd__tapvpwrvgnd_1` | Integrated / `sg13g2_tap_1` | Substrate tap cell reference |
+| **`CELLS` Master Table** | `sky130_fd_sc_hd__*` | `sg13g2_stdcell_*` | Update cell names and width metrics |
+
+### 8.2 Decap Verilog Generation (`py/gen_asw_ctrl.py` & `py/gen_dev_ctrl.py`)
+
+* **Power Pin Names:** Standard cell power pins in `sky130` use `.VPWR (VDPWR)`, `.VGND (VGND)`, `.VPB (VDPWR)`, `.VNB (VGND)`. In `sg13g2_stdcell`, power pins may use `VDD`/`VSS` or `VDPWR`/`VGND` depending on standard cell library netlist conventions.
+* **Decap Instantiations:** Update decap cell selection from `sky130_fd_sc_hd__decap_3/4/6/8/12` to `sg13g2_decap_4` or `sg13g2_decap_8`.
+
+---
+
+## 9. Verification and Build Automation Adaptations
+
+| Automation Task | File Location | SKY130 Command / Syntax | IHP SG13G2 Target Command / Syntax |
+| :--- | :--- | :--- | :--- |
+| **Verilog Elaboration** | `src/Makefile`, `src/stdcells.v` | Synthesizes using `sky130_fd_sc_hd` blackboxes | Synthesizes using `sg13g2_stdcell` blackboxes / models |
+| **LVS Verification** | `tcl/lvs.tcl` | Reads `sky130_fd_sc_hd.spice` & `sky130A_setup.tcl` | Reads `sg13g2_stdcell.spice` & `sg13g2_setup.tcl` |
+| **DRC Scripting** | `tcl/magic_drc.tcl` | Uses `sky130A` Magic tech file / rules | Uses `sg13g2.tech` / KLayout `sg13g2.lydrc` |
+| **Parasitic Extraction** | `tcl/magic_extract_pex.tcl` | SkyWater 130 PEX rules | IHP SG13G2 PEX rules / KLayout PEX |
+| **Simulation Corners** | `xschem/tb_*.sch` | `sky130.lib.spice` (`corner.sym`) | `corner.spice` / `sg13g2.lib` |
