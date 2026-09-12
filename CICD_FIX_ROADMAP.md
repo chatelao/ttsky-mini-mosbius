@@ -37,16 +37,21 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 > **Objective:** Ensure the GitHub Pages deployment API is accessible to the `viewer` action job.
 
 - [ ] **1.1 Navigate to GitHub Pages Settings**
-  - [ ] **1.1.1** Access `https://github.com/<owner>/<repo>/settings/pages` in web browser as repository admin.
-  - [ ] **1.1.2** Verify admin access permissions to repository configuration settings.
+  - [ ] **1.1.1** Open web browser and log into GitHub account with repository admin permissions.
+  - [ ] **1.1.2** Navigate to repository main page on GitHub (`https://github.com/<owner>/<repo>`).
+  - [ ] **1.1.3** Click the **Settings** tab in the top repository navigation bar.
+  - [ ] **1.1.4** Select **Pages** from the left sidebar menu (`https://github.com/<owner>/<repo>/settings/pages`).
+  - [ ] **1.1.5** Verify administrative write access permissions to modify repository configuration options.
 
 - [ ] **1.2 Configure Deployment Source to GitHub Actions**
-  - [ ] **1.2.1** Locate the **Build and deployment** section in GitHub Pages settings.
-  - [ ] **1.2.2** Change **Source** dropdown selection from `Deploy from a branch` to **`GitHub Actions`**.
+  - [ ] **1.2.1** Locate the **Build and deployment** section on the GitHub Pages settings page.
+  - [ ] **1.2.2** Click the **Source** dropdown menu (currently set to `Deploy from a branch`).
+  - [ ] **1.2.3** Select **`GitHub Actions`** from the dropdown menu choices.
 
 - [ ] **1.3 Save Repository Pages Settings & Verify API Accessibility**
-  - [ ] **1.3.1** Save settings and confirm GitHub Pages reflects "Build and deployment: GitHub Actions".
-  - [ ] **1.3.2** Confirm `/repos/{owner}/{repo}/pages/deployments` API endpoint is enabled for GitHub Actions workflow tokens.
+  - [ ] **1.3.1** Confirm setting selection and save changes.
+  - [ ] **1.3.2** Confirm status banner displays "Build and deployment: GitHub Actions".
+  - [ ] **1.3.3** Verify `/repos/{owner}/{repo}/pages/deployments` API endpoint is accessible to workflow `GITHUB_TOKEN`.
 
 ---
 
@@ -76,30 +81,37 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - Execute `make check` to verify Verilog elaboration and Python decap generator execution.
   - [x] **3.1.2 Run `make lint`**
     - Execute `make lint` to verify RTL syntax and formatting.
+  - [x] **3.1.3 Confirm Local Working Tree Sanity**
+    - Verify git status and ensure all procedurally generated decap Verilog stubs (`ctrl_asw.decap.v`, etc.) are created cleanly.
 
 - [ ] **3.2 Commit and Push Workflow & Roadmap Updates**
   - [ ] **3.2.1 Stage Modified Repository Files**
     - Stage modified workflow files (`.github/workflows/gds.yaml`, `.github/workflows/docs.yaml`) and roadmap file (`CICD_FIX_ROADMAP.md`).
-  - [ ] **3.2.2 Formulate Conventional Commit Message**
+  - [ ] **3.2.2 Inspect Staged Changes**
+    - Run `git diff --cached` to review staged changes for clean formatting and syntax.
+  - [ ] **3.2.3 Formulate Conventional Commit Message**
     - Prepare commit subject line (under 50 characters) and descriptive body detailing `@ttihp26b` action tag migration and roadmap refinements.
-  - [ ] **3.2.3 Commit Staged Changes**
+  - [ ] **3.2.4 Commit Staged Changes**
     - Execute git commit to record changes locally.
-  - [ ] **3.2.4 Push Branch to Remote GitHub Repository**
+  - [ ] **3.2.5 Push Branch to Remote GitHub Repository**
     - Push local branch to GitHub remote repository to trigger automated CI pipeline execution.
 
 - [ ] **3.3 Remote CI/CD Trigger & Execution Monitoring (GitHub Actions)**
   - [ ] **3.3.1 Trigger Remote Workflow Run**
     - [ ] **3.3.1.1** Push commits to GitHub repository branch to trigger push events for `gds.yaml` and `docs.yaml`.
-    - [ ] **3.3.1.2** Verify workflow run starts in GitHub Actions UI for both `gds` and `docs` workflows.
+    - [ ] **3.3.1.2** Access GitHub Actions tab (`https://github.com/<owner>/<repo>/actions`).
+    - [ ] **3.3.1.3** Verify workflow run starts in GitHub Actions UI for both `gds` and `docs` workflows.
   - [ ] **3.3.2 Monitor Remote `check` Job Execution**
-    - [ ] **3.3.2.1** Inspect `check` job log to verify recursive submodule checkout.
-    - [ ] **3.3.2.2** Confirm `make check` step passes in clean Ubuntu 24.04 environment.
+    - [ ] **3.3.2.1** Open `check` job details in GitHub Actions.
+    - [ ] **3.3.2.2** Inspect `check` job log to verify recursive submodule checkout (`submodules: recursive`).
+    - [ ] **3.3.2.3** Confirm `make check` step executes and passes in clean Ubuntu 24.04 environment.
   - [ ] **3.3.3 Monitor Remote `gds` Job Execution**
-    - [ ] **3.3.3.1** Confirm `Read top module name` step extracts `TOP_MODULE=tt_um_tnt_mosbius` from `info.yaml`.
-    - [ ] **3.3.3.2** Confirm `custom_gds@ttihp26b` step executes with `pdk: ihp-sg13g2`.
-    - [ ] **3.3.3.3** Verify `gds/tt_um_tnt_mosbius.gds` and `lef/tt_um_tnt_mosbius.lef` artifacts are published.
+    - [ ] **3.3.3.1** Open `gds` job details in GitHub Actions.
+    - [ ] **3.3.3.2** Confirm `Read top module name` step extracts `TOP_MODULE=tt_um_tnt_mosbius` from `info.yaml`.
+    - [ ] **3.3.3.3** Confirm `custom_gds@ttihp26b` step executes with `pdk: ihp-sg13g2`.
+    - [ ] **3.3.3.4** Verify `gds/tt_um_tnt_mosbius.gds` and `lef/tt_um_tnt_mosbius.lef` artifacts are published and downloadable.
   - [ ] **3.3.4 Monitor Downstream `precheck` Job Execution**
-    - [ ] **3.3.4.1** Verify `precheck` job starts after successful completion of `gds` job.
+    - [ ] **3.3.4.1** Verify `precheck` job starts automatically after successful completion of `gds` job.
     - [ ] **3.3.4.2** Confirm `TinyTapeout/tt-gds-action/precheck@ttihp26b` action executes without syntax errors.
   - [ ] **3.3.5 Monitor Downstream `viewer` Job Execution**
     - [ ] **3.3.5.1** Verify `viewer` job inherits `pages: write` and `id-token: write` workflow permissions.
@@ -119,19 +131,23 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [ ] **3.4.2.2** Confirm standard SG13G2 layers (64-71, 235) pass layer validation without false positive errors.
   - [ ] **3.4.3 Pin Placement & DRC Verification**
     - [ ] **3.4.3.1** Confirm analog pin placement checks against the template DEF succeed for `tt_um_tnt_mosbius.gds`.
-    - [ ] **3.4.3.2** Verify KLayout SG13G2 DRC and zero-area checks pass cleanly.
+    - [ ] **3.4.3.2** Verify KLayout SG13G2 DRC check returns zero violations.
+    - [ ] **3.4.3.3** Verify KLayout zero-area check returns zero violations.
+    - [ ] **3.4.3.4** Verify cell name check and Verilog syntax check pass cleanly.
   - [ ] **3.4.4 Precheck Job Final Status**
-    - [ ] **3.4.4.1** Verify precheck summary table displays green checkmarks for all checks.
-    - [ ] **3.4.4.2** Check that the `precheck` job status badge is green (success) in GitHub Actions.
+    - [ ] **3.4.4.1** Verify precheck summary markdown table displays green checkmarks for all checks.
+    - [ ] **3.4.4.2** Check that the `precheck` job status badge is green (success) in GitHub Actions interface.
 
 - [ ] **3.5 Remote Verification of Pages & Documentation Deployment**
   - [ ] **3.5.1 3D Viewer Artifact Generation**
     - [ ] **3.5.1.1** Verify in `viewer` job logs that `gds_render` artifact is downloaded.
     - [ ] **3.5.1.2** Verify 3D web model and `index.html` redirect page referencing `pdk=ihp-sg13g2` are generated.
   - [ ] **3.5.2 GitHub Pages Deployment Verification**
-    - [ ] **3.5.2.1** Verify `actions/upload-pages-artifact` produces `github-pages` artifact.
-    - [ ] **3.5.2.2** Confirm `actions/deploy-pages` step completes with HTTP 200/201 response in remote log output (no 404 error).
+    - [ ] **3.5.2.1** Verify `actions/upload-pages-artifact` produces `github-pages` artifact tarball.
+    - [ ] **3.5.2.2** Confirm `actions/deploy-pages` step completes with HTTP 200/201 response in remote log output.
+    - [ ] **3.5.2.3** Confirm absence of HTTP 404 deployment error.
   - [ ] **3.5.3 Published Site & Documentation Verification**
     - [ ] **3.5.3.1** Verify `docs` job log output shows successful build and publication of documentation artifacts.
-    - [ ] **3.5.3.2** Navigate to the published GitHub Pages site URL in a web browser to confirm 3D top module model renders correctly.
-    - [ ] **3.5.3.3** Verify project overview and pinout details from `info.yaml` render correctly on the docs page.
+    - [ ] **3.5.3.2** Navigate to the published GitHub Pages site URL (`https://<owner>.github.io/<repo>/`) in web browser.
+    - [ ] **3.5.3.3** Confirm 3D top module model renders interactively without WebGL or asset errors.
+    - [ ] **3.5.3.4** Verify project overview, pinout tables, and top module details from `info.yaml` render correctly on docs site.
