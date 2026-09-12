@@ -27,7 +27,7 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 │  - Execute local verification (make check, make lint) │
 │  - Trigger GitHub Actions CI run                      │
 │  - Verify green status on precheck & viewer jobs       │
-└───────────────────────────┬────────────────────────────┘
+└───────────────────────────┴────────────────────────────┘
 ```
 
 ---
@@ -89,40 +89,49 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 
 - [ ] **3.3 Remote CI/CD Trigger & Execution Monitoring (GitHub Actions)**
   - [ ] **3.3.1 Trigger Remote Workflow Run**
-    - Push commits to GitHub repository or invoke `workflow_dispatch` to trigger the CI pipeline.
-  - [ ] **3.3.2 Monitor Remote `check` Job**
-    - Access GitHub Actions UI and verify `check` job log output for `make check` execution.
-  - [ ] **3.3.3 Monitor Remote `gds` Job**
-    - Monitor `gds` job for successful GDS and LEF artifact generation.
-  - [ ] **3.3.4 Monitor Downstream `precheck` Job Status**
-    - Monitor progress of `precheck` job execution in GitHub Actions UI.
-  - [ ] **3.3.5 Monitor Downstream `viewer` Job Status**
-    - Monitor progress of `viewer` job execution in GitHub Actions UI.
-  - [ ] **3.3.6 Monitor Downstream `docs` Job Status**
-    - Monitor progress of `docs` job execution in GitHub Actions UI.
+    - [ ] **3.3.1.1** Push commits to GitHub repository branch to trigger push events for `gds.yaml` and `docs.yaml`.
+    - [ ] **3.3.1.2** Verify workflow run starts in GitHub Actions UI for both `gds` and `docs` workflows.
+  - [ ] **3.3.2 Monitor Remote `check` Job Execution**
+    - [ ] **3.3.2.1** Inspect `check` job log to verify recursive submodule checkout.
+    - [ ] **3.3.2.2** Confirm `make check` step passes in clean Ubuntu 24.04 environment.
+  - [ ] **3.3.3 Monitor Remote `gds` Job Execution**
+    - [ ] **3.3.3.1** Confirm `Read top module name` step extracts `TOP_MODULE=tt_um_tnt_mosbius` from `info.yaml`.
+    - [ ] **3.3.3.2** Confirm `custom_gds@ttihp26b` step executes with `pdk: ihp-sg13g2`.
+    - [ ] **3.3.3.3** Verify `gds/tt_um_tnt_mosbius.gds` and `lef/tt_um_tnt_mosbius.lef` artifacts are published.
+  - [ ] **3.3.4 Monitor Downstream `precheck` Job Execution**
+    - [ ] **3.3.4.1** Verify `precheck` job starts after successful completion of `gds` job.
+    - [ ] **3.3.4.2** Confirm `TinyTapeout/tt-gds-action/precheck@ttihp26b` action executes without syntax errors.
+  - [ ] **3.3.5 Monitor Downstream `viewer` Job Execution**
+    - [ ] **3.3.5.1** Verify `viewer` job inherits `pages: write` and `id-token: write` workflow permissions.
+    - [ ] **3.3.5.2** Confirm `TinyTapeout/tt-gds-action/viewer@ttihp26b` action downloads `gds_render` artifact.
+  - [ ] **3.3.6 Monitor Downstream `docs` Job Execution**
+    - [ ] **3.3.6.1** Verify `docs` workflow in `.github/workflows/docs.yaml` runs in parallel with `gds` workflow.
+    - [ ] **3.3.6.2** Confirm `TinyTapeout/tt-gds-action/docs@ttihp26b` action builds project documentation.
   - [ ] **3.3.7 Review Workflow Execution Summary**
-    - Inspect detailed job execution logs to confirm all steps complete without fatal errors or unhandled exceptions.
+    - [ ] **3.3.7.1** Inspect detailed job execution logs to confirm all steps complete without fatal errors or unhandled exceptions.
 
 - [ ] **3.4 Remote Verification of Precheck Job Execution & Output**
-  - [ ] **3.4.1 Check DEF Template Resolution in Remote Logs**
-    - Inspect precheck step log in GitHub Actions to confirm `../tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def` path is resolved.
-  - [ ] **3.4.2 Confirm DEF Template Parsing**
-    - Verify in remote log output that template DEF file is parsed without `Errno 2` missing file errors.
-  - [ ] **3.4.3 Confirm SG13G2 prBoundary Detection**
-    - Verify in remote log output that `prBoundary.boundary` layer `235/4` is detected (replacing sky130 `189/4`).
-  - [ ] **3.4.4 Confirm SG13G2 Layer Map Validation**
-    - Verify in remote log output that standard SG13G2 layers (64-71, 235) pass layer validation without false positive errors.
-  - [ ] **3.4.5 Confirm Analog Pin Placement Checks**
-    - Verify in remote log output that analog pin checks against the template DEF succeed for `tt_um_tnt_mosbius.gds`.
-  - [ ] **3.4.6 Confirm Precheck Job Final Status**
-    - Check that the `precheck` job status badge is green (success) in GitHub Actions.
+  - [ ] **3.4.1 DEF Template & Tech File Resolution**
+    - [ ] **3.4.1.1** Inspect precheck step log in GitHub Actions to confirm `../tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def` path is resolved.
+    - [ ] **3.4.1.2** Verify in remote log output that template DEF file is parsed without `Errno 2` missing file errors.
+  - [ ] **3.4.2 Boundary & Layer Checks Verification**
+    - [ ] **3.4.2.1** Confirm SG13G2 `prBoundary.boundary` layer `235/4` detection (replacing sky130 `189/4`).
+    - [ ] **3.4.2.2** Confirm standard SG13G2 layers (64-71, 235) pass layer validation without false positive errors.
+  - [ ] **3.4.3 Pin Placement & DRC Verification**
+    - [ ] **3.4.3.1** Confirm analog pin placement checks against the template DEF succeed for `tt_um_tnt_mosbius.gds`.
+    - [ ] **3.4.3.2** Verify KLayout SG13G2 DRC and zero-area checks pass cleanly.
+  - [ ] **3.4.4 Precheck Job Final Status**
+    - [ ] **3.4.4.1** Verify precheck summary table displays green checkmarks for all checks.
+    - [ ] **3.4.4.2** Check that the `precheck` job status badge is green (success) in GitHub Actions.
 
 - [ ] **3.5 Remote Verification of Pages & Documentation Deployment**
-  - [ ] **3.5.1 Check 3D Viewer Artifact Generation**
-    - Verify in `viewer` job logs that `gds_render` artifact is downloaded and 3D web model is generated.
-  - [ ] **3.5.2 Check Pages Deployment API Response**
-    - Confirm `actions/deploy-pages` step completes with HTTP 200/201 response in remote log output.
-  - [ ] **3.5.3 Check Documentation Build Artifacts**
-    - Verify `docs` job log output shows successful build and publication of documentation artifacts.
-  - [ ] **3.5.4 Verify Live Pages Web Output**
-    - Navigate to the published GitHub Pages site URL in a web browser to confirm 3D top module model renders correctly.
+  - [ ] **3.5.1 3D Viewer Artifact Generation**
+    - [ ] **3.5.1.1** Verify in `viewer` job logs that `gds_render` artifact is downloaded.
+    - [ ] **3.5.1.2** Verify 3D web model and `index.html` redirect page referencing `pdk=ihp-sg13g2` are generated.
+  - [ ] **3.5.2 GitHub Pages Deployment Verification**
+    - [ ] **3.5.2.1** Verify `actions/upload-pages-artifact` produces `github-pages` artifact.
+    - [ ] **3.5.2.2** Confirm `actions/deploy-pages` step completes with HTTP 200/201 response in remote log output (no 404 error).
+  - [ ] **3.5.3 Published Site & Documentation Verification**
+    - [ ] **3.5.3.1** Verify `docs` job log output shows successful build and publication of documentation artifacts.
+    - [ ] **3.5.3.2** Navigate to the published GitHub Pages site URL in a web browser to confirm 3D top module model renders correctly.
+    - [ ] **3.5.3.3** Verify project overview and pinout details from `info.yaml` render correctly on the docs page.
