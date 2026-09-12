@@ -2,9 +2,9 @@
 
 ## 1. Overview & Purpose
 
-**tnt's variant of SKY130 mini-MOSbius** is an analog/mixed-signal integrated circuit design submitted for TinyTapeout (TT) shuttles using the SkyWater 130nm CMOS technology node (`sky130A`).
+**tnt's variant of SKY130 mini-MOSbius** is an analog/mixed-signal integrated circuit design submitted for [TinyTapeout](https://tinytapeout.com/) (TT) shuttles using the [SkyWater 130nm CMOS technology node (`sky130A`)](https://skywater-pdk.readthedocs.io/en/main/).
 
-Inspired by the original **MOSbius** project (Peter Kinget et al.), which provides flexible, reconfigurable arrays of analog switches and basic MOS transistor primitives/building blocks, this project adapts Andrew Kang's mini-MOSbius architecture with custom digital control logic and a complete custom physical layout by Sylvain Munaut (246tnt).
+Inspired by the original [**MOSbius**](https://mosbius.org/) project (Peter Kinget et al.), which provides flexible, reconfigurable arrays of analog switches and basic MOS transistor primitives/building blocks, this project adapts Andrew Kang's mini-MOSbius architecture with custom digital control logic and a complete custom physical layout by Sylvain Munaut (246tnt).
 
 The primary goal of the chip is to provide programmable analog building blocks (differential pairs, current mirrors, OTAs, configurable PMOS/NMOS arrays) interconnected via an Analog Switch Matrix (ASW) controlled by a serial shift-register chain.
 
@@ -14,8 +14,8 @@ The primary goal of the chip is to provide programmable analog building blocks (
 
 ### 2.1 Power Domains & Voltage Rails
 The design operates across multiple power domains:
-* **`VDPWR` (1.8V):** Core digital supply voltage powering the shift registers, control logic, buffers, and digital standard cells (`sky130_fd_sc_hd`).
-* **`VAPWR` (3.3V):** High-voltage supply powering the analog switch matrix and analog transistor blocks (e.g., 5.0V/3.3V rated high-voltage FETs `sky130_fd_pr__nfet_g5v0d10v5` and `sky130_fd_pr__pfet_g5v0d10v5`).
+* **`VDPWR` (1.8V):** Core digital supply voltage powering the shift registers, control logic, buffers, and digital standard cells ([`sky130_fd_sc_hd`](https://github.com/google/skywater-pdk-libs-sky130_fd_sc_hd)).
+* **`VAPWR` (3.3V):** High-voltage supply powering the analog switch matrix and analog transistor blocks (e.g., 5.0V/3.3V rated high-voltage FETs [`sky130_fd_pr__nfet_g5v0d10v5`](https://skywater-pdk.readthedocs.io/en/main/rules/device-details.html#v-10-5v-nmos-fet) and [`sky130_fd_pr__pfet_g5v0d10v5`](https://skywater-pdk.readthedocs.io/en/main/rules/device-details.html#v-10-5v-pmos-fet) from the [`sky130_fd_pr`](https://github.com/google/skywater-pdk-libs-sky130_fd_pr) primitive library).
 * **`VGND` (0V):** Common ground reference.
 
 ### 2.2 Top-Level Module (`tt_um_tnt_mosbius`)
@@ -80,11 +80,11 @@ The project relies on open-source Electronic Design Automation (EDA) tools and t
 
 | Category | Tool / Resource | Description |
 |---|---|---|
-| **PDK** | SkyWater 130nm (`sky130A`) | Open-source PDK, using `sky130_fd_sc_hd` (High Density standard cells) and `sky130_fd_pr` (primitive 5V/3.3V transistors). |
-| **Schematic Capture** | **Xschem** | Used for schematic capture of analog blocks, testbenches, and top-level analog integration (`xschem/*.sch`). |
-| **Layout Design** | **Magic VLSI** | Used for manual layout, GDS extraction, DRC checks, and hierarchical assembly (`mag/*.mag`). |
-| **Synthesis & Netlist** | **Yosys** | Synthesizes and elaborates Verilog control logic into standard cells for LVS verification (`src/Makefile`). |
-| **LVS Verification** | **Netgen** | Performs Layout vs. Schematic (LVS) comparison comparing extracted SPICE/Verilog against synthesized netlists (`tcl/lvs.tcl`). |
+| **PDK** | [SkyWater 130nm (`sky130A`)](https://skywater-pdk.readthedocs.io/en/main/) ([GitHub](https://github.com/google/skywater-pdk)) | Open-source PDK, using [`sky130_fd_sc_hd`](https://github.com/google/skywater-pdk-libs-sky130_fd_sc_hd) (High Density standard cells) and [`sky130_fd_pr`](https://github.com/google/skywater-pdk-libs-sky130_fd_pr) (primitive 5V/3.3V transistors such as [`nfet_g5v0d10v5`](https://skywater-pdk.readthedocs.io/en/main/rules/device-details.html#v-10-5v-nmos-fet) and [`pfet_g5v0d10v5`](https://skywater-pdk.readthedocs.io/en/main/rules/device-details.html#v-10-5v-pmos-fet)). |
+| **Schematic Capture** | [**Xschem**](https://github.com/StefanSchippers/xschem) | Used for schematic capture of analog blocks, testbenches, and top-level analog integration (`xschem/*.sch`). |
+| **Layout Design** | [**Magic VLSI**](http://opencircuitdesign.com/magic/) | Used for manual layout, GDS extraction, DRC checks, and hierarchical assembly (`mag/*.mag`). |
+| **Synthesis & Netlist** | [**Yosys**](https://yosyshq.net/yosys/) ([GitHub](https://github.com/YosysHQ/yosys)) | Synthesizes and elaborates Verilog control logic into standard cells for LVS verification (`src/Makefile`). |
+| **LVS Verification** | [**Netgen**](http://opencircuitdesign.com/netgen/) | Performs Layout vs. Schematic (LVS) comparison comparing extracted SPICE/Verilog against synthesized netlists (`tcl/lvs.tcl`). |
 | **GDS / LEF Generation**| **Tcl & Python Scripts** | Custom scripts (`fix_gds.py`, `update_gds_lef.tcl`) to fix GDS cell references, import/export LEF, and run automated DRC. |
 
 ---
