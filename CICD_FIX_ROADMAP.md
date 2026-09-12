@@ -36,11 +36,14 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 
 > **Objective:** Ensure the GitHub Pages deployment API is accessible to the `viewer` action job.
 
-- [ ] **1.1 Enable GitHub Pages Deployment Source**
-  1. Open repository settings in GitHub: `https://github.com/<owner>/<repo>/settings/pages`.
-  2. Under **Build and deployment**:
-     - Change **Source** from `Deploy from a branch` to **`GitHub Actions`**.
-  3. Save changes.
+- [ ] **1.1 Navigate to GitHub Pages Settings**
+  - Open repository settings in GitHub: `https://github.com/<owner>/<repo>/settings/pages`.
+
+- [ ] **1.2 Configure Deployment Source to GitHub Actions**
+  - Under **Build and deployment**, change **Source** from `Deploy from a branch` to **`GitHub Actions`**.
+
+- [ ] **1.3 Save Repository Pages Settings**
+  - Save changes and verify GitHub Pages is configured for Actions deployment.
 
 ---
 
@@ -69,17 +72,29 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
   - Execute `make check` to verify Verilog elaboration and Python decap generator execution.
   - Execute `make lint` to verify RTL syntax and formatting.
 
-- [ ] **3.2 Push Changes & Trigger CI Pipeline**
-  - Push workflow changes to GitHub repository.
-  - Monitor CI run progress under the **Actions** tab.
+- [ ] **3.2 Commit and Push Workflow & Roadmap Updates**
+  - Stage updated workflow definitions and roadmap documentation.
+  - Commit changes with a descriptive commit message and push to repository.
 
-- [ ] **3.3 Verify Precheck & Deployment Success**
-  - [ ] **3.3.1 Resolve DEF Template File Path & Pin/Boundary Check**
-    - Ensure `../tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def` template DEF file path is correctly resolved in precheck action environment.
-  - [ ] **3.3.2 Validate SG13G2 Layer Map & Boundary Layers**
-    - Verify `prBoundary.boundary` (`235/4` for SG13G2) and GDS layer map checks pass without false positives.
-  - [ ] **3.3.3 Verify Analog Pin Placement & Precheck Execution**
-    - Confirm analog pin checks and overall KLayout checks pass on `tt_um_tnt_mosbius.gds`.
-  - [ ] **3.3.4 Confirm GitHub Pages Viewer & Docs Deployment**
-    - Confirm `viewer` job successfully deploys the 3D GDS rendering viewer to GitHub Pages without 404 errors.
-    - Confirm `docs` job builds documentation successfully.
+- [ ] **3.3 Trigger and Monitor GitHub Actions Pipeline Run**
+  - Trigger workflow on push or via manual `workflow_dispatch`.
+  - Monitor live execution under the repository **Actions** tab.
+
+- [ ] **3.4 Verify Precheck Job Execution & Output**
+  - [ ] **3.4.1 Verify DEF Template Resolution**
+    - Check precheck logs to confirm `../tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def` is found and loaded without `FileNotFoundError`.
+  - [ ] **3.4.2 Validate SG13G2 Boundary & Layer Checks**
+    - Confirm `prBoundary.boundary` layer `235/4` is correctly detected.
+    - Confirm standard SG13G2 layers (e.g. 64-71, 235) pass layer validation without false positive errors.
+  - [ ] **3.4.3 Confirm Analog Pin Placement Verification**
+    - Verify analog pin location checks against template DEF pass for `tt_um_tnt_mosbius.gds`.
+  - [ ] **3.4.4 Confirm Precheck Job Green Status**
+    - Verify overall precheck job completes with a successful green status check.
+
+- [ ] **3.5 Verify Pages & Documentation Deployment Jobs**
+  - [ ] **3.5.1 Confirm 3D Viewer Artifact & Pages Deployment**
+    - Verify `viewer` job generates 3D rendering and deploys to GitHub Pages without HTTP 404 errors.
+  - [ ] **3.5.2 Confirm Documentation Build Job**
+    - Verify `docs` job completes successfully and publishes documentation artifacts.
+  - [ ] **3.5.3 Validate Live Page URLs**
+    - Access live GitHub Pages viewer URL and verify top module render displays correctly.
