@@ -1,12 +1,17 @@
 # CI/CD Failure Analysis & Fix Concept (`CICD_FIX_CONECPT.md`)
 
 ## Executive Summary
-This document provides a detailed analysis of all errors found in the GitHub Actions CI/CD run log for the `ttsky-mini-mosbius` project (Job Run `bef31c12-318f-50d5-a145-7b65c35db4c3`, `precheck` job) and outlines the step-by-step remediation plan to fix them.
+This document provides a detailed analysis of all errors found in the GitHub Actions CI/CD run logs for the `ttsky-mini-mosbius` project:
+1. **First Action Flow**: `precheck` job (Job Run `bef31c12-318f-50d5-a145-7b65c35db4c3`)
+2. **Second Action Flow**: `viewer` job (Job Run `911c0c88-54d1-565f-825d-a75110d48289`)
+
+It outlines root causes and a step-by-step remediation plan to resolve all CI/CD pipeline issues.
 
 ---
 
-## 1. Error Overview & Summary Table
+## 1. Error Overview & Summary Tables
 
+### 1.1 First Action Flow: `precheck` Job (`bef31c12-318f-50d5-a145-7b65c35db4c3`)
 During execution of the `precheck` job in `.github/workflows/gds.yaml`, the precheck step failed with the following results summary:
 
 | Precheck Step | Result | Error Message / Details |
@@ -22,6 +27,21 @@ During execution of the `precheck` job in `.github/workflows/gds.yaml`, the prec
 | **Analog pin check** | ❌ Fail | Cascaded failure from missing DEF template file |
 | **Verilog syntax check** | ✅ Pass | — |
 
+### 1.2 Second Action Flow: `viewer` Job (`911c0c88-54d1-565f-825d-a75110d48289`)
+During execution of the `viewer` job in `.github/workflows/gds.yaml`, the workflow failed during GitHub Pages deployment with the following summary:
+
+| Viewer Step | Result | Error Message / Details |
+| :--- | :---: | :--- |
+| **Download GDS artifact** | ✅ Pass | Successfully downloaded `tt_submission` |
+| **Read PDK information** | ✅ Pass | `PDK=ihp-sg13g2` extracted from `pdk.json` |
+| **Download gds_render artifact** | ✅ Pass | Successfully downloaded `gds_render` |
+| **Copy OAS And GDSII** | ✅ Pass | Copied files to `gh-pages/` directory |
+| **Generate redirect HTML page** | ✅ Pass | Created `gh-pages/index.html` referencing `pdk=ihp-sg13g2` |
+| **Upload Pages artifact** | ✅ Pass | Archived and uploaded `github-pages` artifact |
+| **Deploy to GitHub Pages** | ❌ Fail | `HttpError: Not Found (status: 404)` - `Failed to create deployment ... Ensure GitHub Pages has been enabled` |
+| **Check for failure** | ❌ Fail | `Failed to deploy to GitHub Pages, please follow the link to troubleshoot: https://tinytapeout.com/faq/#my-github-action-is-failing-on-the-pages-part` |
+| **Action Tag Specification** | ⚠️ Warning | Using `TinyTapeout/tt-gds-action/viewer@ttsky26c` instead of `@ttihp26b` |
+
 ---
 
 ## 2. Detailed Root Cause Analysis
@@ -31,11 +51,12 @@ During execution of the `precheck` job in `.github/workflows/gds.yaml`, the prec
   ```text
   Download action repository 'TinyTapeout/tt-gds-action@ttsky26c'
   Run TinyTapeout/tt-gds-action/precheck@ttsky26c
+  Run TinyTapeout/tt-gds-action/viewer@ttsky26c
   ```
 * **Root Cause:**
-  The workflow `.github/workflows/gds.yaml` uses `TinyTapeout/tt-gds-action/*@ttsky26c`.
+  The workflows `.github/workflows/gds.yaml` and `.github/workflows/docs.yaml` use `TinyTapeout/tt-gds-action/*@ttsky26c`.
   The `@ttsky26c` tag is meant for SkyWater 130nm (`sky130A`) TinyTapeout shuttles. The current repository targets the **IHP SG13G2** process (`ihp-sg13g2`).
-  Invoking `@ttsky26c` forces `tt-support-tools` to use SkyWater 130nm layer maps, DEF templates, and checking logic against an IHP SG13G2 GDS design.
+  Invoking `@ttsky26c` forces `tt-support-tools` to use SkyWater 130nm layer maps, DEF templates, viewer configurations, and checking logic against an IHP SG13G2 design.
 
 ---
 
@@ -82,11 +103,37 @@ During execution of the `precheck` job in `.github/workflows/gds.yaml`, the prec
 
 ---
 
+### Error 6: GitHub Pages Deployment Failure (HTTP 404 / Not Found)
+* **Log Lines:**
+  ```text
+  2026-09-12T14:47:05.2650482Z ##[error]Creating Pages deployment failed
+  2026-09-12T14:47:05.4268138Z ##[error]HttpError: Not Found
+  ...
+  2026-09-12T14:47:05.4275885Z ##[error]Error: Failed to create deployment (status: 404) with build version c1543e2bcca3e583d8dec0df541374c4484b7e6a. Request ID A420:2B2385:37D9303:B455F66:6AA565E9 Ensure GitHub Pages has been enabled: https://github.com/chatelao/ttsky-mini-mosbius/settings/pages
+  2026-09-12T14:47:05.4747737Z Failed to deploy to GitHub Pages, please follow the link to troubleshoot: https://tinytapeout.com/faq/#my-github-action-is-failing-on-the-pages-part
+  ```
+* **Root Cause:**
+  The `actions/deploy-pages@v5` action failed with HTTP 404 when attempting to call the GitHub Pages deployment API (`/repos/{owner}/{repo}/pages/deployments`).
+  This occurs when:
+  1. GitHub Pages is not enabled in the repository settings.
+  2. The GitHub Pages build and deployment source is not configured to **GitHub Actions** (under Repository Settings -> Pages -> Build and deployment -> Source).
+
+---
+
 ## 3. How to Tackle and Fix the Errors
 
-To resolve all failures, update the GitHub Actions workflows to reference `@ttihp26b` instead of `@ttsky26c`.
+To resolve all failures across both action flows, update GitHub repository configuration settings and update the GitHub Actions workflows to reference `@ttihp26b` instead of `@ttsky26c`.
 
-### 1. Update `.github/workflows/gds.yaml`
+### 1. Enable GitHub Pages in Repository Settings
+In the GitHub repository settings for `chatelao/ttsky-mini-mosbius`:
+1. Navigate to **Settings** -> **Pages**.
+2. Under **Build and deployment**:
+   - Set **Source** to **GitHub Actions** (instead of "Deploy from a branch").
+3. Save the settings.
+
+---
+
+### 2. Update `.github/workflows/gds.yaml`
 Modify action references in `.github/workflows/gds.yaml`:
 
 ```yaml
@@ -151,7 +198,9 @@ jobs:
       - uses: TinyTapeout/tt-gds-action/viewer@ttihp26b
 ```
 
-### 2. Update `.github/workflows/docs.yaml`
+---
+
+### 3. Update `.github/workflows/docs.yaml`
 Modify action reference in `.github/workflows/docs.yaml`:
 
 ```yaml
@@ -179,10 +228,12 @@ jobs:
 
 ## 4. Verification
 
-After applying these workflow updates:
+After applying these workflow updates and repository settings:
 1. Local pre-push verification:
    ```bash
    make check
    make lint
    ```
-2. Trigger the GitHub Actions CI workflow to confirm that precheck succeeds under `@ttihp26b`.
+2. Trigger the GitHub Actions CI workflow (`gds.yaml` and `docs.yaml`) to confirm that:
+   - The `precheck` job succeeds under `@ttihp26b`.
+   - The `viewer` job succeeds and deploys the 3D GDS viewer page to GitHub Pages without 404 errors.
