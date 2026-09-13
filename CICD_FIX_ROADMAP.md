@@ -53,8 +53,8 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [ ] **1.3.1.2** Verify the green success confirmation banner "Pages settings saved" appears at top of settings page.
     - [ ] **1.3.1.3** Confirm the GitHub Pages status banner reflects "Build and deployment: GitHub Actions".
   - [ ] **1.3.2 Verify OIDC Permissions and Pages Deployment API Authentication**
-    - [ ] **1.3.2.1** Confirm `viewer` job in `.github/workflows/gds.yaml` declares explicit `permissions: pages: write` token scope.
-    - [ ] **1.3.2.2** Confirm `viewer` job in `.github/workflows/gds.yaml` declares explicit `permissions: id-token: write` scope for OIDC authentication.
+    - [x] **1.3.2.1** Confirm `viewer` job in `.github/workflows/gds.yaml` declares explicit `permissions: pages: write` token scope.
+    - [x] **1.3.2.2** Confirm `viewer` job in `.github/workflows/gds.yaml` declares explicit `permissions: id-token: write` scope for OIDC authentication.
     - [ ] **1.3.2.3** Confirm `actions/deploy-pages` action exchanges OIDC token with GitHub OIDC provider for Pages deployment authorization.
     - [ ] **1.3.2.4** Verify API POST request to `/repos/{owner}/{repo}/pages/deployments` returns HTTP status 200/201 (preventing HTTP 404 deployment failure).
   - [ ] **1.3.3 Verify Routing and Custom Domain Compatibility**
