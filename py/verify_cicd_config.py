@@ -263,6 +263,49 @@ def check_precheck_def_and_pin_config(repo_root="."):
     return True
 
 
+def check_def_template_config(repo_root="."):
+    info_path = os.path.join(repo_root, "info.yaml")
+    docs_info_path = os.path.join(repo_root, "docs/info.md")
+
+    if not os.path.exists(info_path):
+        print(f"ERROR: {info_path} does not exist.")
+        return False
+
+    errors = []
+
+    with open(info_path, "r") as f:
+        content = f.read()
+
+    if not re.search(r"language:\s*[\"']?Analog[\"']?", content, re.IGNORECASE):
+        errors.append("Missing or invalid 'language: Analog' in info.yaml")
+
+    tile_match = re.search(r"tiles:\s*[\"']?(3x2)[\"']?", content)
+    if not tile_match:
+        errors.append("Expected 'tiles: 3x2' for tt_analog_3x2_3v3.def template resolution in info.yaml")
+
+    if not re.search(r"uses_vapwr:\s*true", content):
+        errors.append("Expected 'uses_vapwr: true' for 3.3V analog power domain in info.yaml")
+
+    if not os.path.exists(docs_info_path):
+        errors.append(f"Missing documentation file: {docs_info_path}")
+    else:
+        with open(docs_info_path, "r") as f:
+            docs_content = f.read()
+        if "## How it works" not in docs_content:
+            errors.append("Missing '## How it works' section in docs/info.md")
+        if "## How to test" not in docs_content:
+            errors.append("Missing '## How to test' section in docs/info.md")
+
+    if errors:
+        print(f"FAILED DEF template and docs config check in {info_path}:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print(f"PASSED DEF template and docs config check in {info_path}")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -275,8 +318,17 @@ def main():
     artifacts_ok = check_gds_lef_artifacts(repo_root)
     pages_ok = check_pages_api_config(repo_root)
     precheck_def_pin_ok = check_precheck_def_and_pin_config(repo_root)
+    def_template_ok = check_def_template_config(repo_root)
 
-    if gds_ok and docs_ok and info_ok and artifacts_ok and pages_ok and precheck_def_pin_ok:
+    if (
+        gds_ok
+        and docs_ok
+        and info_ok
+        and artifacts_ok
+        and pages_ok
+        and precheck_def_pin_ok
+        and def_template_ok
+    ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
     else:
