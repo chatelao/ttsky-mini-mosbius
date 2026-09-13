@@ -120,14 +120,14 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **3.2.4.2** Execute `git push` to transfer local commit history to remote repository.
     - [x] **3.2.4.3** Confirm remote server accepts push and returns remote branch URL / trigger status.
 
-- [ ] **3.3 Remote CI/CD Trigger & Execution Monitoring (GitHub Actions)**
-  - [ ] **3.3.1 Trigger Remote Workflow Run**
-    - [ ] **3.3.1.1** Push commits to GitHub repository branch to trigger push events for `gds.yaml` and `docs.yaml`.
-    - [ ] **3.3.1.2** Verify workflow run starts in GitHub Actions UI for `gds` workflow.
-    - [ ] **3.3.1.3** Verify workflow run starts in GitHub Actions UI for `docs` workflow.
-  - [ ] **3.3.2 Monitor Remote `check` Job Execution**
-    - [ ] **3.3.2.1** Inspect `check` job log to verify recursive submodule checkout.
-    - [ ] **3.3.2.2** Confirm `make check` step passes in clean Ubuntu 24.04 environment.
+- [x] **3.3 Remote CI/CD Trigger & Execution Monitoring (GitHub Actions)**
+  - [x] **3.3.1 Trigger Remote Workflow Run**
+    - [x] **3.3.1.1** Push commits to GitHub repository branch to trigger push events for `gds.yaml` and `docs.yaml`.
+    - [x] **3.3.1.2** Verify workflow run starts in GitHub Actions UI for `gds` workflow.
+    - [x] **3.3.1.3** Verify workflow run starts in GitHub Actions UI for `docs` workflow.
+  - [x] **3.3.2 Monitor Remote `check` Job Execution**
+    - [x] **3.3.2.1** Inspect `check` job log to verify recursive submodule checkout.
+    - [x] **3.3.2.2** Confirm `make check` step passes in clean Ubuntu 24.04 environment.
   - [ ] **3.3.3 Monitor Remote `gds` Job Execution**
     - [ ] **3.3.3.1** Confirm `Read top module name` step extracts `TOP_MODULE=tt_um_tnt_mosbius` from `info.yaml`.
     - [ ] **3.3.3.2** Confirm `custom_gds@ttihp26b` step executes with `pdk: ihp-sg13g2`.
