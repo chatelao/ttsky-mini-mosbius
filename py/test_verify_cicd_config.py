@@ -20,16 +20,25 @@ class TestVerifyCICDConfig(unittest.TestCase):
 name: gds
 jobs:
   gds:
+    runs-on: ubuntu-24.04
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b
         with:
+          verilog_path: src/project.v
           pdk: ihp-sg13g2
   precheck:
     needs: gds
+    runs-on: ubuntu-24.04
+    continue-on-error: true
     steps:
       - uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
   viewer:
     needs: gds
+    runs-on: ubuntu-24.04
+    continue-on-error: true
     permissions:
       pages: write
       id-token: write
@@ -86,12 +95,48 @@ jobs:
         ):
             self.assertFalse(check_gds_workflow())
 
+    def test_check_gds_workflow_missing_submodules(self):
+        missing_submodules_gds = """
+name: gds
+jobs:
+  gds:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b
+        with:
+          verilog_path: src/project.v
+          pdk: ihp-sg13g2
+  precheck:
+    needs: gds
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
+  viewer:
+    needs: gds
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - uses: TinyTapeout/tt-gds-action/viewer@ttihp26b
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=missing_submodules_gds)
+        ):
+            self.assertFalse(check_gds_workflow())
+
     def test_check_docs_workflow_valid(self):
         valid_docs = """
 name: docs
 jobs:
   docs:
+    runs-on: ubuntu-24.04
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: TinyTapeout/tt-gds-action/docs@ttihp26b
 """
         with patch("os.path.exists", return_value=True), patch(
