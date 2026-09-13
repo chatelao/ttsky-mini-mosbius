@@ -10,6 +10,7 @@ from py.verify_cicd_config import (
     check_docs_workflow,
     check_gds_workflow,
     check_info_yaml,
+    check_pages_api_config,
 )
 
 
@@ -176,6 +177,35 @@ project:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
         ):
             self.assertFalse(check_info_yaml())
+
+    def test_check_pages_api_config_valid(self):
+        valid_gds = """
+name: gds
+jobs:
+  viewer:
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - uses: TinyTapeout/tt-gds-action/viewer@ttihp26b
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_gds)
+        ):
+            self.assertTrue(check_pages_api_config())
+
+    def test_check_pages_api_config_invalid(self):
+        invalid_gds = """
+name: gds
+jobs:
+  viewer:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/viewer@ttsky26c
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_gds)
+        ):
+            self.assertFalse(check_pages_api_config())
 
 
 if __name__ == "__main__":

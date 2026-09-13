@@ -139,6 +139,39 @@ def check_info_yaml(repo_root="."):
     return True
 
 
+def check_pages_api_config(repo_root="."):
+    filepath = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    if not os.path.exists(filepath):
+        print(f"ERROR: {filepath} does not exist.")
+        return False
+
+    with open(filepath, "r") as f:
+        content = f.read()
+
+    errors = []
+
+    if "viewer:" not in content:
+        errors.append("Missing 'viewer' job in gds.yaml for Pages deployment API")
+
+    if "pages: write" not in content:
+        errors.append("Missing 'pages: write' permission for GitHub Pages deployment API")
+
+    if "id-token: write" not in content:
+        errors.append("Missing 'id-token: write' permission for OIDC authentication")
+
+    if "TinyTapeout/tt-gds-action/viewer@ttihp26b" not in content:
+        errors.append("Missing expected 'viewer@ttihp26b' action reference for Pages deployment")
+
+    if errors:
+        print(f"FAILED Pages API config check in {filepath}:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print(f"PASSED Pages API config check in {filepath}")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -148,8 +181,9 @@ def main():
     gds_ok = check_gds_workflow(repo_root)
     docs_ok = check_docs_workflow(repo_root)
     info_ok = check_info_yaml(repo_root)
+    pages_ok = check_pages_api_config(repo_root)
 
-    if gds_ok and docs_ok and info_ok:
+    if gds_ok and docs_ok and info_ok and pages_ok:
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
     else:
