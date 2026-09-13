@@ -132,11 +132,32 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [ ] **3.3.4.5** Verify precheck execution logs and summary reports are created and archived as build artifacts.
     - [ ] **3.3.4.6** Confirm precheck step status and evaluate `continue-on-error` behavior for non-blocking warnings.
   - [ ] **3.3.5 Monitor Downstream `viewer` Job Execution**
-    - [ ] **3.3.5.1** Verify `viewer` job inherits `pages: write` and `id-token: write` workflow permissions.
-    - [ ] **3.3.5.2** Confirm `TinyTapeout/tt-gds-action/viewer@ttihp26b` action downloads `gds_render` artifact.
+    - [ ] **3.3.5.1 Job Initialization & Permission Verification**
+      - [ ] **3.3.5.1.1** Verify `viewer` job starts after successful completion of `gds` job via `needs: gds` dependency.
+      - [ ] **3.3.5.1.2** Verify `ubuntu-24.04` runner initializes container environment for `TinyTapeout/tt-gds-action/viewer@ttihp26b`.
+      - [ ] **3.3.5.1.3** Confirm `viewer` job inherits explicit `permissions: pages: write` token authorization scope.
+      - [ ] **3.3.5.1.4** Confirm `viewer` job inherits explicit `permissions: id-token: write` scope for OIDC JWT token exchange.
+    - [ ] **3.3.5.2 Artifact Retrieval & Asset Generation**
+      - [ ] **3.3.5.2.1** Confirm `viewer` step downloads `tt_submission` GDS (`gds/tt_um_tnt_mosbius.gds`) artifact.
+      - [ ] **3.3.5.2.2** Confirm `viewer` step downloads `gds_render` 3D model artifact.
+      - [ ] **3.3.5.2.3** Confirm `pdk.json` configuration is parsed to resolve `pdk: ihp-sg13g2`.
+      - [ ] **3.3.5.2.4** Verify 3D WebGL viewer assets and static `index.html` entrypoint are copied to `gh-pages/` staging directory.
+    - [ ] **3.3.5.3 GitHub Pages Packaging & Deployment**
+      - [ ] **3.3.5.3.1** Confirm `actions/upload-pages-artifact` archives `gh-pages/` content into `github-pages.tar.gz`.
+      - [ ] **3.3.5.3.2** Confirm `actions/deploy-pages` requests OIDC token from GitHub authentication provider.
+      - [ ] **3.3.5.3.3** Verify deployment POST payload to `/repos/{owner}/{repo}/pages/deployments` succeeds with HTTP 200/201 status.
+      - [ ] **3.3.5.3.4** Confirm `viewer` job execution status finishes with green checkmark (success).
   - [ ] **3.3.6 Monitor Downstream `docs` Job Execution**
-    - [ ] **3.3.6.1** Verify `docs` workflow in `.github/workflows/docs.yaml` runs in parallel with `gds` workflow.
-    - [ ] **3.3.6.2** Confirm `TinyTapeout/tt-gds-action/docs@ttihp26b` action builds project documentation.
+    - [ ] **3.3.6.1 Workflow Initialization & Setup**
+      - [ ] **3.3.6.1.1** Verify `docs` workflow in `.github/workflows/docs.yaml` triggers on repository push/PR events in parallel with `gds` workflow.
+      - [ ] **3.3.6.1.2** Confirm `ubuntu-24.04` runner executes `actions/checkout@v4` with `submodules: recursive`.
+    - [ ] **3.3.6.2 Documentation Build & Artifact Rendering**
+      - [ ] **3.3.6.2.1** Confirm `TinyTapeout/tt-gds-action/docs@ttihp26b` step initializes documentation toolchain container.
+      - [ ] **3.3.6.2.2** Verify `info.yaml` metadata (title, author, pinouts, description) is parsed without validation errors.
+      - [ ] **3.3.6.2.3** Confirm Markdown documentation files (`docs/`) and SVG pinout diagrams are rendered into HTML pages.
+      - [ ] **3.3.6.2.4** Verify documentation build output directory (`docs/_build/` or equivalent) contains generated static assets.
+    - [ ] **3.3.6.3 Final Status Assertion**
+      - [ ] **3.3.6.3.1** Confirm `docs` job completes with status success (green) without unhandled build exceptions.
   - [ ] **3.3.7 Review Workflow Execution Summary**
     - [ ] **3.3.7.1** Inspect detailed job execution logs for `gds` workflow.
     - [ ] **3.3.7.2** Inspect detailed job execution logs for `docs` workflow.
