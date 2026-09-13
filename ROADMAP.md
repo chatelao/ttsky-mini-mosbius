@@ -20,12 +20,14 @@ The top priority is establishing and maintaining a functioning **CI/CD pipeline 
 > **Objective:** Ensure automated build and check actions run early and continuously on all commits to prevent design drift.
 
 - [x] **1.1 Update GitHub Workflows for IHP Target**
-  - Update `.github/workflows/gds.yaml` and `docs.yaml` to reference IHP SG13G2 action templates / PDK configuration (`pdk: sg13g2` / tt-gds-action updates).
+  - Update `.github/workflows/gds.yaml` and `docs.yaml` to reference IHP SG13G2 action templates / PDK configuration (`pdk: ihp-sg13g2`).
+  - Update all action steps (`custom_gds`, `precheck`, `viewer`, `docs`) to mandate explicit `@ttihp26b` release tags.
+  - Configure GitHub Pages deployment source (`GitHub Actions`) and mandate explicit OIDC token permissions (`pages: write`, `id-token: write`) on the `viewer` job to prevent deployment HTTP 404 errors.
   - Ensure CI triggers properly on push and pull requests to catch breaking changes immediately.
 - [x] **1.2 Update Metadata & Pinout Definition**
   - Update `info.yaml` to conform to TinyTapeout IHP shuttle pinout and voltage requirements (1.2V $V_{DPWR}$, 3.3V $V_{APWR}$).
 - [x] **1.3 Establish Automated Verification Stubs**
-  - Add basic Makefile lint and synthesis check targets to be executed in CI.
+  - Integrate static CI/CD workflow parameter checks (`py/verify_cicd_config.py`) and Python unit test suites (`py/test_verify_cicd_config.py`) into `make check` alongside Verilog synthesis and lint checks.
 
 ---
 
