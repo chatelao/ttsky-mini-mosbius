@@ -175,10 +175,11 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [ ] **3.3.7.3** Confirm all steps complete without fatal errors or unhandled exceptions.
 
 - [ ] **3.4 Remote Verification of Precheck Job Execution & Output**
-  - [ ] **3.4.1 Local Static Artifact & Config Verification Breakdown**
+  - [x] **3.4.1 Local Static Artifact & Config Verification Breakdown**
     - [x] **3.4.1.1** Implement `check_gds_lef_artifacts` in `py/verify_cicd_config.py` to verify GDS and LEF artifact existence and non-zero size.
     - [x] **3.4.1.2** Enhance `check_info_yaml` in `py/verify_cicd_config.py` to validate SG13G2 project requirements (`uses_vapwr`, `tiles`, `analog_pins`).
     - [x] **3.4.1.3** Add unit tests in `py/test_verify_cicd_config.py` covering artifact check and enhanced info.yaml validation.
+    - [x] **3.4.1.4** Implement `check_precheck_def_and_pin_config` in `py/verify_cicd_config.py` to validate tile dimensions (`3x2`), analog pin count (`analog_pins: 6`), and pinout mappings (`ua[0]`-`ua[5]`), along with corresponding unit tests in `py/test_verify_cicd_config.py`.
   - [ ] **3.4.2 DEF Template & Tech File Resolution**
     - [ ] **3.4.2.1** Inspect precheck step log in GitHub Actions to confirm `../tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def` path is resolved.
     - [ ] **3.4.2.2** Verify in remote log output that template DEF file is parsed without `Errno 2` missing file errors.

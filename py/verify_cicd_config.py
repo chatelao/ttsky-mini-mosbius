@@ -222,6 +222,47 @@ def check_pages_api_config(repo_root="."):
     return True
 
 
+def check_precheck_def_and_pin_config(repo_root="."):
+    info_path = os.path.join(repo_root, "info.yaml")
+    if not os.path.exists(info_path):
+        print(f"ERROR: {info_path} does not exist.")
+        return False
+
+    with open(info_path, "r") as f:
+        content = f.read()
+
+    errors = []
+
+    tile_match = re.search(r"tiles:\s*[\"']?(\d+x\d+)[\"']?", content)
+    if tile_match:
+        tiles = tile_match.group(1)
+        if not re.match(r"^\d+x\d+$", tiles):
+            errors.append(f"Invalid tile specification: '{tiles}'")
+    else:
+        errors.append("Missing 'tiles' specification in info.yaml")
+
+    analog_count_match = re.search(r"analog_pins:\s*(\d+)", content)
+    if analog_count_match:
+        num_analog_pins = int(analog_count_match.group(1))
+        ua_pins = re.findall(r"ua\[(\d+)\]:\s*[\"']([^\"']*)[\"']", content)
+        non_empty_ua = [p for p in ua_pins if p[1].strip() != ""]
+        if len(non_empty_ua) != num_analog_pins:
+            errors.append(
+                f"Mismatch: 'analog_pins' count is {num_analog_pins}, but found {len(non_empty_ua)} non-empty ua[...] pin definitions in info.yaml"
+            )
+    else:
+        errors.append("Missing 'analog_pins' count in info.yaml")
+
+    if errors:
+        print(f"FAILED precheck DEF/pin config check in {info_path}:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print(f"PASSED precheck DEF/pin config check in {info_path}")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -233,8 +274,9 @@ def main():
     info_ok = check_info_yaml(repo_root)
     artifacts_ok = check_gds_lef_artifacts(repo_root)
     pages_ok = check_pages_api_config(repo_root)
+    precheck_def_pin_ok = check_precheck_def_and_pin_config(repo_root)
 
-    if gds_ok and docs_ok and info_ok and artifacts_ok and pages_ok:
+    if gds_ok and docs_ok and info_ok and artifacts_ok and pages_ok and precheck_def_pin_ok:
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
     else:
