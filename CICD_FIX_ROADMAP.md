@@ -95,7 +95,7 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
   - [x] **3.1.2 Run `make lint`**
     - Execute `make lint` to verify RTL syntax and formatting.
 
-- [ ] **3.2 Commit and Push Workflow & Roadmap Updates**
+- [x] **3.2 Commit and Push Workflow & Roadmap Updates**
   - [x] **3.2.1 Stage Modified Repository Files**
     - [x] **3.2.1.1** Stage modified workflow files (`.github/workflows/gds.yaml`, `.github/workflows/docs.yaml`).
     - [x] **3.2.1.2** Stage modified documentation files (`CICD_FIX_ROADMAP.md`).
