@@ -12,6 +12,7 @@ from py.verify_cicd_config import (
     check_gds_workflow,
     check_info_yaml,
     check_pages_api_config,
+    check_precheck_def_and_pin_config,
 )
 
 
@@ -319,6 +320,46 @@ jobs:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_gds)
         ):
             self.assertFalse(check_pages_api_config())
+
+    def test_check_precheck_def_and_pin_config_valid(self):
+        valid_info = """
+project:
+  tiles: "3x2"
+  analog_pins: 2
+
+pinout:
+  ua[0]: "Ref"
+  ua[1]: "Bus"
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_info)
+        ):
+            self.assertTrue(check_precheck_def_and_pin_config())
+
+    def test_check_precheck_def_and_pin_config_mismatch(self):
+        invalid_info = """
+project:
+  tiles: "3x2"
+  analog_pins: 6
+
+pinout:
+  ua[0]: "Ref"
+  ua[1]: "Bus"
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
+        ):
+            self.assertFalse(check_precheck_def_and_pin_config())
+
+    def test_check_precheck_def_and_pin_config_missing_tiles(self):
+        invalid_info = """
+project:
+  analog_pins: 0
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
+        ):
+            self.assertFalse(check_precheck_def_and_pin_config())
 
 
 if __name__ == "__main__":
