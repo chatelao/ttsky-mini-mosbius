@@ -105,9 +105,9 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **3.2.2.1** Draft concise commit title under 50 characters (`ci: update tt-gds-action tags to ttihp26b`).
     - [x] **3.2.2.2** Draft commit body explaining root cause of `@ttsky26c` mismatch and migration to `@ttihp26b`.
     - [x] **3.2.2.3** Ensure commit body references the resolution of precheck DEF/layer errors and Pages 404 deployment error.
-  - [ ] **3.2.3 Commit Staged Changes**
-    - [ ] **3.2.3.1** Run `git commit` with drafted message.
-    - [ ] **3.2.3.2** Verify local commit hash is generated cleanly.
+  - [x] **3.2.3 Commit Staged Changes**
+    - [x] **3.2.3.1** Run `git commit` with drafted message.
+    - [x] **3.2.3.2** Verify local commit hash is generated cleanly.
   - [ ] **3.2.4 Push Branch to Remote GitHub Repository**
     - [ ] **3.2.4.1** Determine target remote name (`origin`) and current tracking branch.
     - [ ] **3.2.4.2** Execute `git push` to transfer local commit history to remote repository.
