@@ -187,9 +187,17 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 
 - [ ] **3.5 Remote Verification of Pages & Documentation Deployment**
   - [ ] **3.5.1 3D Viewer Artifact Generation**
-    - [ ] **3.5.1.1** Verify in `viewer` job logs that `gds_render` artifact is downloaded.
-    - [ ] **3.5.1.2** Verify 3D web model and `index.html` redirect page referencing `pdk=ihp-sg13g2` are generated.
-    - [ ] **3.5.1.3** Confirm `gh-pages/` staging folder is created containing OAS and GDSII files.
+    - [ ] **3.5.1.1 Verify GDS and Render Artifact Retrieval**
+      - [ ] **3.5.1.1.1** Confirm `tt_submission` artifact containing top-level GDS file (`gds/tt_um_tnt_mosbius.gds`) is downloaded in `viewer` job.
+      - [ ] **3.5.1.1.2** Confirm `gds_render` 3D model artifact is successfully downloaded from upstream job outputs.
+    - [ ] **3.5.1.2 Verify WebGL 3D Model and Redirect Generation**
+      - [ ] **3.5.1.2.1** Verify `pdk.json` configuration is parsed to resolve `pdk: ihp-sg13g2`.
+      - [ ] **3.5.1.2.2** Confirm generation of `index.html` redirect entrypoint pointing to the WebGL 3D model with parameter `pdk=ihp-sg13g2`.
+      - [ ] **3.5.1.2.3** Verify WebGL viewer assets (`gds.html`, JS/CSS bundles) are created in `gh-pages/` staging directory.
+    - [ ] **3.5.1.3 Verify Layout File Staging in Pages Directory**
+      - [ ] **3.5.1.3.1** Confirm GDSII layout file (`tt_um_tnt_mosbius.gds`) is copied into `gh-pages/` staging directory.
+      - [ ] **3.5.1.3.2** Confirm OASIS compressed layout file (`tt_um_tnt_mosbius.oas`) is generated and copied into `gh-pages/` staging directory.
+      - [ ] **3.5.1.3.3** Verify file permissions and relative paths in `gh-pages/` directory structure prior to artifact archiving.
   - [ ] **3.5.2 GitHub Pages Deployment Verification**
     - [ ] **3.5.2.1 Artifact Bundling & Archive Creation**
       - [ ] **3.5.2.1.1** Verify `actions/upload-pages-artifact` creates tarball containing `gh-pages/` files.
