@@ -91,9 +91,11 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 
 - [x] **3.1 Run Local Verification Checks**
   - [x] **3.1.1 Run `make check`**
-    - Execute `make check` to verify Verilog elaboration and Python decap generator execution.
+    - Execute `make check` to verify Verilog elaboration, Python decap generator execution, and static CI/CD config verification (`verify_cicd_config.py`).
   - [x] **3.1.2 Run `make lint`**
     - Execute `make lint` to verify RTL syntax and formatting.
+  - [x] **3.1.3 Automated CI/CD Config Verification Integration**
+    - Confirm `src/Makefile` check target executes `py/verify_cicd_config.py` and unit tests in `py/test_verify_cicd_config.py` pass.
 
 - [x] **3.2 Commit and Push Workflow & Roadmap Updates**
   - [x] **3.2.1 Stage Modified Repository Files**
