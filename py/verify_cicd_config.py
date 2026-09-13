@@ -136,6 +136,15 @@ def check_info_yaml(repo_root="."):
                 f"Expected top_module 'tt_um_tnt_mosbius', got '{top_module}'"
             )
 
+    if not re.search(r"uses_vapwr:\s*true", content):
+        errors.append("Missing or invalid 'uses_vapwr: true' in info.yaml")
+
+    if not re.search(r"analog_pins:\s*\d+", content):
+        errors.append("Missing or invalid 'analog_pins' in info.yaml")
+
+    if not re.search(r"tiles:\s*[\"']?\d+x\d+[\"']?", content):
+        errors.append("Missing or invalid 'tiles' parameter in info.yaml")
+
     if errors:
         print(f"FAILED {filepath}:")
         for err in errors:
@@ -143,6 +152,40 @@ def check_info_yaml(repo_root="."):
         return False
 
     print(f"PASSED {filepath} (top_module={match.group(1)})")
+    return True
+
+
+def check_gds_lef_artifacts(repo_root="."):
+    info_path = os.path.join(repo_root, "info.yaml")
+    top_module = "tt_um_tnt_mosbius"
+    if os.path.exists(info_path):
+        with open(info_path, "r") as f:
+            content = f.read()
+            match = re.search(r"top_module:\s*[\"']?([a-zA-Z0-9_]+)[\"']?", content)
+            if match:
+                top_module = match.group(1)
+
+    errors = []
+    gds_file = os.path.join(repo_root, "gds", f"{top_module}.gds")
+    lef_file = os.path.join(repo_root, "lef", f"{top_module}.lef")
+
+    if not os.path.exists(gds_file):
+        errors.append(f"Missing GDS artifact file: {gds_file}")
+    elif os.path.getsize(gds_file) == 0:
+        errors.append(f"GDS artifact file is empty: {gds_file}")
+
+    if not os.path.exists(lef_file):
+        errors.append(f"Missing LEF artifact file: {lef_file}")
+    elif os.path.getsize(lef_file) == 0:
+        errors.append(f"LEF artifact file is empty: {lef_file}")
+
+    if errors:
+        print("FAILED GDS/LEF local artifact check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print(f"PASSED GDS/LEF local artifact check for {top_module}")
     return True
 
 
@@ -188,9 +231,10 @@ def main():
     gds_ok = check_gds_workflow(repo_root)
     docs_ok = check_docs_workflow(repo_root)
     info_ok = check_info_yaml(repo_root)
+    artifacts_ok = check_gds_lef_artifacts(repo_root)
     pages_ok = check_pages_api_config(repo_root)
 
-    if gds_ok and docs_ok and info_ok and pages_ok:
+    if gds_ok and docs_ok and info_ok and artifacts_ok and pages_ok:
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
     else:
