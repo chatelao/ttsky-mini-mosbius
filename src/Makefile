@@ -57,6 +57,7 @@ lint:
 
 check: lint
 	python3 ../py/verify_cicd_config.py
+	PYTHONPATH=.. python3 -m unittest discover -s ../py
 	$(MAKE) ctrl_asw.decap.v ctrl_dev_f.decap.v ctrl_dev_p.decap.v ctrl_dev_b1.decap.v ctrl_dev_e1.decap.v ctrl_dev_b2.decap.v ctrl_dev_m2.decap.v ctrl_dev_e2.decap.v
 	@if command -v yosys >/dev/null 2>&1; then \
 		$(MAKE) all; \
