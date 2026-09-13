@@ -90,14 +90,16 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 - [ ] **3.3 Remote CI/CD Trigger & Execution Monitoring (GitHub Actions)**
   - [ ] **3.3.1 Trigger Remote Workflow Run**
     - [ ] **3.3.1.1** Push commits to GitHub repository branch to trigger push events for `gds.yaml` and `docs.yaml`.
-    - [ ] **3.3.1.2** Verify workflow run starts in GitHub Actions UI for both `gds` and `docs` workflows.
+    - [ ] **3.3.1.2** Verify workflow run starts in GitHub Actions UI for `gds` workflow.
+    - [ ] **3.3.1.3** Verify workflow run starts in GitHub Actions UI for `docs` workflow.
   - [ ] **3.3.2 Monitor Remote `check` Job Execution**
     - [ ] **3.3.2.1** Inspect `check` job log to verify recursive submodule checkout.
     - [ ] **3.3.2.2** Confirm `make check` step passes in clean Ubuntu 24.04 environment.
   - [ ] **3.3.3 Monitor Remote `gds` Job Execution**
     - [ ] **3.3.3.1** Confirm `Read top module name` step extracts `TOP_MODULE=tt_um_tnt_mosbius` from `info.yaml`.
     - [ ] **3.3.3.2** Confirm `custom_gds@ttihp26b` step executes with `pdk: ihp-sg13g2`.
-    - [ ] **3.3.3.3** Verify `gds/tt_um_tnt_mosbius.gds` and `lef/tt_um_tnt_mosbius.lef` artifacts are published.
+    - [ ] **3.3.3.3** Verify `gds/tt_um_tnt_mosbius.gds` artifact is published.
+    - [ ] **3.3.3.4** Verify `lef/tt_um_tnt_mosbius.lef` artifact is published.
   - [ ] **3.3.4 Monitor Downstream `precheck` Job Execution**
     - [ ] **3.3.4.1** Verify `precheck` job starts after successful completion of `gds` job.
     - [ ] **3.3.4.2** Confirm `TinyTapeout/tt-gds-action/precheck@ttihp26b` action executes without syntax errors.
@@ -108,7 +110,9 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [ ] **3.3.6.1** Verify `docs` workflow in `.github/workflows/docs.yaml` runs in parallel with `gds` workflow.
     - [ ] **3.3.6.2** Confirm `TinyTapeout/tt-gds-action/docs@ttihp26b` action builds project documentation.
   - [ ] **3.3.7 Review Workflow Execution Summary**
-    - [ ] **3.3.7.1** Inspect detailed job execution logs to confirm all steps complete without fatal errors or unhandled exceptions.
+    - [ ] **3.3.7.1** Inspect detailed job execution logs for `gds` workflow.
+    - [ ] **3.3.7.2** Inspect detailed job execution logs for `docs` workflow.
+    - [ ] **3.3.7.3** Confirm all steps complete without fatal errors or unhandled exceptions.
 
 - [ ] **3.4 Remote Verification of Precheck Job Execution & Output**
   - [ ] **3.4.1 DEF Template & Tech File Resolution**
