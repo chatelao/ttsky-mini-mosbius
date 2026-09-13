@@ -96,7 +96,7 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - Execute `make lint` to verify RTL syntax and formatting.
 
 - [ ] **3.2 Commit and Push Workflow & Roadmap Updates**
-  - [ ] **3.2.1 Stage Modified Repository Files**
+  - [x] **3.2.1 Stage Modified Repository Files**
     - [x] **3.2.1.1** Stage modified workflow files (`.github/workflows/gds.yaml`, `.github/workflows/docs.yaml`).
     - [x] **3.2.1.2** Stage modified documentation files (`CICD_FIX_ROADMAP.md`).
     - [x] **3.2.1.3** Run `git status` to verify no untracked or unintended file modifications remain unstaged.
@@ -200,17 +200,33 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
       - [ ] **3.5.1.3.3** Verify file permissions and relative paths in `gh-pages/` directory structure prior to artifact archiving.
   - [ ] **3.5.2 GitHub Pages Deployment Verification**
     - [ ] **3.5.2.1 Artifact Bundling & Archive Creation**
-      - [ ] **3.5.2.1.1** Verify `actions/upload-pages-artifact` creates tarball containing `gh-pages/` files.
-      - [ ] **3.5.2.1.2** Confirm tarball contains valid `index.html` entrypoint and GDS/OAS assets.
+      - [ ] **3.5.2.1.1** Verify `actions/upload-pages-artifact` initializes with target staging directory `gh-pages/`.
+      - [ ] **3.5.2.1.2** Verify archiving process packages `index.html`, GDSII (`*.gds`), and OASIS (`*.oas`) files into `github-pages.tar.gz`.
+      - [ ] **3.5.2.1.3** Confirm artifact checksum logging and archive size verification in action runner log output.
+      - [ ] **3.5.2.1.4** Verify artifact upload to GitHub Actions artifact storage completes without network timeout errors.
     - [ ] **3.5.2.2 OIDC Token Exchange & Authorization**
       - [ ] **3.5.2.2.1** Confirm `actions/deploy-pages` step requests OpenID Connect (OIDC) JWT token using `id-token: write` scope.
-      - [ ] **3.5.2.2.2** Verify GitHub Actions OIDC provider exchanges JWT token for Pages deployment authorization.
+      - [ ] **3.5.2.2.2** Verify JWT token claims include repository subject, runner environment, and workflow trigger event.
+      - [ ] **3.5.2.2.3** Confirm OIDC token exchange with GitHub OAuth/OIDC provider succeeds without authentication errors.
+      - [ ] **3.5.2.2.4** Confirm token scope authorization validation against repository Pages setting (`build_type: workflow`).
     - [ ] **3.5.2.3 API Deployment & Status Assertion**
-      - [ ] **3.5.2.3.1** Verify API POST request to `/repos/{owner}/{repo}/pages/deployments` authenticates using `pages: write` token scope.
-      - [ ] **3.5.2.3.2** Confirm API response returns HTTP status code 200 or 201 (preventing previous 404 deployment error).
-      - [ ] **3.5.2.3.3** Verify Pages deployment status transitions to `succeeded` in workflow summary log.
+      - [ ] **3.5.2.3.1** Verify API POST request to `/repos/{owner}/{repo}/pages/deployments` includes valid artifact ID and authorization token.
+      - [ ] **3.5.2.3.2** Confirm API POST response returns HTTP status code 200 or 201 (preventing previous 404 deployment failure).
+      - [ ] **3.5.2.3.3** Monitor API deployment status polling loop until status transitions to `succeeded`.
+      - [ ] **3.5.2.3.4** Confirm published site URL endpoint in job output matches expected `*.github.io` repository domain.
   - [ ] **3.5.3 Published Site & Documentation Verification**
-    - [ ] **3.5.3.1** Verify `docs` job log output shows successful build and publication of documentation artifacts.
-    - [ ] **3.5.3.2** Navigate to the published GitHub Pages site URL in a web browser to confirm 3D top module model renders correctly.
-    - [ ] **3.5.3.3** Verify project overview and pinout details from `info.yaml` render correctly on the docs page.
-    - [ ] **3.5.3.4** Confirm WebGL 3D rendering canvas loads without shader or texture errors.
+    - [ ] **3.5.3.1 Documentation Build & Artifact Verification**
+      - [ ] **3.5.3.1.1** Verify `docs` job log output shows successful execution of `tt-gds-action/docs@ttihp26b`.
+      - [ ] **3.5.3.1.2** Confirm static HTML page generation from Markdown source files in `docs/` folder.
+      - [ ] **3.5.3.1.3** Confirm pinout table rendering and SVG diagram generation from `info.yaml` definitions.
+      - [ ] **3.5.3.1.4** Verify documentation build output directory contains generated HTML and asset files.
+    - [ ] **3.5.3.2 WebGL 3D Viewer Interactive Verification**
+      - [ ] **3.5.3.2.1** Navigate to published GitHub Pages URL in web browser environment.
+      - [ ] **3.5.3.2.2** Confirm `index.html` entrypoint successfully loads WebGL 3D model viewer canvas.
+      - [ ] **3.5.3.2.3** Confirm URL query parameter `pdk=ihp-sg13g2` is correctly parsed by viewer application.
+      - [ ] **3.5.3.2.4** Verify WebGL 3D rendering canvas loads without shader compilation errors or missing texture warnings.
+    - [ ] **3.5.3.3 Documentation Content & Pinout Verification**
+      - [ ] **3.5.3.3.1** Verify project overview and description match `info.yaml` metadata.
+      - [ ] **3.5.3.3.2** Verify digital and analog pinout mappings display correctly on documentation page.
+      - [ ] **3.5.3.3.3** Verify clock, reset, and enable pin configurations match hardware specs.
+      - [ ] **3.5.3.3.4** Confirm all embedded assets and navigation hyperlinks load cleanly without 404 resource errors.
