@@ -184,13 +184,13 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
   - [x] **3.4.2 DEF Template & Tech File Resolution**
     - [x] **3.4.2.1** Statically verify in `check_def_template_config` that tile dimensions (`tiles: 3x2`) and power domain (`uses_vapwr: true`) in `info.yaml` map to `../tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def`.
     - [x] **3.4.2.2** Confirm `info.yaml` specifies `language: Analog` so precheck toolchain selects analog DEF template without missing file errors.
-  - [ ] **3.4.3 Boundary & Layer Checks Verification**
-    - [ ] **3.4.3.1** Confirm SG13G2 `prBoundary.boundary` layer `235/4` detection (replacing sky130 `189/4`).
-    - [ ] **3.4.3.2** Confirm standard SG13G2 layers (64-71, 235) pass layer validation without false positive errors.
-  - [ ] **3.4.4 Pin Placement & DRC Verification**
-    - [ ] **3.4.4.1** Confirm analog pin placement checks against the template DEF succeed for `tt_um_tnt_mosbius.gds`.
-    - [ ] **3.4.4.2** Confirm pin net name and direction mappings correspond to `info.yaml` definitions.
-    - [ ] **3.4.4.3** Verify DEF layer assignment and pin boundary coordinates match template specifications.
+  - [x] **3.4.3 Boundary & Layer Checks Verification**
+    - [x] **3.4.3.1** Confirm SG13G2 `prBoundary.boundary` layer `235/4` detection (replacing sky130 `189/4`) and MACRO SIZE dimensions in LEF via `check_lef_pin_and_boundary_config`.
+    - [x] **3.4.3.2** Confirm standard SG13G2 layers (64-71, 235) pass layer validation without false positive errors.
+  - [x] **3.4.4 Pin Placement & DRC Verification**
+    - [x] **3.4.4.1** Confirm analog pin placement checks against the template DEF succeed for `tt_um_tnt_mosbius.gds`.
+    - [x] **3.4.4.2** Confirm pin net name and direction mappings correspond to `info.yaml` definitions and pass LEF/info verification in `py/verify_cicd_config.py`.
+    - [x] **3.4.4.3** Verify DEF layer assignment and pin boundary coordinates match template specifications in `check_lef_pin_and_boundary_config`.
     - [ ] **3.4.4.4** Verify KLayout SG13G2 DRC execution completes without rule violations.
     - [ ] **3.4.4.5** Verify KLayout antenna and density check rules complete without violations.
     - [ ] **3.4.4.6** Verify KLayout zero-area polygon checks pass cleanly without geometry errors.
