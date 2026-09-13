@@ -1,7 +1,10 @@
 import os
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from py.verify_cicd_config import (
     check_docs_workflow,
@@ -22,9 +25,11 @@ jobs:
         with:
           pdk: ihp-sg13g2
   precheck:
+    needs: gds
     steps:
       - uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
   viewer:
+    needs: gds
     permissions:
       pages: write
       id-token: write
@@ -54,6 +59,30 @@ jobs:
 """
         with patch("os.path.exists", return_value=True), patch(
             "builtins.open", unittest.mock.mock_open(read_data=invalid_gds)
+        ):
+            self.assertFalse(check_gds_workflow())
+
+    def test_check_gds_workflow_missing_needs(self):
+        missing_needs_gds = """
+name: gds
+jobs:
+  gds:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b
+        with:
+          pdk: ihp-sg13g2
+  precheck:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
+  viewer:
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - uses: TinyTapeout/tt-gds-action/viewer@ttihp26b
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=missing_needs_gds)
         ):
             self.assertFalse(check_gds_workflow())
 
