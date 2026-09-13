@@ -125,8 +125,12 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [ ] **3.3.3.5** Verify `lef/tt_um_tnt_mosbius.lef` artifact is produced and archived.
     - [ ] **3.3.3.6** Confirm workflow job status transitions to success (green).
   - [ ] **3.3.4 Monitor Downstream `precheck` Job Execution**
-    - [ ] **3.3.4.1** Verify `precheck` job starts after successful completion of `gds` job.
-    - [ ] **3.3.4.2** Confirm `TinyTapeout/tt-gds-action/precheck@ttihp26b` action executes without syntax errors.
+    - [ ] **3.3.4.1** Verify `precheck` job starts after successful completion of `gds` job via `needs: gds` dependency.
+    - [ ] **3.3.4.2** Confirm `ubuntu-24.04` runner initializes and pulls container image for `TinyTapeout/tt-gds-action/precheck@ttihp26b`.
+    - [ ] **3.3.4.3** Verify `precheck` step acquires upstream `tt_submission` GDS (`gds/tt_um_tnt_mosbius.gds`) and LEF (`lef/tt_um_tnt_mosbius.lef`) artifacts.
+    - [ ] **3.3.4.4** Confirm `precheck@ttihp26b` action executes precheck verification suite without syntax or runtime exceptions.
+    - [ ] **3.3.4.5** Verify precheck execution logs and summary reports are created and archived as build artifacts.
+    - [ ] **3.3.4.6** Confirm precheck step status and evaluate `continue-on-error` behavior for non-blocking warnings.
   - [ ] **3.3.5 Monitor Downstream `viewer` Job Execution**
     - [ ] **3.3.5.1** Verify `viewer` job inherits `pages: write` and `id-token: write` workflow permissions.
     - [ ] **3.3.5.2** Confirm `TinyTapeout/tt-gds-action/viewer@ttihp26b` action downloads `gds_render` artifact.
