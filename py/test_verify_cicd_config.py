@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from py.verify_cicd_config import (
     check_docs_workflow,
+    check_gds_lef_artifacts,
     check_gds_workflow,
     check_info_yaml,
     check_pages_api_config,
@@ -239,6 +240,9 @@ jobs:
         valid_info = """
 project:
   top_module: "tt_um_tnt_mosbius"
+  uses_vapwr: true
+  tiles: "3x2"
+  analog_pins: 6
 """
         with patch("os.path.exists", return_value=True), patch(
             "builtins.open", unittest.mock.mock_open(read_data=valid_info)
@@ -254,6 +258,38 @@ project:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
         ):
             self.assertFalse(check_info_yaml())
+
+    def test_check_info_yaml_missing_fields(self):
+        missing_info = """
+project:
+  top_module: "tt_um_tnt_mosbius"
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=missing_info)
+        ):
+            self.assertFalse(check_info_yaml())
+
+    def test_check_gds_lef_artifacts_valid(self):
+        with patch("os.path.exists", return_value=True), patch(
+            "os.path.getsize", return_value=1024
+        ), patch(
+            "builtins.open",
+            unittest.mock.mock_open(read_data='project:\n  top_module: "tt_um_tnt_mosbius"'),
+        ):
+            self.assertTrue(check_gds_lef_artifacts())
+
+    def test_check_gds_lef_artifacts_missing(self):
+        with patch("os.path.exists", return_value=False):
+            self.assertFalse(check_gds_lef_artifacts())
+
+    def test_check_gds_lef_artifacts_empty(self):
+        with patch("os.path.exists", return_value=True), patch(
+            "os.path.getsize", return_value=0
+        ), patch(
+            "builtins.open",
+            unittest.mock.mock_open(read_data='project:\n  top_module: "tt_um_tnt_mosbius"'),
+        ):
+            self.assertFalse(check_gds_lef_artifacts())
 
     def test_check_pages_api_config_valid(self):
         valid_gds = """

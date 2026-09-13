@@ -175,22 +175,26 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [ ] **3.3.7.3** Confirm all steps complete without fatal errors or unhandled exceptions.
 
 - [ ] **3.4 Remote Verification of Precheck Job Execution & Output**
-  - [ ] **3.4.1 DEF Template & Tech File Resolution**
-    - [ ] **3.4.1.1** Inspect precheck step log in GitHub Actions to confirm `../tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def` path is resolved.
-    - [ ] **3.4.1.2** Verify in remote log output that template DEF file is parsed without `Errno 2` missing file errors.
-  - [ ] **3.4.2 Boundary & Layer Checks Verification**
-    - [ ] **3.4.2.1** Confirm SG13G2 `prBoundary.boundary` layer `235/4` detection (replacing sky130 `189/4`).
-    - [ ] **3.4.2.2** Confirm standard SG13G2 layers (64-71, 235) pass layer validation without false positive errors.
-  - [ ] **3.4.3 Pin Placement & DRC Verification**
-    - [ ] **3.4.3.1** Confirm analog pin placement checks against the template DEF succeed for `tt_um_tnt_mosbius.gds`.
-    - [ ] **3.4.3.2** Confirm pin net name and direction mappings correspond to `info.yaml` definitions.
-    - [ ] **3.4.3.3** Verify DEF layer assignment and pin boundary coordinates match template specifications.
-    - [ ] **3.4.3.4** Verify KLayout SG13G2 DRC execution completes without rule violations.
-    - [ ] **3.4.3.5** Verify KLayout antenna and density check rules complete without violations.
-    - [ ] **3.4.3.6** Verify KLayout zero-area polygon checks pass cleanly without geometry errors.
-  - [ ] **3.4.4 Precheck Job Final Status**
-    - [ ] **3.4.4.1** Verify precheck summary table displays green checkmarks for all checks.
-    - [ ] **3.4.4.2** Check that the `precheck` job status badge is green (success) in GitHub Actions.
+  - [ ] **3.4.1 Local Static Artifact & Config Verification Breakdown**
+    - [x] **3.4.1.1** Implement `check_gds_lef_artifacts` in `py/verify_cicd_config.py` to verify GDS and LEF artifact existence and non-zero size.
+    - [x] **3.4.1.2** Enhance `check_info_yaml` in `py/verify_cicd_config.py` to validate SG13G2 project requirements (`uses_vapwr`, `tiles`, `analog_pins`).
+    - [x] **3.4.1.3** Add unit tests in `py/test_verify_cicd_config.py` covering artifact check and enhanced info.yaml validation.
+  - [ ] **3.4.2 DEF Template & Tech File Resolution**
+    - [ ] **3.4.2.1** Inspect precheck step log in GitHub Actions to confirm `../tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def` path is resolved.
+    - [ ] **3.4.2.2** Verify in remote log output that template DEF file is parsed without `Errno 2` missing file errors.
+  - [ ] **3.4.3 Boundary & Layer Checks Verification**
+    - [ ] **3.4.3.1** Confirm SG13G2 `prBoundary.boundary` layer `235/4` detection (replacing sky130 `189/4`).
+    - [ ] **3.4.3.2** Confirm standard SG13G2 layers (64-71, 235) pass layer validation without false positive errors.
+  - [ ] **3.4.4 Pin Placement & DRC Verification**
+    - [ ] **3.4.4.1** Confirm analog pin placement checks against the template DEF succeed for `tt_um_tnt_mosbius.gds`.
+    - [ ] **3.4.4.2** Confirm pin net name and direction mappings correspond to `info.yaml` definitions.
+    - [ ] **3.4.4.3** Verify DEF layer assignment and pin boundary coordinates match template specifications.
+    - [ ] **3.4.4.4** Verify KLayout SG13G2 DRC execution completes without rule violations.
+    - [ ] **3.4.4.5** Verify KLayout antenna and density check rules complete without violations.
+    - [ ] **3.4.4.6** Verify KLayout zero-area polygon checks pass cleanly without geometry errors.
+  - [ ] **3.4.5 Precheck Job Final Status**
+    - [ ] **3.4.5.1** Verify precheck summary table displays green checkmarks for all checks.
+    - [ ] **3.4.5.2** Check that the `precheck` job status badge is green (success) in GitHub Actions.
 
 - [ ] **3.5 Remote Verification of Pages & Documentation Deployment**
   - [ ] **3.5.1 3D Viewer Artifact Generation**
