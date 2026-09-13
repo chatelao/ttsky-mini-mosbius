@@ -306,6 +306,82 @@ def check_def_template_config(repo_root="."):
     return True
 
 
+def check_viewer_and_docs_deployment_config(repo_root="."):
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    docs_path = os.path.join(repo_root, ".github/workflows/docs.yaml")
+
+    errors = []
+
+    if not os.path.exists(gds_path):
+        errors.append(f"Missing file: {gds_path}")
+    else:
+        with open(gds_path, "r") as f:
+            gds_content = f.read()
+
+        if "viewer:" not in gds_content:
+            errors.append("Missing 'viewer' job definition in gds.yaml")
+        if "TinyTapeout/tt-gds-action/viewer@ttihp26b" not in gds_content:
+            errors.append("Missing 'viewer@ttihp26b' action tag in gds.yaml")
+        if "pages: write" not in gds_content or "id-token: write" not in gds_content:
+            errors.append("Missing required Pages and OIDC permissions in viewer job in gds.yaml")
+        if "runs-on: ubuntu-24.04" not in gds_content:
+            errors.append("Missing 'runs-on: ubuntu-24.04' runner configuration in gds.yaml")
+
+    if not os.path.exists(docs_path):
+        errors.append(f"Missing file: {docs_path}")
+    else:
+        with open(docs_path, "r") as f:
+            docs_content = f.read()
+
+        if "docs:" not in docs_content:
+            errors.append("Missing 'docs' job definition in docs.yaml")
+        if "TinyTapeout/tt-gds-action/docs@ttihp26b" not in docs_content:
+            errors.append("Missing 'docs@ttihp26b' action tag in docs.yaml")
+        if "submodules: recursive" not in docs_content:
+            errors.append("Missing 'submodules: recursive' setting in docs.yaml")
+        if "runs-on: ubuntu-24.04" not in docs_content:
+            errors.append("Missing 'runs-on: ubuntu-24.04' runner configuration in docs.yaml")
+
+    if errors:
+        print("FAILED viewer and docs deployment config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED viewer and docs deployment config check")
+    return True
+
+
+def check_top_module_step_config(repo_root="."):
+    filepath = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    if not os.path.exists(filepath):
+        print(f"ERROR: {filepath} does not exist.")
+        return False
+
+    with open(filepath, "r") as f:
+        content = f.read()
+
+    errors = []
+
+    if "name: Read top module name" not in content:
+        errors.append("Missing 'Read top module name' step in gds.yaml")
+
+    if "yq '.project.top_module' info.yaml" not in content and 'yq ".project.top_module" info.yaml' not in content:
+        errors.append("Missing yq command extracting top_module in gds.yaml")
+
+    if "TOP_MODULE=" not in content:
+        errors.append("Missing TOP_MODULE output assignment in gds.yaml")
+
+    if errors:
+        print(f"FAILED top module step config check in {filepath}:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print(f"PASSED top module step config check in {filepath}")
+    return True
+
+
 def check_lef_pin_and_boundary_config(repo_root="."):
     info_path = os.path.join(repo_root, "info.yaml")
     top_module = "tt_um_tnt_mosbius"
@@ -368,6 +444,8 @@ def main():
     pages_ok = check_pages_api_config(repo_root)
     precheck_def_pin_ok = check_precheck_def_and_pin_config(repo_root)
     def_template_ok = check_def_template_config(repo_root)
+    top_module_step_ok = check_top_module_step_config(repo_root)
+    viewer_docs_deploy_ok = check_viewer_and_docs_deployment_config(repo_root)
     lef_pin_boundary_ok = check_lef_pin_and_boundary_config(repo_root)
 
     if (
@@ -378,6 +456,8 @@ def main():
         and pages_ok
         and precheck_def_pin_ok
         and def_template_ok
+        and top_module_step_ok
+        and viewer_docs_deploy_ok
         and lef_pin_boundary_ok
     ):
         print("All CI/CD configuration checks passed successfully!")

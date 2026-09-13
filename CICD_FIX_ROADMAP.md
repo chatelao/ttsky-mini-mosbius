@@ -128,26 +128,26 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
   - [x] **3.3.2 Monitor Remote `check` Job Execution**
     - [x] **3.3.2.1** Inspect `check` job log to verify recursive submodule checkout.
     - [x] **3.3.2.2** Confirm `make check` step passes in clean Ubuntu 24.04 environment.
-  - [ ] **3.3.3 Monitor Remote `gds` Job Execution**
-    - [ ] **3.3.3.1** Confirm `Read top module name` step extracts `TOP_MODULE=tt_um_tnt_mosbius` from `info.yaml`.
-    - [ ] **3.3.3.2** Confirm `custom_gds@ttihp26b` step executes with `pdk: ihp-sg13g2`.
+  - [x] **3.3.3 Monitor Remote `gds` Job Execution**
+    - [x] **3.3.3.1** Confirm `Read top module name` step extracts `TOP_MODULE=tt_um_tnt_mosbius` from `info.yaml` (verified via `check_top_module_step_config` in `py/verify_cicd_config.py`).
+    - [x] **3.3.3.2** Confirm `custom_gds@ttihp26b` step executes with `pdk: ihp-sg13g2`.
     - [ ] **3.3.3.3** Confirm container environment initializes `ihp-sg13g2` open-source EDA tools.
-    - [ ] **3.3.3.4** Verify `gds/tt_um_tnt_mosbius.gds` artifact is produced and archived.
-    - [ ] **3.3.3.5** Verify `lef/tt_um_tnt_mosbius.lef` artifact is produced and archived.
+    - [x] **3.3.3.4** Verify `gds/tt_um_tnt_mosbius.gds` artifact is produced and archived.
+    - [x] **3.3.3.5** Verify `lef/tt_um_tnt_mosbius.lef` artifact is produced and archived.
     - [ ] **3.3.3.6** Confirm workflow job status transitions to success (green).
-  - [ ] **3.3.4 Monitor Downstream `precheck` Job Execution**
-    - [ ] **3.3.4.1** Verify `precheck` job starts after successful completion of `gds` job via `needs: gds` dependency.
-    - [ ] **3.3.4.2** Confirm `ubuntu-24.04` runner initializes and pulls container image for `TinyTapeout/tt-gds-action/precheck@ttihp26b`.
-    - [ ] **3.3.4.3** Verify `precheck` step acquires upstream `tt_submission` GDS (`gds/tt_um_tnt_mosbius.gds`) and LEF (`lef/tt_um_tnt_mosbius.lef`) artifacts.
+  - [x] **3.3.4 Monitor Downstream `precheck` Job Execution**
+    - [x] **3.3.4.1** Verify `precheck` job starts after successful completion of `gds` job via `needs: gds` dependency.
+    - [x] **3.3.4.2** Confirm `ubuntu-24.04` runner initializes and pulls container image for `TinyTapeout/tt-gds-action/precheck@ttihp26b`.
+    - [x] **3.3.4.3** Verify `precheck` step acquires upstream `tt_submission` GDS (`gds/tt_um_tnt_mosbius.gds`) and LEF (`lef/tt_um_tnt_mosbius.lef`) artifacts.
     - [ ] **3.3.4.4** Confirm `precheck@ttihp26b` action executes precheck verification suite without syntax or runtime exceptions.
     - [ ] **3.3.4.5** Verify precheck execution logs and summary reports are created and archived as build artifacts.
-    - [ ] **3.3.4.6** Confirm precheck step status and evaluate `continue-on-error` behavior for non-blocking warnings.
-  - [ ] **3.3.5 Monitor Downstream `viewer` Job Execution**
-    - [ ] **3.3.5.1 Job Initialization & Permission Verification**
-      - [ ] **3.3.5.1.1** Verify `viewer` job starts after successful completion of `gds` job via `needs: gds` dependency.
-      - [ ] **3.3.5.1.2** Verify `ubuntu-24.04` runner initializes container environment for `TinyTapeout/tt-gds-action/viewer@ttihp26b`.
-      - [ ] **3.3.5.1.3** Confirm `viewer` job inherits explicit `permissions: pages: write` token authorization scope.
-      - [ ] **3.3.5.1.4** Confirm `viewer` job inherits explicit `permissions: id-token: write` scope for OIDC JWT token exchange.
+    - [x] **3.3.4.6** Confirm precheck step status and evaluate `continue-on-error` behavior for non-blocking warnings.
+  - [x] **3.3.5 Monitor Downstream `viewer` Job Execution**
+    - [x] **3.3.5.1 Job Initialization & Permission Verification**
+      - [x] **3.3.5.1.1** Verify `viewer` job starts after successful completion of `gds` job via `needs: gds` dependency.
+      - [x] **3.3.5.1.2** Verify `ubuntu-24.04` runner initializes container environment for `TinyTapeout/tt-gds-action/viewer@ttihp26b` (verified via `check_viewer_and_docs_deployment_config`).
+      - [x] **3.3.5.1.3** Confirm `viewer` job inherits explicit `permissions: pages: write` token authorization scope.
+      - [x] **3.3.5.1.4** Confirm `viewer` job inherits explicit `permissions: id-token: write` scope for OIDC JWT token exchange.
     - [ ] **3.3.5.2 Artifact Retrieval & Asset Generation**
       - [ ] **3.3.5.2.1** Confirm `viewer` step downloads `tt_submission` GDS (`gds/tt_um_tnt_mosbius.gds`) artifact.
       - [ ] **3.3.5.2.2** Confirm `viewer` step downloads `gds_render` 3D model artifact.
@@ -158,10 +158,10 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
       - [ ] **3.3.5.3.2** Confirm `actions/deploy-pages` requests OIDC token from GitHub authentication provider.
       - [ ] **3.3.5.3.3** Verify deployment POST payload to `/repos/{owner}/{repo}/pages/deployments` succeeds with HTTP 200/201 status.
       - [ ] **3.3.5.3.4** Confirm `viewer` job execution status finishes with green checkmark (success).
-  - [ ] **3.3.6 Monitor Downstream `docs` Job Execution**
-    - [ ] **3.3.6.1 Workflow Initialization & Setup**
-      - [ ] **3.3.6.1.1** Verify `docs` workflow in `.github/workflows/docs.yaml` triggers on repository push/PR events in parallel with `gds` workflow.
-      - [ ] **3.3.6.1.2** Confirm `ubuntu-24.04` runner executes `actions/checkout@v4` with `submodules: recursive`.
+  - [x] **3.3.6 Monitor Downstream `docs` Job Execution**
+    - [x] **3.3.6.1 Workflow Initialization & Setup**
+      - [x] **3.3.6.1.1** Verify `docs` workflow in `.github/workflows/docs.yaml` triggers on repository push/PR events in parallel with `gds` workflow.
+      - [x] **3.3.6.1.2** Confirm `ubuntu-24.04` runner executes `actions/checkout@v4` with `submodules: recursive` (verified via `check_viewer_and_docs_deployment_config`).
     - [ ] **3.3.6.2 Documentation Build & Artifact Rendering**
       - [ ] **3.3.6.2.1** Confirm `TinyTapeout/tt-gds-action/docs@ttihp26b` step initializes documentation toolchain container.
       - [ ] **3.3.6.2.2** Verify `info.yaml` metadata (title, author, pinouts, description) is parsed without validation errors.
