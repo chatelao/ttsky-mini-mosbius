@@ -9,8 +9,8 @@ import re
 import sys
 
 
-def check_gds_workflow():
-    filepath = ".github/workflows/gds.yaml"
+def check_gds_workflow(repo_root="."):
+    filepath = os.path.join(repo_root, ".github/workflows/gds.yaml")
     if not os.path.exists(filepath):
         print(f"ERROR: {filepath} does not exist.")
         return False
@@ -52,8 +52,8 @@ def check_gds_workflow():
     return True
 
 
-def check_docs_workflow():
-    filepath = ".github/workflows/docs.yaml"
+def check_docs_workflow(repo_root="."):
+    filepath = os.path.join(repo_root, ".github/workflows/docs.yaml")
     if not os.path.exists(filepath):
         print(f"ERROR: {filepath} does not exist.")
         return False
@@ -80,8 +80,8 @@ def check_docs_workflow():
     return True
 
 
-def check_info_yaml():
-    filepath = "info.yaml"
+def check_info_yaml(repo_root="."):
+    filepath = os.path.join(repo_root, "info.yaml")
     if not os.path.exists(filepath):
         print(f"ERROR: {filepath} does not exist.")
         return False
@@ -113,9 +113,13 @@ def check_info_yaml():
 
 def main():
     print("=== Running CI/CD Configuration Verification ===")
-    gds_ok = check_gds_workflow()
-    docs_ok = check_docs_workflow()
-    info_ok = check_info_yaml()
+    # Locate repo root (assuming py/ directory resides directly under repo root)
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    repo_root = os.path.abspath(os.path.join(script_dir, ".."))
+
+    gds_ok = check_gds_workflow(repo_root)
+    docs_ok = check_docs_workflow(repo_root)
+    info_ok = check_info_yaml(repo_root)
 
     if gds_ok and docs_ok and info_ok:
         print("All CI/CD configuration checks passed successfully!")
