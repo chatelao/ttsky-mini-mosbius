@@ -28,10 +28,10 @@ Port the SKY edition of the "Mini MOSBIUS" to IHP26b.
 - It contains a detailed architecture of all components and their technical interfaces.
 - Included the TOP_ARCHITECTURE.puml` as dynamic-rendering image as soon as available.
 
-# `ROADMAP.md` handling
-- The `ROADMAP.md` is the final plan to implement the `CONCEPT.md` and `DESIGN.md` to achive the top goal
+# `*ROADMAP.md` handling
+- The `*ROADMAP.md` is the final plan to implement the `*CONCEPT.md` and `*DESIGN.md` to achive the top goal
 - Define the steps in a way to allow for parallelization by defining interfaces only first and implementing functions later.
-- The `ROADMAP.md` file is structured into several key sections:
+- The `*ROADMAP.md` file is structured into several key sections:
   - **Progress Overview**: A table summarizing Phases, Descriptions, and Status (using ✅ for completed, 🚧 for in-progress, ⏳ for planned).
   - **Goals**: A high-level list of project objectives with status emojis.
   - **Phases**: Detailed chapters for each project phase.
