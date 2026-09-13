@@ -110,8 +110,10 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
   - [ ] **3.3.3 Monitor Remote `gds` Job Execution**
     - [ ] **3.3.3.1** Confirm `Read top module name` step extracts `TOP_MODULE=tt_um_tnt_mosbius` from `info.yaml`.
     - [ ] **3.3.3.2** Confirm `custom_gds@ttihp26b` step executes with `pdk: ihp-sg13g2`.
-    - [ ] **3.3.3.3** Verify `gds/tt_um_tnt_mosbius.gds` artifact is published.
-    - [ ] **3.3.3.4** Verify `lef/tt_um_tnt_mosbius.lef` artifact is published.
+    - [ ] **3.3.3.3** Confirm container environment initializes `ihp-sg13g2` open-source EDA tools.
+    - [ ] **3.3.3.4** Verify `gds/tt_um_tnt_mosbius.gds` artifact is produced and archived.
+    - [ ] **3.3.3.5** Verify `lef/tt_um_tnt_mosbius.lef` artifact is produced and archived.
+    - [ ] **3.3.3.6** Confirm workflow job status transitions to success (green).
   - [ ] **3.3.4 Monitor Downstream `precheck` Job Execution**
     - [ ] **3.3.4.1** Verify `precheck` job starts after successful completion of `gds` job.
     - [ ] **3.3.4.2** Confirm `TinyTapeout/tt-gds-action/precheck@ttihp26b` action executes without syntax errors.
@@ -135,7 +137,9 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [ ] **3.4.2.2** Confirm standard SG13G2 layers (64-71, 235) pass layer validation without false positive errors.
   - [ ] **3.4.3 Pin Placement & DRC Verification**
     - [ ] **3.4.3.1** Confirm analog pin placement checks against the template DEF succeed for `tt_um_tnt_mosbius.gds`.
-    - [ ] **3.4.3.2** Verify KLayout SG13G2 DRC and zero-area checks pass cleanly.
+    - [ ] **3.4.3.2** Confirm pin net name and direction mappings correspond to `info.yaml` definitions.
+    - [ ] **3.4.3.3** Verify KLayout SG13G2 DRC execution completes without rule violations.
+    - [ ] **3.4.3.4** Verify KLayout zero-area polygon checks pass cleanly without geometry errors.
   - [ ] **3.4.4 Precheck Job Final Status**
     - [ ] **3.4.4.1** Verify precheck summary table displays green checkmarks for all checks.
     - [ ] **3.4.4.2** Check that the `precheck` job status badge is green (success) in GitHub Actions.
@@ -148,7 +152,8 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
   - [ ] **3.5.2 GitHub Pages Deployment Verification**
     - [ ] **3.5.2.1** Verify `actions/upload-pages-artifact` produces `github-pages` artifact tarball.
     - [ ] **3.5.2.2** Confirm `actions/deploy-pages` step requests OIDC ID token using `id-token: write` permission.
-    - [ ] **3.5.2.3** Confirm `actions/deploy-pages` step completes with HTTP 200/201 response in remote log output (no 404 error).
+    - [ ] **3.5.2.3** Verify GitHub Pages deployment API authentication succeeds using `pages: write` token scope.
+    - [ ] **3.5.2.4** Confirm `actions/deploy-pages` step completes with HTTP 200/201 response in remote log output (no 404 error).
   - [ ] **3.5.3 Published Site & Documentation Verification**
     - [ ] **3.5.3.1** Verify `docs` job log output shows successful build and publication of documentation artifacts.
     - [ ] **3.5.3.2** Navigate to the published GitHub Pages site URL in a web browser to confirm 3D top module model renders correctly.
