@@ -98,7 +98,7 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **3.1.3.1 Static Verification Core Rule Set**
       - Confirm `py/verify_cicd_config.py` validates action tags (`@ttihp26b`), PDK configuration (`ihp-sg13g2`), Pages/OIDC permissions (`pages: write`, `id-token: write`), job dependencies (`needs: gds`), and top module definition in `info.yaml`.
     - [x] **3.1.3.2 Extended CI/CD Workflow Parameter Validation**
-      - Confirm `py/verify_cicd_config.py` validates `submodules: recursive` checkout, `runs-on: ubuntu-24.04` runner environment, `continue-on-error: true` flag, and `verilog_path: src/project.v` across `.github/workflows/gds.yaml` and `.github/workflows/docs.yaml`.
+      - Confirm `py/verify_cicd_config.py` validates `submodules: recursive` checkout, `runs-on: ubuntu-24.04` runner environment, `continue-on-error: true` flag, `verilog_path: src/project.v`, `gds_path`, and `lef_path` across `.github/workflows/gds.yaml` and `.github/workflows/docs.yaml`.
     - [x] **3.1.3.3 Comprehensive Unit Test Suite Execution**
       - Confirm `py/test_verify_cicd_config.py` executes unit test assertions covering valid and invalid configurations for all CI/CD verification rules via `python3 -m unittest discover -s py`.
 

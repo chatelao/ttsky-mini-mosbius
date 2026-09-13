@@ -62,6 +62,13 @@ def check_gds_workflow(repo_root="."):
     if "verilog_path: src/project.v" not in content:
         errors.append("Missing 'verilog_path: src/project.v' parameter in gds.yaml")
 
+    # Check gds_path and lef_path parameters
+    if "gds_path: gds/${{ steps.top_module.outputs.TOP_MODULE }}.gds" not in content:
+        errors.append("Missing expected 'gds_path' parameter in gds.yaml")
+
+    if "lef_path: lef/${{ steps.top_module.outputs.TOP_MODULE }}.lef" not in content:
+        errors.append("Missing expected 'lef_path' parameter in gds.yaml")
+
     if errors:
         print(f"FAILED {filepath}:")
         for err in errors:
