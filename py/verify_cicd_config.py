@@ -46,6 +46,22 @@ def check_gds_workflow(repo_root="."):
     if "needs: gds" not in content:
         errors.append("Missing required job dependency 'needs: gds' in gds.yaml")
 
+    # Check checkout submodules configuration
+    if "submodules: recursive" not in content:
+        errors.append("Missing 'submodules: recursive' setting in gds.yaml")
+
+    # Check runner configuration
+    if "runs-on: ubuntu-24.04" not in content:
+        errors.append("Missing 'runs-on: ubuntu-24.04' runner configuration in gds.yaml")
+
+    # Check continue-on-error setting
+    if "continue-on-error: true" not in content:
+        errors.append("Missing 'continue-on-error: true' setting in gds.yaml")
+
+    # Check verilog_path parameter
+    if "verilog_path: src/project.v" not in content:
+        errors.append("Missing 'verilog_path: src/project.v' parameter in gds.yaml")
+
     if errors:
         print(f"FAILED {filepath}:")
         for err in errors:
@@ -73,6 +89,14 @@ def check_docs_workflow(repo_root="."):
 
     if "ttsky26c" in content:
         errors.append("Found legacy tag 'ttsky26c' in docs.yaml")
+
+    # Check checkout submodules configuration
+    if "submodules: recursive" not in content:
+        errors.append("Missing 'submodules: recursive' setting in docs.yaml")
+
+    # Check runner configuration
+    if "runs-on: ubuntu-24.04" not in content:
+        errors.append("Missing 'runs-on: ubuntu-24.04' runner configuration in docs.yaml")
 
     if errors:
         print(f"FAILED {filepath}:")
