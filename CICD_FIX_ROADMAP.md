@@ -94,13 +94,13 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 - [ ] **3.2 Commit and Push Workflow & Roadmap Updates**
   - [ ] **3.2.1 Stage Modified Repository Files**
     - [x] **3.2.1.1** Stage modified workflow files (`.github/workflows/gds.yaml`, `.github/workflows/docs.yaml`).
-    - [ ] **3.2.1.2** Stage modified documentation files (`CICD_FIX_ROADMAP.md`).
-    - [ ] **3.2.1.3** Run `git status` to verify no untracked or unintended file modifications remain unstaged.
+    - [x] **3.2.1.2** Stage modified documentation files (`CICD_FIX_ROADMAP.md`).
+    - [x] **3.2.1.3** Run `git status` to verify no untracked or unintended file modifications remain unstaged.
     - [x] **3.2.1.4** Inspect `git diff --staged` to verify tag updates to `@ttihp26b` and parameter updates (`pdk: ihp-sg13g2`).
-  - [ ] **3.2.2 Formulate Conventional Commit Message**
-    - [ ] **3.2.2.1** Draft concise commit title under 50 characters (e.g. `ci: update action tags to ttihp26b`).
-    - [ ] **3.2.2.2** Draft commit body explaining root cause of `@ttsky26c` mismatch and migration to `@ttihp26b`.
-    - [ ] **3.2.2.3** Ensure commit body references the resolution of precheck DEF/layer errors and Pages 404 deployment error.
+  - [x] **3.2.2 Formulate Conventional Commit Message**
+    - [x] **3.2.2.1** Draft concise commit title under 50 characters (`ci: update tt-gds-action tags to ttihp26b`).
+    - [x] **3.2.2.2** Draft commit body explaining root cause of `@ttsky26c` mismatch and migration to `@ttihp26b`.
+    - [x] **3.2.2.3** Ensure commit body references the resolution of precheck DEF/layer errors and Pages 404 deployment error.
   - [ ] **3.2.3 Commit Staged Changes**
     - [ ] **3.2.3.1** Run `git commit` with drafted message.
     - [ ] **3.2.3.2** Verify local commit hash is generated cleanly.
