@@ -46,7 +46,8 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 
 - [ ] **1.3 Save Repository Pages Settings & Verify API Accessibility**
   - [ ] **1.3.1** Save settings and confirm GitHub Pages reflects "Build and deployment: GitHub Actions".
-  - [ ] **1.3.2** Confirm `/repos/{owner}/{repo}/pages/deployments` API endpoint is enabled for GitHub Actions workflow tokens.
+  - [ ] **1.3.2** Confirm `/repos/{owner}/{repo}/pages` returns HTTP 200 via `curl -H "Accept: application/vnd.github+json" https://api.github.com/repos/<owner>/<repo>/pages`.
+  - [ ] **1.3.3** Confirm `/repos/{owner}/{repo}/pages/deployments` API endpoint is enabled for GitHub Actions workflow tokens.
 
 ---
 
@@ -93,16 +94,17 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [ ] **3.3.1.2** Verify workflow run starts in GitHub Actions UI for `gds` workflow.
     - [ ] **3.3.1.3** Verify workflow run starts in GitHub Actions UI for `docs` workflow.
   - [ ] **3.3.2 Monitor Remote `check` Job Execution**
-    - [ ] **3.3.2.1** Inspect `check` job log to verify recursive submodule checkout.
-    - [ ] **3.3.2.2** Confirm `make check` step passes in clean Ubuntu 24.04 environment.
+    - [ ] **3.3.2.1** Inspect `check` job log to verify recursive submodule checkout (`git submodule update --init --recursive`).
+    - [ ] **3.3.2.2** Confirm `make check` step executes python decap compilation without error in clean Ubuntu 24.04 environment.
   - [ ] **3.3.3 Monitor Remote `gds` Job Execution**
     - [ ] **3.3.3.1** Confirm `Read top module name` step extracts `TOP_MODULE=tt_um_tnt_mosbius` from `info.yaml`.
     - [ ] **3.3.3.2** Confirm `custom_gds@ttihp26b` step executes with `pdk: ihp-sg13g2`.
-    - [ ] **3.3.3.3** Verify `gds/tt_um_tnt_mosbius.gds` artifact is published.
-    - [ ] **3.3.3.4** Verify `lef/tt_um_tnt_mosbius.lef` artifact is published.
+    - [ ] **3.3.3.3** Verify Magic layout processing completes without fatal errors.
+    - [ ] **3.3.3.4** Verify `gds/tt_um_tnt_mosbius.gds` artifact is published and non-empty (>0 KB).
+    - [ ] **3.3.3.5** Verify `lef/tt_um_tnt_mosbius.lef` artifact is published and non-empty (>0 KB).
   - [ ] **3.3.4 Monitor Downstream `precheck` Job Execution**
     - [ ] **3.3.4.1** Verify `precheck` job starts after successful completion of `gds` job.
-    - [ ] **3.3.4.2** Confirm `TinyTapeout/tt-gds-action/precheck@ttihp26b` action executes without syntax errors.
+    - [ ] **3.3.4.2** Confirm `TinyTapeout/tt-gds-action/precheck@ttihp26b` action fetches IHP SG13G2 support tools.
   - [ ] **3.3.5 Monitor Downstream `viewer` Job Execution**
     - [ ] **3.3.5.1** Verify `viewer` job inherits `pages: write` and `id-token: write` workflow permissions.
     - [ ] **3.3.5.2** Confirm `TinyTapeout/tt-gds-action/viewer@ttihp26b` action downloads `gds_render` artifact.
@@ -117,13 +119,14 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 - [ ] **3.4 Remote Verification of Precheck Job Execution & Output**
   - [ ] **3.4.1 DEF Template & Tech File Resolution**
     - [ ] **3.4.1.1** Inspect precheck step log in GitHub Actions to confirm `../tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def` path is resolved.
-    - [ ] **3.4.1.2** Verify in remote log output that template DEF file is parsed without `Errno 2` missing file errors.
+    - [ ] **3.4.1.2** Verify in remote log output that template DEF file header and tile bounds are parsed without `Errno 2` missing file errors.
   - [ ] **3.4.2 Boundary & Layer Checks Verification**
     - [ ] **3.4.2.1** Confirm SG13G2 `prBoundary.boundary` layer `235/4` detection (replacing sky130 `189/4`).
     - [ ] **3.4.2.2** Confirm standard SG13G2 layers (64-71, 235) pass layer validation without false positive errors.
+    - [ ] **3.4.2.3** Confirm forbidden layer check reports 0 violations across design geometry.
   - [ ] **3.4.3 Pin Placement & DRC Verification**
     - [ ] **3.4.3.1** Confirm analog pin placement checks against the template DEF succeed for `tt_um_tnt_mosbius.gds`.
-    - [ ] **3.4.3.2** Verify KLayout SG13G2 DRC and zero-area checks pass cleanly.
+    - [ ] **3.4.3.2** Verify KLayout SG13G2 DRC and zero-area checks pass cleanly with 0 violation markers.
   - [ ] **3.4.4 Precheck Job Final Status**
     - [ ] **3.4.4.1** Verify precheck summary table displays green checkmarks for all checks.
     - [ ] **3.4.4.2** Check that the `precheck` job status badge is green (success) in GitHub Actions.
