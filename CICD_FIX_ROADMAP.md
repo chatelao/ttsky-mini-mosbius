@@ -138,8 +138,10 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
   - [ ] **3.4.3 Pin Placement & DRC Verification**
     - [ ] **3.4.3.1** Confirm analog pin placement checks against the template DEF succeed for `tt_um_tnt_mosbius.gds`.
     - [ ] **3.4.3.2** Confirm pin net name and direction mappings correspond to `info.yaml` definitions.
-    - [ ] **3.4.3.3** Verify KLayout SG13G2 DRC execution completes without rule violations.
-    - [ ] **3.4.3.4** Verify KLayout zero-area polygon checks pass cleanly without geometry errors.
+    - [ ] **3.4.3.3** Verify DEF layer assignment and pin boundary coordinates match template specifications.
+    - [ ] **3.4.3.4** Verify KLayout SG13G2 DRC execution completes without rule violations.
+    - [ ] **3.4.3.5** Verify KLayout antenna and density check rules complete without violations.
+    - [ ] **3.4.3.6** Verify KLayout zero-area polygon checks pass cleanly without geometry errors.
   - [ ] **3.4.4 Precheck Job Final Status**
     - [ ] **3.4.4.1** Verify precheck summary table displays green checkmarks for all checks.
     - [ ] **3.4.4.2** Check that the `precheck` job status badge is green (success) in GitHub Actions.
