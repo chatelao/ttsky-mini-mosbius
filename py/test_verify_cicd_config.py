@@ -7,6 +7,7 @@ from unittest.mock import patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from py.verify_cicd_config import (
+    check_def_template_config,
     check_docs_workflow,
     check_gds_lef_artifacts,
     check_gds_workflow,
@@ -360,6 +361,52 @@ project:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
         ):
             self.assertFalse(check_precheck_def_and_pin_config())
+
+    def test_check_def_template_config_valid(self):
+        valid_info = """
+project:
+  language: "Analog"
+  tiles: "3x2"
+  uses_vapwr: true
+"""
+        valid_docs = """
+## How it works
+Description here.
+
+## How to test
+Testing instructions here.
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_info)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_def_template_config())
+
+    def test_check_def_template_config_missing_language(self):
+        invalid_info = """
+project:
+  tiles: "3x2"
+  uses_vapwr: true
+"""
+        valid_docs = """
+## How it works
+## How to test
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_info)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_def_template_config())
 
 
 if __name__ == "__main__":

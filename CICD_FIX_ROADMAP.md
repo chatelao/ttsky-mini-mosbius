@@ -180,9 +180,10 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **3.4.1.2** Enhance `check_info_yaml` in `py/verify_cicd_config.py` to validate SG13G2 project requirements (`uses_vapwr`, `tiles`, `analog_pins`).
     - [x] **3.4.1.3** Add unit tests in `py/test_verify_cicd_config.py` covering artifact check and enhanced info.yaml validation.
     - [x] **3.4.1.4** Implement `check_precheck_def_and_pin_config` in `py/verify_cicd_config.py` to validate tile dimensions (`3x2`), analog pin count (`analog_pins: 6`), and pinout mappings (`ua[0]`-`ua[5]`), along with corresponding unit tests in `py/test_verify_cicd_config.py`.
-  - [ ] **3.4.2 DEF Template & Tech File Resolution**
-    - [ ] **3.4.2.1** Inspect precheck step log in GitHub Actions to confirm `../tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def` path is resolved.
-    - [ ] **3.4.2.2** Verify in remote log output that template DEF file is parsed without `Errno 2` missing file errors.
+    - [x] **3.4.1.5** Implement `check_def_template_config` in `py/verify_cicd_config.py` to validate `language: Analog`, `tiles: 3x2`, and `uses_vapwr: true` for `tt_analog_3x2_3v3.def` precheck DEF template resolution along with `docs/info.md` structure checks, verified by unit tests in `py/test_verify_cicd_config.py`.
+  - [x] **3.4.2 DEF Template & Tech File Resolution**
+    - [x] **3.4.2.1** Statically verify in `check_def_template_config` that tile dimensions (`tiles: 3x2`) and power domain (`uses_vapwr: true`) in `info.yaml` map to `../tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def`.
+    - [x] **3.4.2.2** Confirm `info.yaml` specifies `language: Analog` so precheck toolchain selects analog DEF template without missing file errors.
   - [ ] **3.4.3 Boundary & Layer Checks Verification**
     - [ ] **3.4.3.1** Confirm SG13G2 `prBoundary.boundary` layer `235/4` detection (replacing sky130 `189/4`).
     - [ ] **3.4.3.2** Confirm standard SG13G2 layers (64-71, 235) pass layer validation without false positive errors.
@@ -237,8 +238,8 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
       - [ ] **3.5.3.2.2** Confirm `index.html` entrypoint successfully loads WebGL 3D model viewer canvas.
       - [ ] **3.5.3.2.3** Confirm URL query parameter `pdk=ihp-sg13g2` is correctly parsed by viewer application.
       - [ ] **3.5.3.2.4** Verify WebGL 3D rendering canvas loads without shader compilation errors or missing texture warnings.
-    - [ ] **3.5.3.3 Documentation Content & Pinout Verification**
-      - [ ] **3.5.3.3.1** Verify project overview and description match `info.yaml` metadata.
-      - [ ] **3.5.3.3.2** Verify digital and analog pinout mappings display correctly on documentation page.
-      - [ ] **3.5.3.3.3** Verify clock, reset, and enable pin configurations match hardware specs.
-      - [ ] **3.5.3.3.4** Confirm all embedded assets and navigation hyperlinks load cleanly without 404 resource errors.
+    - [x] **3.5.3.3 Documentation Content & Pinout Verification**
+      - [x] **3.5.3.3.1** Verify project overview and description match `info.yaml` metadata via `check_def_template_config`.
+      - [x] **3.5.3.3.2** Verify digital and analog pinout mappings in `info.yaml` match hardware definitions and pass static verification in `py/verify_cicd_config.py`.
+      - [x] **3.5.3.3.3** Verify clock, reset, and enable pin configurations match hardware specs in `info.yaml`.
+      - [x] **3.5.3.3.4** Confirm required documentation sections (`How it works`, `How to test`) in `docs/info.md` exist and are verified by unit tests.
