@@ -306,6 +306,55 @@ def check_def_template_config(repo_root="."):
     return True
 
 
+def check_lef_pin_and_boundary_config(repo_root="."):
+    info_path = os.path.join(repo_root, "info.yaml")
+    top_module = "tt_um_tnt_mosbius"
+    if os.path.exists(info_path):
+        with open(info_path, "r") as f:
+            content = f.read()
+            match = re.search(r"top_module:\s*[\"']?([a-zA-Z0-9_]+)[\"']?", content)
+            if match:
+                top_module = match.group(1)
+
+    lef_path = os.path.join(repo_root, "lef", f"{top_module}.lef")
+    if not os.path.exists(lef_path):
+        print(f"ERROR: LEF file does not exist: {lef_path}")
+        return False
+
+    with open(lef_path, "r") as f:
+        lef_content = f.read()
+
+    errors = []
+
+    macro_match = re.search(r"MACRO\s+" + re.escape(top_module), lef_content)
+    if not macro_match:
+        errors.append(f"LEF missing MACRO declaration for top_module '{top_module}'")
+
+    size_match = re.search(r"SIZE\s+([\d\.]+)\s+BY\s+([\d\.]+)", lef_content)
+    if size_match:
+        width = float(size_match.group(1))
+        height = float(size_match.group(2))
+        if width <= 0 or height <= 0:
+            errors.append(f"Invalid MACRO SIZE in LEF: width={width}, height={height}")
+    else:
+        errors.append("Missing MACRO SIZE definition in LEF")
+
+    required_pins = ["ua[0]", "ua[1]", "ua[2]", "ua[3]", "ua[4]", "ua[5]", "clk", "ena", "rst_n"]
+    for pin in required_pins:
+        pin_pattern = r"PIN\s+" + re.escape(pin) + r"(?:\s|;|$)"
+        if not re.search(pin_pattern, lef_content):
+            errors.append(f"Missing PIN declaration for '{pin}' in LEF")
+
+    if errors:
+        print(f"FAILED LEF pin and boundary config check in {lef_path}:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print(f"PASSED LEF pin and boundary config check for {top_module}")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -319,6 +368,7 @@ def main():
     pages_ok = check_pages_api_config(repo_root)
     precheck_def_pin_ok = check_precheck_def_and_pin_config(repo_root)
     def_template_ok = check_def_template_config(repo_root)
+    lef_pin_boundary_ok = check_lef_pin_and_boundary_config(repo_root)
 
     if (
         gds_ok
@@ -328,6 +378,7 @@ def main():
         and pages_ok
         and precheck_def_pin_ok
         and def_template_ok
+        and lef_pin_boundary_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)

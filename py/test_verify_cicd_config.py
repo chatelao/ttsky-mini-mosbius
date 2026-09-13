@@ -12,6 +12,7 @@ from py.verify_cicd_config import (
     check_gds_lef_artifacts,
     check_gds_workflow,
     check_info_yaml,
+    check_lef_pin_and_boundary_config,
     check_pages_api_config,
     check_precheck_def_and_pin_config,
 )
@@ -407,6 +408,95 @@ project:
             "builtins.open", side_effect=mock_open_file
         ):
             self.assertFalse(check_def_template_config())
+
+    def test_check_lef_pin_and_boundary_config_valid(self):
+        valid_lef = """
+MACRO tt_um_tnt_mosbius
+  SIZE 493.120 BY 225.760 ;
+  PIN clk
+  END clk
+  PIN ena
+  END ena
+  PIN rst_n
+  END rst_n
+  PIN ua[0]
+  END ua[0]
+  PIN ua[1]
+  END ua[1]
+  PIN ua[2]
+  END ua[2]
+  PIN ua[3]
+  END ua[3]
+  PIN ua[4]
+  END ua[4]
+  PIN ua[5]
+  END ua[5]
+END tt_um_tnt_mosbius
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data='project:\n  top_module: "tt_um_tnt_mosbius"')()
+            else:
+                return unittest.mock.mock_open(read_data=valid_lef)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_lef_pin_and_boundary_config())
+
+    def test_check_lef_pin_and_boundary_config_missing_pin(self):
+        invalid_lef = """
+MACRO tt_um_tnt_mosbius
+  SIZE 493.120 BY 225.760 ;
+  PIN clk
+  END clk
+END tt_um_tnt_mosbius
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data='project:\n  top_module: "tt_um_tnt_mosbius"')()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_lef)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_lef_pin_and_boundary_config())
+
+    def test_check_lef_pin_and_boundary_config_invalid_size(self):
+        invalid_lef = """
+MACRO tt_um_tnt_mosbius
+  SIZE 0.0 BY 0.0 ;
+  PIN clk
+  END clk
+  PIN ena
+  END ena
+  PIN rst_n
+  END rst_n
+  PIN ua[0]
+  END ua[0]
+  PIN ua[1]
+  END ua[1]
+  PIN ua[2]
+  END ua[2]
+  PIN ua[3]
+  END ua[3]
+  PIN ua[4]
+  END ua[4]
+  PIN ua[5]
+  END ua[5]
+END tt_um_tnt_mosbius
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data='project:\n  top_module: "tt_um_tnt_mosbius"')()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_lef)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_lef_pin_and_boundary_config())
 
 
 if __name__ == "__main__":
