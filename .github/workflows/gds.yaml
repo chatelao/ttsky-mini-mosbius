@@ -50,6 +50,12 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Create tech symlinks for precheck
+        run: |
+          mkdir -p tt/precheck
+          ln -sf ../tech tt/tech
+          ln -sf ../../tech tt/precheck/tech
+
       - name: Run Tiny Tapeout Precheck
         uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
 
