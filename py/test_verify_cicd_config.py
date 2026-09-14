@@ -10,6 +10,7 @@ from py.verify_cicd_config import (
     check_def_template_config,
     check_docs_build_and_asset_config,
     check_docs_workflow,
+    check_eda_toolchain_and_container_config,
     check_gds_lef_artifacts,
     check_gds_workflow,
     check_info_yaml,
@@ -18,9 +19,11 @@ from py.verify_cicd_config import (
     check_pages_api_config,
     check_pages_deployment_and_oidc_config,
     check_precheck_def_and_pin_config,
+    check_precheck_execution_and_reporting_config,
     check_top_module_step_config,
     check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
+    check_workflow_execution_summary_config,
 )
 
 
@@ -731,6 +734,110 @@ jobs:
             "builtins.open", side_effect=mock_open_file
         ):
             self.assertFalse(check_klayout_drc_and_geometry_config())
+
+    def test_check_eda_toolchain_and_container_config_valid(self):
+        valid_gds = """
+jobs:
+  gds:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b
+        with:
+          pdk: ihp-sg13g2
+          verilog_path: src/project.v
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_gds)
+        ):
+            self.assertTrue(check_eda_toolchain_and_container_config())
+
+    def test_check_eda_toolchain_and_container_config_invalid(self):
+        invalid_gds = """
+jobs:
+  gds:
+    runs-on: ubuntu-22.04
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_gds)
+        ):
+            self.assertFalse(check_eda_toolchain_and_container_config())
+
+    def test_check_precheck_execution_and_reporting_config_valid(self):
+        valid_gds = """
+jobs:
+  precheck:
+    needs: gds
+    continue-on-error: true
+    steps:
+      - uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_gds)
+        ):
+            self.assertTrue(check_precheck_execution_and_reporting_config())
+
+    def test_check_precheck_execution_and_reporting_config_invalid(self):
+        invalid_gds = """
+jobs:
+  precheck:
+    steps: []
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_gds)
+        ):
+            self.assertFalse(check_precheck_execution_and_reporting_config())
+
+    def test_check_workflow_execution_summary_config_valid(self):
+        valid_gds = """
+jobs:
+  gds:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b
+  precheck:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
+  viewer:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/viewer@ttihp26b
+"""
+        valid_docs = """
+jobs:
+  docs:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/docs@ttihp26b
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_workflow_execution_summary_config())
+
+    def test_check_workflow_execution_summary_config_invalid(self):
+        invalid_gds = """
+jobs:
+  gds:
+    steps: []
+"""
+        invalid_docs = """
+jobs:
+  docs:
+    steps: []
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_workflow_execution_summary_config())
 
 
 if __name__ == "__main__":

@@ -582,6 +582,96 @@ def check_klayout_drc_and_geometry_config(repo_root="."):
     return True
 
 
+def check_eda_toolchain_and_container_config(repo_root="."):
+    gds_workflow_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    errors = []
+
+    if not os.path.exists(gds_workflow_path):
+        errors.append(f"Missing workflow file: {gds_workflow_path}")
+    else:
+        with open(gds_workflow_path, "r") as f:
+            content = f.read()
+
+        if "TinyTapeout/tt-gds-action/custom_gds@ttihp26b" not in content:
+            errors.append("Missing 'custom_gds@ttihp26b' action step in gds.yaml")
+        if "pdk: ihp-sg13g2" not in content:
+            errors.append("Missing 'pdk: ihp-sg13g2' parameter in gds.yaml")
+        if "runs-on: ubuntu-24.04" not in content:
+            errors.append("Missing 'runs-on: ubuntu-24.04' runner configuration in gds.yaml")
+        if "verilog_path: src/project.v" not in content:
+            errors.append("Missing 'verilog_path: src/project.v' parameter in gds.yaml")
+
+    if errors:
+        print("FAILED EDA toolchain and container config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED EDA toolchain and container config check")
+    return True
+
+
+def check_precheck_execution_and_reporting_config(repo_root="."):
+    gds_workflow_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    errors = []
+
+    if not os.path.exists(gds_workflow_path):
+        errors.append(f"Missing workflow file: {gds_workflow_path}")
+    else:
+        with open(gds_workflow_path, "r") as f:
+            content = f.read()
+
+        if "precheck:" not in content:
+            errors.append("Missing 'precheck' job definition in gds.yaml")
+        if "needs: gds" not in content:
+            errors.append("Missing 'needs: gds' dependency in precheck job in gds.yaml")
+        if "TinyTapeout/tt-gds-action/precheck@ttihp26b" not in content:
+            errors.append("Missing 'precheck@ttihp26b' action step in gds.yaml")
+        if "continue-on-error: true" not in content:
+            errors.append("Missing 'continue-on-error: true' setting in precheck job in gds.yaml")
+
+    if errors:
+        print("FAILED precheck execution and reporting config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED precheck execution and reporting config check")
+    return True
+
+
+def check_workflow_execution_summary_config(repo_root="."):
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    docs_path = os.path.join(repo_root, ".github/workflows/docs.yaml")
+    errors = []
+
+    if not os.path.exists(gds_path):
+        errors.append(f"Missing file: {gds_path}")
+    else:
+        with open(gds_path, "r") as f:
+            gds_content = f.read()
+        for action in ["custom_gds@ttihp26b", "precheck@ttihp26b", "viewer@ttihp26b"]:
+            if action not in gds_content:
+                errors.append(f"Missing action reference '{action}' in gds.yaml execution flow")
+
+    if not os.path.exists(docs_path):
+        errors.append(f"Missing file: {docs_path}")
+    else:
+        with open(docs_path, "r") as f:
+            docs_content = f.read()
+        if "docs@ttihp26b" not in docs_content:
+            errors.append("Missing action reference 'docs@ttihp26b' in docs.yaml execution flow")
+
+    if errors:
+        print("FAILED workflow execution summary config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED workflow execution summary config check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -602,6 +692,9 @@ def main():
     viewer_artifact_ok = check_viewer_artifact_and_staging_config(repo_root)
     pages_deploy_ok = check_pages_deployment_and_oidc_config(repo_root)
     drc_geom_ok = check_klayout_drc_and_geometry_config(repo_root)
+    eda_toolchain_ok = check_eda_toolchain_and_container_config(repo_root)
+    precheck_exec_ok = check_precheck_execution_and_reporting_config(repo_root)
+    wf_summary_ok = check_workflow_execution_summary_config(repo_root)
 
     if (
         gds_ok
@@ -618,6 +711,9 @@ def main():
         and viewer_artifact_ok
         and pages_deploy_ok
         and drc_geom_ok
+        and eda_toolchain_ok
+        and precheck_exec_ok
+        and wf_summary_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
