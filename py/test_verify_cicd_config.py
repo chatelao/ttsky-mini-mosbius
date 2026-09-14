@@ -15,6 +15,8 @@ from py.verify_cicd_config import (
     check_lef_pin_and_boundary_config,
     check_pages_api_config,
     check_precheck_def_and_pin_config,
+    check_top_module_step_config,
+    check_viewer_and_docs_deployment_config,
 )
 
 
@@ -462,6 +464,89 @@ END tt_um_tnt_mosbius
             "builtins.open", side_effect=mock_open_file
         ):
             self.assertFalse(check_lef_pin_and_boundary_config())
+
+    def test_check_top_module_step_config_valid(self):
+        valid_gds = """
+jobs:
+  gds:
+    steps:
+      - name: Read top module name
+        id: top_module
+        run: |
+          echo TOP_MODULE=`yq '.project.top_module' info.yaml` | tee $GITHUB_OUTPUT
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_gds)
+        ):
+            self.assertTrue(check_top_module_step_config())
+
+    def test_check_top_module_step_config_invalid(self):
+        invalid_gds = """
+jobs:
+  gds:
+    steps:
+      - name: Other step
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_gds)
+        ):
+            self.assertFalse(check_top_module_step_config())
+
+    def test_check_viewer_and_docs_deployment_config_valid(self):
+        valid_gds = """
+jobs:
+  viewer:
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - uses: TinyTapeout/tt-gds-action/viewer@ttihp26b
+"""
+        valid_docs = """
+jobs:
+  docs:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: TinyTapeout/tt-gds-action/docs@ttihp26b
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_viewer_and_docs_deployment_config())
+
+    def test_check_viewer_and_docs_deployment_config_invalid(self):
+        invalid_gds = """
+jobs:
+  viewer:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/viewer@ttsky26c
+"""
+        invalid_docs = """
+jobs:
+  docs:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/docs@ttsky26c
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_viewer_and_docs_deployment_config())
 
     def test_check_lef_pin_and_boundary_config_invalid_size(self):
         invalid_lef = """
