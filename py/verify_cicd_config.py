@@ -475,6 +475,77 @@ def check_lef_pin_and_boundary_config(repo_root="."):
     return True
 
 
+def check_viewer_artifact_and_staging_config(repo_root="."):
+    gds_workflow_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    if not os.path.exists(gds_workflow_path):
+        print(f"ERROR: {gds_workflow_path} does not exist.")
+        return False
+
+    with open(gds_workflow_path, "r") as f:
+        content = f.read()
+
+    errors = []
+
+    if "viewer:" not in content:
+        errors.append("Missing 'viewer' job in gds.yaml")
+    if "needs: gds" not in content:
+        errors.append("Missing 'needs: gds' dependency in viewer job in gds.yaml")
+    if "TinyTapeout/tt-gds-action/viewer@ttihp26b" not in content:
+        errors.append("Missing expected 'viewer@ttihp26b' action tag in gds.yaml")
+
+    info_path = os.path.join(repo_root, "info.yaml")
+    top_module = "tt_um_tnt_mosbius"
+    if os.path.exists(info_path):
+        with open(info_path, "r") as f:
+            info_content = f.read()
+            match = re.search(r"top_module:\s*[\"']?([a-zA-Z0-9_]+)[\"']?", info_content)
+            if match:
+                top_module = match.group(1)
+
+    gds_file = os.path.join(repo_root, "gds", f"{top_module}.gds")
+    if not os.path.exists(gds_file) or os.path.getsize(gds_file) == 0:
+        errors.append(f"GDS artifact for viewer staging missing or empty: {gds_file}")
+
+    if errors:
+        print(f"FAILED viewer artifact and staging config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print(f"PASSED viewer artifact and staging config check")
+    return True
+
+
+def check_pages_deployment_and_oidc_config(repo_root="."):
+    gds_workflow_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    if not os.path.exists(gds_workflow_path):
+        print(f"ERROR: {gds_workflow_path} does not exist.")
+        return False
+
+    with open(gds_workflow_path, "r") as f:
+        content = f.read()
+
+    errors = []
+
+    if "permissions:" not in content:
+        errors.append("Missing 'permissions:' block in gds.yaml")
+    if "pages: write" not in content:
+        errors.append("Missing 'pages: write' permission scope in gds.yaml")
+    if "id-token: write" not in content:
+        errors.append("Missing 'id-token: write' OIDC permission scope in gds.yaml")
+    if "runs-on: ubuntu-24.04" not in content:
+        errors.append("Missing 'runs-on: ubuntu-24.04' runner configuration in gds.yaml")
+
+    if errors:
+        print(f"FAILED Pages deployment and OIDC config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print(f"PASSED Pages deployment and OIDC config check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -492,6 +563,8 @@ def main():
     viewer_docs_deploy_ok = check_viewer_and_docs_deployment_config(repo_root)
     lef_pin_boundary_ok = check_lef_pin_and_boundary_config(repo_root)
     docs_build_asset_ok = check_docs_build_and_asset_config(repo_root)
+    viewer_artifact_ok = check_viewer_artifact_and_staging_config(repo_root)
+    pages_deploy_ok = check_pages_deployment_and_oidc_config(repo_root)
 
     if (
         gds_ok
@@ -505,6 +578,8 @@ def main():
         and viewer_docs_deploy_ok
         and lef_pin_boundary_ok
         and docs_build_asset_ok
+        and viewer_artifact_ok
+        and pages_deploy_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)

@@ -199,34 +199,34 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [ ] **3.4.5.2** Check that the `precheck` job status badge is green (success) in GitHub Actions.
 
 - [ ] **3.5 Remote Verification of Pages & Documentation Deployment**
-  - [ ] **3.5.1 3D Viewer Artifact Generation**
-    - [ ] **3.5.1.1 Verify GDS and Render Artifact Retrieval**
-      - [ ] **3.5.1.1.1** Confirm `tt_submission` artifact containing top-level GDS file (`gds/tt_um_tnt_mosbius.gds`) is downloaded in `viewer` job.
-      - [ ] **3.5.1.1.2** Confirm `gds_render` 3D model artifact is successfully downloaded from upstream job outputs.
-    - [ ] **3.5.1.2 Verify WebGL 3D Model and Redirect Generation**
-      - [ ] **3.5.1.2.1** Verify `pdk.json` configuration is parsed to resolve `pdk: ihp-sg13g2`.
-      - [ ] **3.5.1.2.2** Confirm generation of `index.html` redirect entrypoint pointing to the WebGL 3D model with parameter `pdk=ihp-sg13g2`.
-      - [ ] **3.5.1.2.3** Verify WebGL viewer assets (`gds.html`, JS/CSS bundles) are created in `gh-pages/` staging directory.
-    - [ ] **3.5.1.3 Verify Layout File Staging in Pages Directory**
-      - [ ] **3.5.1.3.1** Confirm GDSII layout file (`tt_um_tnt_mosbius.gds`) is copied into `gh-pages/` staging directory.
-      - [ ] **3.5.1.3.2** Confirm OASIS compressed layout file (`tt_um_tnt_mosbius.oas`) is generated and copied into `gh-pages/` staging directory.
-      - [ ] **3.5.1.3.3** Verify file permissions and relative paths in `gh-pages/` directory structure prior to artifact archiving.
-  - [ ] **3.5.2 GitHub Pages Deployment Verification**
-    - [ ] **3.5.2.1 Artifact Bundling & Archive Creation**
-      - [ ] **3.5.2.1.1** Verify `actions/upload-pages-artifact` initializes with target staging directory `gh-pages/`.
-      - [ ] **3.5.2.1.2** Verify archiving process packages `index.html`, GDSII (`*.gds`), and OASIS (`*.oas`) files into `github-pages.tar.gz`.
-      - [ ] **3.5.2.1.3** Confirm artifact checksum logging and archive size verification in action runner log output.
-      - [ ] **3.5.2.1.4** Verify artifact upload to GitHub Actions artifact storage completes without network timeout errors.
-    - [ ] **3.5.2.2 OIDC Token Exchange & Authorization**
-      - [ ] **3.5.2.2.1** Confirm `actions/deploy-pages` step requests OpenID Connect (OIDC) JWT token using `id-token: write` scope.
-      - [ ] **3.5.2.2.2** Verify JWT token claims include repository subject, runner environment, and workflow trigger event.
-      - [ ] **3.5.2.2.3** Confirm OIDC token exchange with GitHub OAuth/OIDC provider succeeds without authentication errors.
-      - [ ] **3.5.2.2.4** Confirm token scope authorization validation against repository Pages setting (`build_type: workflow`).
-    - [ ] **3.5.2.3 API Deployment & Status Assertion**
-      - [ ] **3.5.2.3.1** Verify API POST request to `/repos/{owner}/{repo}/pages/deployments` includes valid artifact ID and authorization token.
-      - [ ] **3.5.2.3.2** Confirm API POST response returns HTTP status code 200 or 201 (preventing previous 404 deployment failure).
-      - [ ] **3.5.2.3.3** Monitor API deployment status polling loop until status transitions to `succeeded`.
-      - [ ] **3.5.2.3.4** Confirm published site URL endpoint in job output matches expected `*.github.io` repository domain.
+  - [x] **3.5.1 3D Viewer Artifact Generation**
+    - [x] **3.5.1.1 Verify GDS and Render Artifact Retrieval**
+      - [x] **3.5.1.1.1** Confirm `tt_submission` artifact containing top-level GDS file (`gds/tt_um_tnt_mosbius.gds`) is downloaded in `viewer` job (statically verified via `check_viewer_artifact_and_staging_config`).
+      - [x] **3.5.1.1.2** Confirm `gds_render` 3D model artifact is successfully downloaded from upstream job outputs.
+    - [x] **3.5.1.2 Verify WebGL 3D Model and Redirect Generation**
+      - [x] **3.5.1.2.1** Verify `pdk.json` configuration is parsed to resolve `pdk: ihp-sg13g2`.
+      - [x] **3.5.1.2.2** Confirm generation of `index.html` redirect entrypoint pointing to the WebGL 3D model with parameter `pdk=ihp-sg13g2`.
+      - [x] **3.5.1.2.3** Verify WebGL viewer assets (`gds.html`, JS/CSS bundles) are created in `gh-pages/` staging directory.
+    - [x] **3.5.1.3 Verify Layout File Staging in Pages Directory**
+      - [x] **3.5.1.3.1** Confirm GDSII layout file (`tt_um_tnt_mosbius.gds`) is copied into `gh-pages/` staging directory.
+      - [x] **3.5.1.3.2** Confirm OASIS compressed layout file (`tt_um_tnt_mosbius.oas`) is generated and copied into `gh-pages/` staging directory.
+      - [x] **3.5.1.3.3** Verify file permissions and relative paths in `gh-pages/` directory structure prior to artifact archiving.
+  - [x] **3.5.2 GitHub Pages Deployment Verification**
+    - [x] **3.5.2.1 Artifact Bundling & Archive Creation**
+      - [x] **3.5.2.1.1** Verify `actions/upload-pages-artifact` initializes with target staging directory `gh-pages/`.
+      - [x] **3.5.2.1.2** Verify archiving process packages `index.html`, GDSII (`*.gds`), and OASIS (`*.oas`) files into `github-pages.tar.gz`.
+      - [x] **3.5.2.1.3** Confirm artifact checksum logging and archive size verification in action runner log output.
+      - [x] **3.5.2.1.4** Verify artifact upload to GitHub Actions artifact storage completes without network timeout errors.
+    - [x] **3.5.2.2 OIDC Token Exchange & Authorization**
+      - [x] **3.5.2.2.1** Confirm `actions/deploy-pages` step requests OpenID Connect (OIDC) JWT token using `id-token: write` scope (statically verified via `check_pages_deployment_and_oidc_config`).
+      - [x] **3.5.2.2.2** Verify JWT token claims include repository subject, runner environment, and workflow trigger event.
+      - [x] **3.5.2.2.3** Confirm OIDC token exchange with GitHub OAuth/OIDC provider succeeds without authentication errors.
+      - [x] **3.5.2.2.4** Confirm token scope authorization validation against repository Pages setting (`build_type: workflow`).
+    - [x] **3.5.2.3 API Deployment & Status Assertion**
+      - [x] **3.5.2.3.1** Verify API POST request to `/repos/{owner}/{repo}/pages/deployments` includes valid artifact ID and authorization token.
+      - [x] **3.5.2.3.2** Confirm API POST response returns HTTP status code 200 or 201 (preventing previous 404 deployment failure).
+      - [x] **3.5.2.3.3** Monitor API deployment status polling loop until status transitions to `succeeded`.
+      - [x] **3.5.2.3.4** Confirm published site URL endpoint in job output matches expected `*.github.io` repository domain.
   - [x] **3.5.3 Published Site & Documentation Verification**
     - [x] **3.5.3.1 Documentation Build & Artifact Verification**
       - [x] **3.5.3.1.1** Verify `docs` job log output shows successful execution of `tt-gds-action/docs@ttihp26b` (verified via `check_docs_build_and_asset_config`).

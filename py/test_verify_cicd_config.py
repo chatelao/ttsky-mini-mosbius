@@ -15,8 +15,10 @@ from py.verify_cicd_config import (
     check_info_yaml,
     check_lef_pin_and_boundary_config,
     check_pages_api_config,
+    check_pages_deployment_and_oidc_config,
     check_precheck_def_and_pin_config,
     check_top_module_step_config,
+    check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
 )
 
@@ -619,6 +621,71 @@ END tt_um_tnt_mosbius
             "builtins.open", side_effect=mock_open_file
         ):
             self.assertFalse(check_lef_pin_and_boundary_config())
+
+    def test_check_viewer_artifact_and_staging_config_valid(self):
+        valid_gds_wf = """
+jobs:
+  viewer:
+    needs: gds
+    steps:
+      - uses: TinyTapeout/tt-gds-action/viewer@ttihp26b
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data='project:\n  top_module: "tt_um_tnt_mosbius"')()
+            else:
+                return unittest.mock.mock_open(read_data=valid_gds_wf)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "os.path.getsize", return_value=1024
+        ), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_viewer_artifact_and_staging_config())
+
+    def test_check_viewer_artifact_and_staging_config_missing_viewer_job(self):
+        invalid_gds_wf = """
+jobs:
+  gds:
+    steps: []
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data='project:\n  top_module: "tt_um_tnt_mosbius"')()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_gds_wf)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "os.path.getsize", return_value=1024
+        ), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_viewer_artifact_and_staging_config())
+
+    def test_check_pages_deployment_and_oidc_config_valid(self):
+        valid_gds_wf = """
+jobs:
+  viewer:
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_gds_wf)
+        ):
+            self.assertTrue(check_pages_deployment_and_oidc_config())
+
+    def test_check_pages_deployment_and_oidc_config_missing_permissions(self):
+        invalid_gds_wf = """
+jobs:
+  viewer:
+    runs-on: ubuntu-24.04
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_gds_wf)
+        ):
+            self.assertFalse(check_pages_deployment_and_oidc_config())
 
 
 if __name__ == "__main__":
