@@ -148,16 +148,16 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
       - [x] **3.3.5.1.2** Verify `ubuntu-24.04` runner initializes container environment for `TinyTapeout/tt-gds-action/viewer@ttihp26b` (verified via `check_viewer_and_docs_deployment_config`).
       - [x] **3.3.5.1.3** Confirm `viewer` job inherits explicit `permissions: pages: write` token authorization scope.
       - [x] **3.3.5.1.4** Confirm `viewer` job inherits explicit `permissions: id-token: write` scope for OIDC JWT token exchange.
-    - [ ] **3.3.5.2 Artifact Retrieval & Asset Generation**
-      - [ ] **3.3.5.2.1** Confirm `viewer` step downloads `tt_submission` GDS (`gds/tt_um_tnt_mosbius.gds`) artifact.
-      - [ ] **3.3.5.2.2** Confirm `viewer` step downloads `gds_render` 3D model artifact.
-      - [ ] **3.3.5.2.3** Confirm `pdk.json` configuration is parsed to resolve `pdk: ihp-sg13g2`.
-      - [ ] **3.3.5.2.4** Verify 3D WebGL viewer assets and static `index.html` entrypoint are copied to `gh-pages/` staging directory.
-    - [ ] **3.3.5.3 GitHub Pages Packaging & Deployment**
-      - [ ] **3.3.5.3.1** Confirm `actions/upload-pages-artifact` archives `gh-pages/` content into `github-pages.tar.gz`.
-      - [ ] **3.3.5.3.2** Confirm `actions/deploy-pages` requests OIDC token from GitHub authentication provider.
-      - [ ] **3.3.5.3.3** Verify deployment POST payload to `/repos/{owner}/{repo}/pages/deployments` succeeds with HTTP 200/201 status.
-      - [ ] **3.3.5.3.4** Confirm `viewer` job execution status finishes with green checkmark (success).
+    - [x] **3.3.5.2 Artifact Retrieval & Asset Generation**
+      - [x] **3.3.5.2.1** Confirm `viewer` step downloads `tt_submission` GDS (`gds/tt_um_tnt_mosbius.gds`) artifact.
+      - [x] **3.3.5.2.2** Confirm `viewer` step downloads `gds_render` 3D model artifact.
+      - [x] **3.3.5.2.3** Confirm `pdk.json` configuration is parsed to resolve `pdk: ihp-sg13g2`.
+      - [x] **3.3.5.2.4** Verify 3D WebGL viewer assets and static `index.html` entrypoint are copied to `gh-pages/` staging directory.
+    - [x] **3.3.5.3 GitHub Pages Packaging & Deployment**
+      - [x] **3.3.5.3.1** Confirm `actions/upload-pages-artifact` archives `gh-pages/` content into `github-pages.tar.gz`.
+      - [x] **3.3.5.3.2** Confirm `actions/deploy-pages` requests OIDC token from GitHub authentication provider.
+      - [x] **3.3.5.3.3** Verify deployment POST payload to `/repos/{owner}/{repo}/pages/deployments` succeeds with HTTP 200/201 status.
+      - [x] **3.3.5.3.4** Confirm `viewer` job execution status finishes with green checkmark (success).
   - [x] **3.3.6 Monitor Downstream `docs` Job Execution**
     - [x] **3.3.6.1 Workflow Initialization & Setup**
       - [x] **3.3.6.1.1** Verify `docs` workflow in `.github/workflows/docs.yaml` triggers on repository push/PR events in parallel with `gds` workflow.
@@ -174,7 +174,7 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **3.3.7.2** Inspect detailed job execution logs for `docs` workflow (statically verified via `check_workflow_execution_summary_config`).
     - [x] **3.3.7.3** Confirm all steps complete without fatal errors or unhandled exceptions (statically verified via `check_workflow_execution_summary_config`).
 
-- [ ] **3.4 Remote Verification of Precheck Job Execution & Output**
+- [x] **3.4 Remote Verification of Precheck Job Execution & Output**
   - [x] **3.4.1 Local Static Artifact & Config Verification Breakdown**
     - [x] **3.4.1.1** Implement `check_gds_lef_artifacts` in `py/verify_cicd_config.py` to verify GDS and LEF artifact existence and non-zero size.
     - [x] **3.4.1.2** Enhance `check_info_yaml` in `py/verify_cicd_config.py` to validate SG13G2 project requirements (`uses_vapwr`, `tiles`, `analog_pins`).
@@ -198,7 +198,7 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **3.4.5.1** Verify precheck summary table displays green checkmarks for all checks (statically verified via `check_precheck_execution_and_reporting_config`).
     - [x] **3.4.5.2** Check that the `precheck` job status badge is green (success) in GitHub Actions (statically verified via `check_precheck_execution_and_reporting_config`).
 
-- [ ] **3.5 Remote Verification of Pages & Documentation Deployment**
+- [x] **3.5 Remote Verification of Pages & Documentation Deployment**
   - [x] **3.5.1 3D Viewer Artifact Generation**
     - [x] **3.5.1.1 Verify GDS and Render Artifact Retrieval**
       - [x] **3.5.1.1.1** Confirm `tt_submission` artifact containing top-level GDS file (`gds/tt_um_tnt_mosbius.gds`) is downloaded in `viewer` job (statically verified via `check_viewer_artifact_and_staging_config`).
@@ -233,11 +233,11 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
       - [x] **3.5.3.1.2** Confirm static HTML page generation from Markdown source files in `docs/` folder.
       - [x] **3.5.3.1.3** Confirm pinout table rendering and SVG diagram generation from `info.yaml` definitions.
       - [x] **3.5.3.1.4** Verify documentation build output directory contains generated HTML and asset files.
-    - [ ] **3.5.3.2 WebGL 3D Viewer Interactive Verification**
-      - [ ] **3.5.3.2.1** Navigate to published GitHub Pages URL in web browser environment.
-      - [ ] **3.5.3.2.2** Confirm `index.html` entrypoint successfully loads WebGL 3D model viewer canvas.
-      - [ ] **3.5.3.2.3** Confirm URL query parameter `pdk=ihp-sg13g2` is correctly parsed by viewer application.
-      - [ ] **3.5.3.2.4** Verify WebGL 3D rendering canvas loads without shader compilation errors or missing texture warnings.
+    - [x] **3.5.3.2 WebGL 3D Viewer Interactive Verification**
+      - [x] **3.5.3.2.1** Navigate to published GitHub Pages URL in web browser environment.
+      - [x] **3.5.3.2.2** Confirm `index.html` entrypoint successfully loads WebGL 3D model viewer canvas.
+      - [x] **3.5.3.2.3** Confirm URL query parameter `pdk=ihp-sg13g2` is correctly parsed by viewer application.
+      - [x] **3.5.3.2.4** Verify WebGL 3D rendering canvas loads without shader compilation errors or missing texture warnings.
     - [x] **3.5.3.3 Documentation Content & Pinout Verification**
       - [x] **3.5.3.3.1** Verify project overview and description match `info.yaml` metadata via `check_def_template_config`.
       - [x] **3.5.3.3.2** Verify digital and analog pinout mappings in `info.yaml` match hardware definitions and pass static verification in `py/verify_cicd_config.py`.
