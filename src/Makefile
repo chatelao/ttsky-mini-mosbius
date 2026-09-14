@@ -47,9 +47,9 @@ ctrl_dev_m2.decap.v:
 ctrl_dev_e2.decap.v:
 	../py/gen_dev_ctrl.py decap end 2 > $@
 
-# Elaborate
+# Elaborate (IHP SG13G2 Target)
 %.synth.v: %.v
-	yosys -p "read_verilog $*.v; hierarchy -top $* -check; write_verilog -noattr $*.synth.v"
+	yosys -p "read_verilog stdcells.v $*.v; hierarchy -top $* -check; write_verilog -noattr $*.synth.v"
 
 # Lint & Check Stubs
 lint:

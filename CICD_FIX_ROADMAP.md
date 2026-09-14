@@ -27,7 +27,15 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 │  - Execute local verification (make check, make lint) │
 │  - Trigger GitHub Actions CI run                      │
 │  - Verify green status on precheck & viewer jobs       │
-└───────────────────────────┴────────────────────────────┘
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│  Phase 4: Synthesis & RTL CI/CD Verification           │
+│  - Adapt Yosys elaboration rules in src/Makefile       │
+│  - Add static verification check for Yosys Makefile   │
+│  - Validate via unit tests & make check                │
+└────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -253,3 +261,18 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **3.6.2.2** Statically verify `.github/workflows/docs.yaml` uses `actions/checkout@v4` with `submodules: recursive` via `check_git_submodule_and_checkout_config` in `py/verify_cicd_config.py`.
   - [x] **3.6.3 Unit Testing & Integration**
     - [x] **3.6.3.1** Add unit test suite assertions in `py/test_verify_cicd_config.py` validating valid and invalid configurations for `check_workflow_trigger_events_config` and `check_git_submodule_and_checkout_config`.
+
+---
+
+## Phase 4: Synthesis Toolchain & RTL CI/CD Pipeline Verification
+
+> **Objective:** Ensure Yosys elaboration and synthesis rules in `src/Makefile` target IHP SG13G2 (`sg13g2_stdcell`) standard cells and are statically verified in CI/CD pipeline checks.
+
+- [x] **4.1 Update Yosys Synthesis Adaptation in `src/Makefile`**
+  - [x] **4.1.1** Update `src/Makefile` Yosys elaboration rules (`%.synth.v`) to include `stdcells.v` and target `sg13g2_stdcell` primitives.
+  - [x] **4.1.2** Ensure `src/Makefile` clean, lint, and check targets operate correctly.
+- [x] **4.2 Extend Static CI/CD Verification Suite**
+  - [x] **4.2.1** Add `check_synthesis_makefile_config` function to `py/verify_cicd_config.py` to verify `src/Makefile` Yosys configuration.
+  - [x] **4.2.2** Add corresponding unit test assertions in `py/test_verify_cicd_config.py`.
+- [x] **4.3 Verification and Execution**
+  - [x] **4.3.1** Execute `make check` and `python3 -m unittest discover -s py` to verify all checks pass cleanly.

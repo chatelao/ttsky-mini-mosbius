@@ -22,6 +22,7 @@ from py.verify_cicd_config import (
     check_precheck_def_and_pin_config,
     check_precheck_execution_and_reporting_config,
     check_stdcell_declarations,
+    check_synthesis_makefile_config,
     check_top_module_step_config,
     check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
@@ -911,6 +912,25 @@ steps:
             "builtins.open", side_effect=mock_open_file
         ):
             self.assertFalse(check_stdcell_declarations())
+
+    def test_check_synthesis_makefile_config_valid(self):
+        valid_makefile = """
+%.synth.v: %.v
+	yosys -p "read_verilog stdcells.v $*.v; hierarchy -top $* -check; write_verilog -noattr $*.synth.v"
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_makefile)
+        ):
+            self.assertTrue(check_synthesis_makefile_config())
+
+    def test_check_synthesis_makefile_config_invalid(self):
+        invalid_makefile = """
+# Missing Yosys command and stdcells reference
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_makefile)
+        ):
+            self.assertFalse(check_synthesis_makefile_config())
 
 
 if __name__ == "__main__":
