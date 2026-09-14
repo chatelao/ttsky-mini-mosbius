@@ -352,6 +352,50 @@ def check_viewer_and_docs_deployment_config(repo_root="."):
     return True
 
 
+def check_docs_build_and_asset_config(repo_root="."):
+    info_path = os.path.join(repo_root, "info.yaml")
+    docs_info_path = os.path.join(repo_root, "docs/info.md")
+    docs_workflow_path = os.path.join(repo_root, ".github/workflows/docs.yaml")
+
+    errors = []
+
+    if not os.path.exists(info_path):
+        errors.append(f"Missing file: {info_path}")
+    else:
+        with open(info_path, "r") as f:
+            info_content = f.read()
+        for field in ["title:", "author:", "description:", "pinout:"]:
+            if field not in info_content:
+                errors.append(f"Missing required metadata field '{field}' in info.yaml")
+
+    if not os.path.exists(docs_info_path):
+        errors.append(f"Missing file: {docs_info_path}")
+    else:
+        with open(docs_info_path, "r") as f:
+            docs_content = f.read()
+        if "## How it works" not in docs_content:
+            errors.append("Missing '## How it works' section in docs/info.md")
+        if "## How to test" not in docs_content:
+            errors.append("Missing '## How to test' section in docs/info.md")
+
+    if not os.path.exists(docs_workflow_path):
+        errors.append(f"Missing file: {docs_workflow_path}")
+    else:
+        with open(docs_workflow_path, "r") as f:
+            workflow_content = f.read()
+        if "TinyTapeout/tt-gds-action/docs@ttihp26b" not in workflow_content:
+            errors.append("Missing action tag 'TinyTapeout/tt-gds-action/docs@ttihp26b' in docs.yaml")
+
+    if errors:
+        print("FAILED docs build and asset config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED docs build and asset config check")
+    return True
+
+
 def check_top_module_step_config(repo_root="."):
     filepath = os.path.join(repo_root, ".github/workflows/gds.yaml")
     if not os.path.exists(filepath):
@@ -447,6 +491,7 @@ def main():
     top_module_step_ok = check_top_module_step_config(repo_root)
     viewer_docs_deploy_ok = check_viewer_and_docs_deployment_config(repo_root)
     lef_pin_boundary_ok = check_lef_pin_and_boundary_config(repo_root)
+    docs_build_asset_ok = check_docs_build_and_asset_config(repo_root)
 
     if (
         gds_ok
@@ -459,6 +504,7 @@ def main():
         and top_module_step_ok
         and viewer_docs_deploy_ok
         and lef_pin_boundary_ok
+        and docs_build_asset_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)

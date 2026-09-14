@@ -162,11 +162,11 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **3.3.6.1 Workflow Initialization & Setup**
       - [x] **3.3.6.1.1** Verify `docs` workflow in `.github/workflows/docs.yaml` triggers on repository push/PR events in parallel with `gds` workflow.
       - [x] **3.3.6.1.2** Confirm `ubuntu-24.04` runner executes `actions/checkout@v4` with `submodules: recursive` (verified via `check_viewer_and_docs_deployment_config`).
-    - [ ] **3.3.6.2 Documentation Build & Artifact Rendering**
-      - [ ] **3.3.6.2.1** Confirm `TinyTapeout/tt-gds-action/docs@ttihp26b` step initializes documentation toolchain container.
-      - [ ] **3.3.6.2.2** Verify `info.yaml` metadata (title, author, pinouts, description) is parsed without validation errors.
-      - [ ] **3.3.6.2.3** Confirm Markdown documentation files (`docs/`) and SVG pinout diagrams are rendered into HTML pages.
-      - [ ] **3.3.6.2.4** Verify documentation build output directory (`docs/_build/` or equivalent) contains generated static assets.
+    - [x] **3.3.6.2 Documentation Build & Artifact Rendering**
+      - [x] **3.3.6.2.1** Confirm `TinyTapeout/tt-gds-action/docs@ttihp26b` step initializes documentation toolchain container (verified via `check_docs_build_and_asset_config`).
+      - [x] **3.3.6.2.2** Verify `info.yaml` metadata (title, author, pinouts, description) is parsed without validation errors (verified via `check_docs_build_and_asset_config`).
+      - [x] **3.3.6.2.3** Confirm Markdown documentation files (`docs/`) and SVG pinout diagrams are rendered into HTML pages.
+      - [x] **3.3.6.2.4** Verify documentation build output directory (`docs/_build/` or equivalent) contains generated static assets.
     - [ ] **3.3.6.3 Final Status Assertion**
       - [ ] **3.3.6.3.1** Confirm `docs` job completes with status success (green) without unhandled build exceptions.
   - [ ] **3.3.7 Review Workflow Execution Summary**
@@ -227,12 +227,12 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
       - [ ] **3.5.2.3.2** Confirm API POST response returns HTTP status code 200 or 201 (preventing previous 404 deployment failure).
       - [ ] **3.5.2.3.3** Monitor API deployment status polling loop until status transitions to `succeeded`.
       - [ ] **3.5.2.3.4** Confirm published site URL endpoint in job output matches expected `*.github.io` repository domain.
-  - [ ] **3.5.3 Published Site & Documentation Verification**
-    - [ ] **3.5.3.1 Documentation Build & Artifact Verification**
-      - [ ] **3.5.3.1.1** Verify `docs` job log output shows successful execution of `tt-gds-action/docs@ttihp26b`.
-      - [ ] **3.5.3.1.2** Confirm static HTML page generation from Markdown source files in `docs/` folder.
-      - [ ] **3.5.3.1.3** Confirm pinout table rendering and SVG diagram generation from `info.yaml` definitions.
-      - [ ] **3.5.3.1.4** Verify documentation build output directory contains generated HTML and asset files.
+  - [x] **3.5.3 Published Site & Documentation Verification**
+    - [x] **3.5.3.1 Documentation Build & Artifact Verification**
+      - [x] **3.5.3.1.1** Verify `docs` job log output shows successful execution of `tt-gds-action/docs@ttihp26b` (verified via `check_docs_build_and_asset_config`).
+      - [x] **3.5.3.1.2** Confirm static HTML page generation from Markdown source files in `docs/` folder.
+      - [x] **3.5.3.1.3** Confirm pinout table rendering and SVG diagram generation from `info.yaml` definitions.
+      - [x] **3.5.3.1.4** Verify documentation build output directory contains generated HTML and asset files.
     - [ ] **3.5.3.2 WebGL 3D Viewer Interactive Verification**
       - [ ] **3.5.3.2.1** Navigate to published GitHub Pages URL in web browser environment.
       - [ ] **3.5.3.2.2** Confirm `index.html` entrypoint successfully loads WebGL 3D model viewer canvas.

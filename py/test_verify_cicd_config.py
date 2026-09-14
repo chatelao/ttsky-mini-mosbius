@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from py.verify_cicd_config import (
     check_def_template_config,
+    check_docs_build_and_asset_config,
     check_docs_workflow,
     check_gds_lef_artifacts,
     check_gds_workflow,
@@ -547,6 +548,42 @@ jobs:
             "builtins.open", side_effect=mock_open_file
         ):
             self.assertFalse(check_viewer_and_docs_deployment_config())
+
+    def test_check_docs_build_and_asset_config_valid(self):
+        valid_info = "title:\nauthor:\ndescription:\npinout:\n"
+        valid_docs = "## How it works\n## How to test\n"
+        valid_workflow = "TinyTapeout/tt-gds-action/docs@ttihp26b"
+
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_info)()
+            elif "info.md" in filepath:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_workflow)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_docs_build_and_asset_config())
+
+    def test_check_docs_build_and_asset_config_invalid(self):
+        invalid_info = "title:\n"
+        invalid_docs = "Missing sections\n"
+        invalid_workflow = "TinyTapeout/tt-gds-action/docs@ttsky26c"
+
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_info)()
+            elif "info.md" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_docs)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_workflow)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_docs_build_and_asset_config())
 
     def test_check_lef_pin_and_boundary_config_invalid_size(self):
         invalid_lef = """
