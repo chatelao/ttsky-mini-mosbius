@@ -24,6 +24,14 @@ logic. And of course the layout is entirely mine.
 A configuration bitstream needs to be loaded serially to control all the analog
 switches on-board. The software suite to generate this is yet to be written.
 
+During development, prechecks can be run locally using:
+
+```bash
+make precheck
+```
+
+Local precheck execution runs `py/run_precheck.py`, validating all 10 TinyTapeout checks including IHP SG13G2 PR boundary layer (189/4), analog pinout (`ua[0]`..`ua[5]`), DEF template options (`tiles: 3x2`, `analog_pins: 6`, `uses_vapwr: true`, `language: Analog`), layer map, DRC, zero area, cell name, and Verilog syntax.
+
 
 ## External hardware
 

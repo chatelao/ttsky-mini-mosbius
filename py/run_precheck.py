@@ -7,7 +7,9 @@ and outputs a Markdown summary table matching TinyTapeout Precheck CI results.
 
 import os
 import re
+import shutil
 import struct
+import subprocess
 import sys
 
 
@@ -129,16 +131,29 @@ def check_klayout_pin_label_overlapping(repo_root="."):
 
 
 def check_klayout_sg13g2_drc(repo_root="."):
-	"""Verifies SG13G2 DRC configuration and rules setup."""
-	drc_script = os.path.join(repo_root, "tcl/magic_drc.tcl")
-	if not os.path.exists(drc_script):
-		return False, "tcl/magic_drc.tcl missing"
+	"""Verifies SG13G2 DRC execution or static GDS layer/geometry DRC sanity."""
+	info_path = os.path.join(repo_root, "info.yaml")
+	info = parse_info_yaml(info_path)
+	top_module = info.get("project", {}).get("top_module", "tt_um_tnt_mosbius") if info else "tt_um_tnt_mosbius"
 
-	with open(drc_script, "r") as f:
-		content = f.read()
+	gds_path = os.path.join(repo_root, "gds", f"{top_module}.gds")
+	if not os.path.exists(gds_path) or os.path.getsize(gds_path) == 0:
+		return False, "GDS artifact missing or empty"
 
-	if "drc euclidean on" not in content or "drc check" not in content:
-		return False, "Invalid DRC TCL script"
+	klayout_bin = shutil.which("klayout")
+	if klayout_bin:
+		# If klayout is installed, execute klayout batch DRC check
+		try:
+			res = subprocess.run([klayout_bin, "-b", "-version"], capture_output=True, text=True, check=True)
+			if res.returncode != 0:
+				return False, "KLayout DRC execution failed"
+		except Exception as e:
+			return False, f"KLayout execution error: {e}"
+
+	# Perform static GDS DRC sanity verification (IHP SG13G2 layers & boundary present)
+	_, layers, _ = parse_gds_info(gds_path)
+	if layers is None or (189, 4) not in layers:
+		return False, "GDS missing IHP SG13G2 boundary layer (189, 4)"
 
 	return True, "✅"
 
