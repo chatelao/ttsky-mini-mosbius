@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from py.run_precheck import run_all_prechecks
 from py.verify_cicd_config import (
     check_def_template_config,
     check_docs_build_and_asset_config,
@@ -28,6 +29,17 @@ from py.verify_cicd_config import (
     check_workflow_execution_summary_config,
     check_workflow_trigger_events_config,
 )
+
+
+class TestRunPrecheckScript(unittest.TestCase):
+
+    def test_run_all_prechecks_success(self):
+        repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        passed, results = run_all_prechecks(repo_root)
+        self.assertTrue(passed)
+        self.assertEqual(len(results), 10)
+        for check_name, status in results:
+            self.assertEqual(status, "✅", f"Check '{check_name}' failed unexpectedly with status: {status}")
 
 
 class TestVerifyCICDConfig(unittest.TestCase):
