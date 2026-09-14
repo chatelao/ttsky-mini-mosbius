@@ -6,6 +6,7 @@ Verifies action tags, PDK parameter, permissions, and info.yaml module settings.
 
 import os
 import re
+import struct
 import sys
 
 
@@ -155,9 +156,6 @@ def check_info_yaml(repo_root="."):
     return True
 
 
-import struct
-
-
 def parse_gds_layers(gds_filepath):
     layers = set()
     with open(gds_filepath, "rb") as f:
@@ -207,6 +205,11 @@ def check_gds_lef_artifacts(repo_root="."):
                 errors.append(f"GDS file {gds_file} missing IHP SG13G2 prBoundary layer (189, 4)")
             if (235, 4) in layers:
                 errors.append(f"GDS file {gds_file} contains legacy SkyWater prBoundary layer (235, 4)")
+
+            legacy_layers = [(68, 20), (69, 20), (70, 20), (71, 20), (72, 20)]
+            for leg in legacy_layers:
+                if leg in layers:
+                    errors.append(f"GDS file {gds_file} contains unmapped legacy layer {leg}")
         except Exception as e:
             errors.append(f"Failed to parse GDS file {gds_file}: {e}")
 
@@ -665,6 +668,16 @@ def check_precheck_execution_and_reporting_config(repo_root="."):
             errors.append("Missing 'precheck@ttihp26b' action step in gds.yaml")
         if "continue-on-error: true" not in content:
             errors.append("Missing 'continue-on-error: true' setting in precheck job in gds.yaml")
+
+        precheck_match = re.search(r"precheck:\s*\n.*?(?=\n  [a-zA-Z0-9_-]+:|$)", content, re.DOTALL)
+        if precheck_match:
+            precheck_block = precheck_match.group(0)
+            if "actions/checkout@v4" not in precheck_block:
+                errors.append("Missing 'actions/checkout@v4' step in precheck job in gds.yaml")
+            if "submodules: recursive" not in precheck_block:
+                errors.append("Missing 'submodules: recursive' setting in precheck job in gds.yaml")
+        else:
+            errors.append("Could not parse precheck job block in gds.yaml")
 
     if errors:
         print("FAILED precheck execution and reporting config check:")

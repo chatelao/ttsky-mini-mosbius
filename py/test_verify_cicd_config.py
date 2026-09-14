@@ -54,6 +54,9 @@ jobs:
     runs-on: ubuntu-24.04
     continue-on-error: true
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
   viewer:
     needs: gds
@@ -288,12 +291,23 @@ project:
         with patch("os.path.exists", return_value=True), patch(
             "os.path.getsize", return_value=1024
         ), patch(
-            "py.verify_cicd_config.parse_gds_layers", return_value={(189, 4)}
+            "py.verify_cicd_config.parse_gds_layers", return_value={(189, 4), (8, 0), (30, 0), (50, 0), (67, 0), (125, 0)}
         ), patch(
             "builtins.open",
             unittest.mock.mock_open(read_data='project:\n  top_module: "tt_um_tnt_mosbius"'),
         ):
             self.assertTrue(check_gds_lef_artifacts())
+
+    def test_check_gds_lef_artifacts_unmapped_legacy_layer(self):
+        with patch("os.path.exists", return_value=True), patch(
+            "os.path.getsize", return_value=1024
+        ), patch(
+            "py.verify_cicd_config.parse_gds_layers", return_value={(189, 4), (68, 20)}
+        ), patch(
+            "builtins.open",
+            unittest.mock.mock_open(read_data='project:\n  top_module: "tt_um_tnt_mosbius"'),
+        ):
+            self.assertFalse(check_gds_lef_artifacts())
 
     def test_check_gds_lef_artifacts_missing_prboundary(self):
         with patch("os.path.exists", return_value=True), patch(
@@ -785,7 +799,12 @@ jobs:
     needs: gds
     continue-on-error: true
     steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
+  viewer:
+    steps: []
 """
         with patch("os.path.exists", return_value=True), patch(
             "builtins.open", unittest.mock.mock_open(read_data=valid_gds)

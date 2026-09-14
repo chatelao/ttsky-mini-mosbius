@@ -1,41 +1,64 @@
 #!/usr/bin/env python3
 """
 GDS post-processing and layer remapping script for IHP SG13G2.
-Remaps legacy SkyWater 130 layer definitions (e.g., prBoundary 235/4)
-to IHP SG13G2 layer definitions (e.g., prBoundary 189/4).
+Remaps legacy SkyWater 130 layer definitions and previous incorrect layer maps
+to official IHP SG13G2 layer definitions (e.g., prBoundary 189/4, Metal1 8/0,
+Metal2 30/0, Metal3 50/0, Metal4 67/0, Metal5 125/0).
 """
 
 import os
 import struct
 import sys
 
-# SkyWater 130 -> IHP SG13G2 GDS layer mapping table
+# SkyWater 130 / Legacy GDS -> IHP SG13G2 GDS layer mapping table
 LAYER_MAP = {
-    (235, 4): (189, 4),  # Sky130 prBoundary.boundary -> IHP SG13G2 prBoundary (189/4)
-    (236, 0): (189, 4),  # Sky130 bound -> IHP SG13G2 prBoundary (189/4)
-    (64, 20): (31, 0),   # Sky130 nwell -> IHP nwell (31/0)
-    (64, 16): (31, 2),   # Sky130 nwell pin -> IHP nwell pin (31/2)
-    (65, 20): (1, 0),    # Sky130 diff -> IHP Activ (1/0)
-    (65, 44): (1, 25),   # Sky130 diff text -> IHP Activ text (1/25)
-    (66, 20): (10, 0),   # Sky130 poly -> IHP GatPoly (10/0)
-    (66, 15): (10, 2),   # Sky130 poly pin -> IHP GatPoly pin (10/2)
-    (66, 44): (10, 25),  # Sky130 poly text -> IHP GatPoly text (10/25)
-    (67, 20): (67, 20),  # Sky130 li1 -> IHP Metal1 (67/20)
-    (67, 16): (67, 20),  # Sky130 li1 pin -> IHP Metal1 (67/20)
-    (67, 44): (67, 25),  # Sky130 li1 text -> IHP Metal1 text (67/25)
-    (68, 20): (69, 20),  # Sky130 met1 -> IHP Metal2 (69/20)
-    (68, 16): (69, 20),  # Sky130 met1 pin -> IHP Metal2 (69/20)
-    (68, 44): (69, 25),  # Sky130 met1 text -> IHP Metal2 text (69/25)
-    (68, 5): (69, 2),    # Sky130 met1 pin -> IHP Metal2 pin (69/2)
-    (69, 20): (70, 20),  # Sky130 met2 -> IHP Metal3 (70/20)
-    (69, 44): (70, 25),  # Sky130 met2 text -> IHP Metal3 text (70/25)
-    (70, 20): (71, 20),  # Sky130 met3 -> IHP Metal4 (71/20)
-    (70, 16): (71, 20),  # Sky130 met3 pin -> IHP Metal4 (71/20)
-    (70, 44): (71, 25),  # Sky130 met3 text -> IHP Metal4 text (71/25)
-    (70, 5): (71, 2),    # Sky130 met3 pin -> IHP Metal4 pin (71/2)
-    (71, 20): (72, 20),  # Sky130 met4 -> IHP Metal5 (72/20)
-    (71, 16): (72, 20),  # Sky130 met4 pin -> IHP Metal5 (72/20)
-    (71, 5): (72, 2),    # Sky130 met4 pin -> IHP Metal5 pin (72/2)
+    (235, 4): (189, 4),   # Sky130 prBoundary.boundary -> IHP SG13G2 prBoundary (189/4)
+    (236, 0): (189, 4),   # Sky130 bound -> IHP SG13G2 prBoundary (189/4)
+    (81, 4): (189, 4),
+    (81, 23): (189, 4),
+    (64, 20): (31, 0),    # Sky130 nwell -> IHP nwell (31/0)
+    (64, 16): (31, 2),    # Sky130 nwell pin -> IHP nwell pin (31/2)
+    (64, 5): (31, 2),
+    (64, 59): (31, 0),
+    (65, 20): (1, 0),     # Sky130 diff -> IHP Activ (1/0)
+    (65, 44): (1, 25),    # Sky130 diff text -> IHP Activ text (1/25)
+    (1, 25): (1, 25),
+    (66, 20): (10, 0),    # Sky130 poly -> IHP GatPoly (10/0)
+    (66, 15): (10, 2),    # Sky130 poly pin -> IHP GatPoly pin (10/2)
+    (66, 44): (10, 25),   # Sky130 poly text -> IHP GatPoly text (10/25)
+    (67, 20): (8, 0),     # Sky130 li1 -> IHP Metal1 (8/0)
+    (67, 16): (8, 2),     # Sky130 li1 pin -> IHP Metal1 pin (8/2)
+    (67, 5): (8, 2),      # Sky130 li1 pin -> IHP Metal1 pin (8/2)
+    (67, 25): (8, 25),    # Sky130 li1 text -> IHP Metal1 text (8/25)
+    (67, 44): (8, 25),    # Sky130 li1 text -> IHP Metal1 text (8/25)
+    (68, 20): (30, 0),    # Sky130 met1 -> IHP Metal2 (30/0)
+    (68, 16): (30, 2),    # Sky130 met1 pin -> IHP Metal2 pin (30/2)
+    (68, 44): (30, 25),   # Sky130 met1 text -> IHP Metal2 text (30/25)
+    (68, 5): (30, 2),     # Sky130 met1 pin -> IHP Metal2 pin (30/2)
+    (69, 20): (50, 0),    # Sky130 met2 -> IHP Metal3 (50/0)
+    (69, 25): (50, 25),   # Sky130 met2 text -> IHP Metal3 text (50/25)
+    (69, 44): (50, 25),   # Sky130 met2 text -> IHP Metal3 text (50/25)
+    (69, 2): (50, 2),     # Sky130 met2 pin -> IHP Metal3 pin (50/2)
+    (70, 20): (67, 0),    # Sky130 met3 -> IHP Metal4 (67/0)
+    (70, 16): (67, 2),    # Sky130 met3 pin -> IHP Metal4 pin (67/2)
+    (70, 44): (67, 25),   # Sky130 met3 text -> IHP Metal4 text (67/25)
+    (70, 25): (67, 25),
+    (70, 5): (67, 2),     # Sky130 met3 pin -> IHP Metal4 pin (67/2)
+    (71, 20): (125, 0),   # Sky130 met4 -> IHP Metal5 (125/0)
+    (71, 16): (125, 2),   # Sky130 met4 pin -> IHP Metal5 pin (125/2)
+    (71, 25): (125, 25),
+    (71, 5): (125, 2),    # Sky130 met4 pin -> IHP Metal5 pin (125/2)
+    (71, 2): (125, 2),
+    (72, 20): (125, 0),
+    (72, 2): (125, 2),
+    (75, 20): (125, 0),
+    (78, 44): (67, 25),
+    (83, 44): (67, 25),
+    (93, 44): (67, 25),
+    (94, 20): (50, 0),
+    (95, 20): (67, 0),
+    (122, 16): (125, 2),
+    (125, 20): (125, 0),
 }
 
 

@@ -45,6 +45,11 @@ jobs:
     runs-on: ubuntu-24.04
     continue-on-error: true
     steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
       - name: Run Tiny Tapeout Precheck
         uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
 
