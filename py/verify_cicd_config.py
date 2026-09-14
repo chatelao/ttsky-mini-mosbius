@@ -727,6 +727,38 @@ def check_git_submodule_and_checkout_config(repo_root="."):
     return True
 
 
+def check_verification_job_config(repo_root="."):
+    gds_workflow_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    if not os.path.exists(gds_workflow_path):
+        print(f"ERROR: {gds_workflow_path} does not exist.")
+        return False
+
+    with open(gds_workflow_path, "r") as f:
+        content = f.read()
+
+    errors = []
+
+    if "check:" not in content:
+        errors.append("Missing 'check' job definition in gds.yaml")
+    if "runs-on: ubuntu-24.04" not in content:
+        errors.append("Missing 'runs-on: ubuntu-24.04' runner configuration in check job in gds.yaml")
+    if "actions/checkout@v4" not in content:
+        errors.append("Missing 'actions/checkout@v4' step in check job in gds.yaml")
+    if "submodules: recursive" not in content:
+        errors.append("Missing 'submodules: recursive' setting in check job in gds.yaml")
+    if "make check" not in content:
+        errors.append("Missing 'make check' execution step in check job in gds.yaml")
+
+    if errors:
+        print("FAILED verification job config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED verification job config check")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -790,6 +822,7 @@ def main():
     wf_summary_ok = check_workflow_execution_summary_config(repo_root)
     wf_trigger_ok = check_workflow_trigger_events_config(repo_root)
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
+    verification_job_ok = check_verification_job_config(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
 
     if (
@@ -812,6 +845,7 @@ def main():
         and wf_summary_ok
         and wf_trigger_ok
         and checkout_submodule_ok
+        and verification_job_ok
         and stdcell_decl_ok
     ):
         print("All CI/CD configuration checks passed successfully!")

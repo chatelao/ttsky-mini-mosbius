@@ -26,6 +26,7 @@ from py.verify_cicd_config import (
     check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
     check_workflow_execution_summary_config,
+    check_verification_job_config,
     check_workflow_trigger_events_config,
 )
 
@@ -911,6 +912,33 @@ steps:
             "builtins.open", side_effect=mock_open_file
         ):
             self.assertFalse(check_stdcell_declarations())
+
+    def test_check_verification_job_config_valid(self):
+        valid_gds = """
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - run: make check
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_gds)
+        ):
+            self.assertTrue(check_verification_job_config())
+
+    def test_check_verification_job_config_invalid(self):
+        invalid_gds = """
+jobs:
+  gds:
+    runs-on: ubuntu-24.04
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_gds)
+        ):
+            self.assertFalse(check_verification_job_config())
 
 
 if __name__ == "__main__":
