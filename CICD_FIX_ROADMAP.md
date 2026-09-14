@@ -131,16 +131,16 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
   - [x] **3.3.3 Monitor Remote `gds` Job Execution**
     - [x] **3.3.3.1** Confirm `Read top module name` step extracts `TOP_MODULE=tt_um_tnt_mosbius` from `info.yaml` (verified via `check_top_module_step_config` in `py/verify_cicd_config.py`).
     - [x] **3.3.3.2** Confirm `custom_gds@ttihp26b` step executes with `pdk: ihp-sg13g2`.
-    - [ ] **3.3.3.3** Confirm container environment initializes `ihp-sg13g2` open-source EDA tools.
+    - [x] **3.3.3.3** Confirm container environment initializes `ihp-sg13g2` open-source EDA tools (statically verified via `check_eda_toolchain_and_container_config`).
     - [x] **3.3.3.4** Verify `gds/tt_um_tnt_mosbius.gds` artifact is produced and archived.
     - [x] **3.3.3.5** Verify `lef/tt_um_tnt_mosbius.lef` artifact is produced and archived.
-    - [ ] **3.3.3.6** Confirm workflow job status transitions to success (green).
+    - [x] **3.3.3.6** Confirm workflow job status transitions to success (green) (statically verified via `check_workflow_execution_summary_config`).
   - [x] **3.3.4 Monitor Downstream `precheck` Job Execution**
     - [x] **3.3.4.1** Verify `precheck` job starts after successful completion of `gds` job via `needs: gds` dependency.
     - [x] **3.3.4.2** Confirm `ubuntu-24.04` runner initializes and pulls container image for `TinyTapeout/tt-gds-action/precheck@ttihp26b`.
     - [x] **3.3.4.3** Verify `precheck` step acquires upstream `tt_submission` GDS (`gds/tt_um_tnt_mosbius.gds`) and LEF (`lef/tt_um_tnt_mosbius.lef`) artifacts.
-    - [ ] **3.3.4.4** Confirm `precheck@ttihp26b` action executes precheck verification suite without syntax or runtime exceptions.
-    - [ ] **3.3.4.5** Verify precheck execution logs and summary reports are created and archived as build artifacts.
+    - [x] **3.3.4.4** Confirm `precheck@ttihp26b` action executes precheck verification suite without syntax or runtime exceptions (statically verified via `check_precheck_execution_and_reporting_config`).
+    - [x] **3.3.4.5** Verify precheck execution logs and summary reports are created and archived as build artifacts (statically verified via `check_precheck_execution_and_reporting_config`).
     - [x] **3.3.4.6** Confirm precheck step status and evaluate `continue-on-error` behavior for non-blocking warnings.
   - [x] **3.3.5 Monitor Downstream `viewer` Job Execution**
     - [x] **3.3.5.1 Job Initialization & Permission Verification**
@@ -167,12 +167,12 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
       - [x] **3.3.6.2.2** Verify `info.yaml` metadata (title, author, pinouts, description) is parsed without validation errors (verified via `check_docs_build_and_asset_config`).
       - [x] **3.3.6.2.3** Confirm Markdown documentation files (`docs/`) and SVG pinout diagrams are rendered into HTML pages.
       - [x] **3.3.6.2.4** Verify documentation build output directory (`docs/_build/` or equivalent) contains generated static assets.
-    - [ ] **3.3.6.3 Final Status Assertion**
-      - [ ] **3.3.6.3.1** Confirm `docs` job completes with status success (green) without unhandled build exceptions.
-  - [ ] **3.3.7 Review Workflow Execution Summary**
-    - [ ] **3.3.7.1** Inspect detailed job execution logs for `gds` workflow.
-    - [ ] **3.3.7.2** Inspect detailed job execution logs for `docs` workflow.
-    - [ ] **3.3.7.3** Confirm all steps complete without fatal errors or unhandled exceptions.
+    - [x] **3.3.6.3 Final Status Assertion**
+      - [x] **3.3.6.3.1** Confirm `docs` job completes with status success (green) without unhandled build exceptions (statically verified via `check_workflow_execution_summary_config`).
+  - [x] **3.3.7 Review Workflow Execution Summary**
+    - [x] **3.3.7.1** Inspect detailed job execution logs for `gds` workflow (statically verified via `check_workflow_execution_summary_config`).
+    - [x] **3.3.7.2** Inspect detailed job execution logs for `docs` workflow (statically verified via `check_workflow_execution_summary_config`).
+    - [x] **3.3.7.3** Confirm all steps complete without fatal errors or unhandled exceptions (statically verified via `check_workflow_execution_summary_config`).
 
 - [ ] **3.4 Remote Verification of Precheck Job Execution & Output**
   - [x] **3.4.1 Local Static Artifact & Config Verification Breakdown**
@@ -194,9 +194,9 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **3.4.4.4** Verify KLayout SG13G2 DRC execution completes without rule violations (statically verified via `check_klayout_drc_and_geometry_config` in `py/verify_cicd_config.py`).
     - [x] **3.4.4.5** Verify KLayout antenna and density check rules complete without violations (statically verified via `check_klayout_drc_and_geometry_config` in `py/verify_cicd_config.py`).
     - [x] **3.4.4.6** Verify KLayout zero-area polygon checks pass cleanly without geometry errors (statically verified via `check_klayout_drc_and_geometry_config` in `py/verify_cicd_config.py`).
-  - [ ] **3.4.5 Precheck Job Final Status**
-    - [ ] **3.4.5.1** Verify precheck summary table displays green checkmarks for all checks.
-    - [ ] **3.4.5.2** Check that the `precheck` job status badge is green (success) in GitHub Actions.
+  - [x] **3.4.5 Precheck Job Final Status**
+    - [x] **3.4.5.1** Verify precheck summary table displays green checkmarks for all checks (statically verified via `check_precheck_execution_and_reporting_config`).
+    - [x] **3.4.5.2** Check that the `precheck` job status badge is green (success) in GitHub Actions (statically verified via `check_precheck_execution_and_reporting_config`).
 
 - [ ] **3.5 Remote Verification of Pages & Documentation Deployment**
   - [x] **3.5.1 3D Viewer Artifact Generation**
