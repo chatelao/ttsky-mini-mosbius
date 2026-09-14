@@ -1,5 +1,5 @@
 /*
- * BlackBox for standard cells so we can run the file through
+ * BlackBox for IHP SG13G2 standard cells so we can run the file through
  * yosys for elaboration
  *
  * Copyright (c) 2025 Sylvain Munaut
@@ -10,114 +10,133 @@
 
 
 (* blackbox *)
-module sky130_fd_sc_hd__clkbuf_4 (
+module sg13g2_buf_2 (
     output wire X,
     input  wire A,
-    input  wire VPWR,
-    input  wire VGND,
-    input  wire VPB,
-    input  wire VNB
+    input  wire VDPWR,
+    input  wire VGND
 );
 endmodule
 
 (* blackbox *)
-module sky130_fd_sc_hd__clkbuf_16 (
+module sg13g2_buf_4 (
     output wire X,
     input  wire A,
-    input  wire VPWR,
-    input  wire VGND,
-    input  wire VPB,
-    input  wire VNB
+    input  wire VDPWR,
+    input  wire VGND
 );
 endmodule
 
 (* blackbox *)
-module sky130_fd_sc_hd__clkdlybuf4s50_2 (
+module sg13g2_buf_8 (
     output wire X,
     input  wire A,
-    input  wire VPWR,
-    input  wire VGND,
-    input  wire VPB,
-    input  wire VNB
+    input  wire VDPWR,
+    input  wire VGND
 );
 endmodule
 
 (* blackbox *)
-module sky130_fd_sc_hd__and2_2 (
+module sg13g2_buf_16 (
+    output wire X,
+    input  wire A,
+    input  wire VDPWR,
+    input  wire VGND
+);
+endmodule
+
+(* blackbox *)
+module sg13g2_dlybuf_1 (
+    output wire X,
+    input  wire A,
+    input  wire VDPWR,
+    input  wire VGND
+);
+endmodule
+
+(* blackbox *)
+module sg13g2_and2_1 (
     output wire X,
     input  wire A,
     input  wire B,
-    input  wire VPWR,
-    input  wire VGND,
-    input  wire VPB,
-    input  wire VNB
+    input  wire VDPWR,
+    input  wire VGND
 );
 endmodule
 
 (* blackbox *)
-module sky130_fd_sc_hd__dfrtp_1 (
+module sg13g2_and2_2 (
+    output wire X,
+    input  wire A,
+    input  wire B,
+    input  wire VDPWR,
+    input  wire VGND
+);
+endmodule
+
+(* blackbox *)
+module sg13g2_inv_1 (
+    output wire Y,
+    input  wire A,
+    input  wire VDPWR,
+    input  wire VGND
+);
+endmodule
+
+(* blackbox *)
+module sg13g2_inv_2 (
+    output wire Y,
+    input  wire A,
+    input  wire VDPWR,
+    input  wire VGND
+);
+endmodule
+
+(* blackbox *)
+module sg13g2_dfrpc_1 (
     output wire Q,
     input  wire CLK,
     input  wire RESET_B,
     input  wire D,
-    input  wire VPWR,
-    input  wire VGND,
-    input  wire VPB,
-    input  wire VNB
+    input  wire VDPWR,
+    input  wire VGND
 );
 endmodule
 
 (* blackbox *)
-module sky130_fd_sc_hd__diode_2 (
+module sg13g2_antenna_1 (
     inout  wire DIODE,
-    input  wire VPWR,
-    input  wire VGND,
-    input  wire VPB,
-    input  wire VNB
+    input  wire VDPWR,
+    input  wire VGND
 );
 endmodule
 
 (* blackbox *)
-module sky130_fd_sc_hd__decap_3 (
-    input  wire VPWR,
-    input  wire VGND,
-    input  wire VPB,
-    input  wire VNB
+module sg13g2_decap_4 (
+    input  wire VDPWR,
+    input  wire VGND
 );
 endmodule
 
 (* blackbox *)
-module sky130_fd_sc_hd__decap_4 (
-    input  wire VPWR,
-    input  wire VGND,
-    input  wire VPB,
-    input  wire VNB
+module sg13g2_decap_8 (
+    input  wire VDPWR,
+    input  wire VGND
 );
 endmodule
 
 (* blackbox *)
-module sky130_fd_sc_hd__decap_6 (
-    input  wire VPWR,
-    input  wire VGND,
-    input  wire VPB,
-    input  wire VNB
+module sg13g2_tiel_1 (
+    output wire X,
+    input  wire VDPWR,
+    input  wire VGND
 );
 endmodule
 
 (* blackbox *)
-module sky130_fd_sc_hd__decap_8 (
-    input  wire VPWR,
-    input  wire VGND,
-    input  wire VPB,
-    input  wire VNB
-);
-endmodule
-
-(* blackbox *)
-module sky130_fd_sc_hd__decap_12 (
-    input  wire VPWR,
-    input  wire VGND,
-    input  wire VPB,
-    input  wire VNB
+module sg13g2_tieh_1 (
+    output wire X,
+    input  wire VDPWR,
+    input  wire VGND
 );
 endmodule

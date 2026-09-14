@@ -21,6 +21,7 @@ from py.verify_cicd_config import (
     check_pages_deployment_and_oidc_config,
     check_precheck_def_and_pin_config,
     check_precheck_execution_and_reporting_config,
+    check_stdcell_declarations,
     check_top_module_step_config,
     check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
@@ -884,6 +885,32 @@ steps:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_wf)
         ):
             self.assertFalse(check_git_submodule_and_checkout_config())
+
+    def test_check_stdcell_declarations_valid(self):
+        valid_stdcells = "module sg13g2_buf_2 (output wire X); endmodule"
+        valid_rtl = "module ctrl_block; sg13g2_buf_4 buf_I(); endmodule"
+
+        def mock_open_file(filepath, mode="r"):
+            if "stdcells.v" in filepath:
+                return unittest.mock.mock_open(read_data=valid_stdcells)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_rtl)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_stdcell_declarations())
+
+    def test_check_stdcell_declarations_invalid(self):
+        invalid_stdcells = "module sky130_fd_sc_hd__clkbuf_4; endmodule"
+
+        def mock_open_file(filepath, mode="r"):
+            return unittest.mock.mock_open(read_data=invalid_stdcells)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_stdcell_declarations())
 
 
 if __name__ == "__main__":

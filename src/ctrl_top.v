@@ -35,22 +35,18 @@ module ctrl_top (
 	// -----
 
 	// Buffers
-	sky130_fd_sc_hd__clkbuf_16 buf_in_I[2:0] (
-		.X    ({ g_clk, g_rst_n, g_enable }),
-		.A    ({   clk,   rst_n,   enable }),
-		.VPWR (VDPWR),
-		.VGND (VGND),
-		.VPB  (VDPWR),
-		.VNB  (VGND)
+	sg13g2_buf_16 buf_in_I[2:0] (
+		.X     ({ g_clk, g_rst_n, g_enable }),
+		.A     ({   clk,   rst_n,   enable }),
+		.VDPWR (VDPWR),
+		.VGND  (VGND)
 	);
 
 	// Diodes
-	sky130_fd_sc_hd__diode_2 diode_in_I[2:0] (
+	sg13g2_antenna_1 diode_in_I[2:0] (
 		.DIODE ({ g_clk, g_rst_n, g_enable }),
-		.VPWR  (VDPWR),
-		.VGND  (VGND),
-		.VPB   (VDPWR),
-		.VNB   (VGND)
+		.VDPWR (VDPWR),
+		.VGND  (VGND)
 	);
 
 
@@ -89,22 +85,18 @@ module ctrl_top (
 	// Intermediate buffers
 	// --------------------
 
-	sky130_fd_sc_hd__clkbuf_4 buf_mid_I[1:0] (
-		.X    ({ mid_data[1], mid_data[0] }),
-		.A    ({ mid_data[0], asw_data[26] }),
-		.VPWR (VDPWR),
-		.VGND (VGND),
-		.VPB  (VDPWR),
-		.VNB  (VGND)
+	sg13g2_buf_4 buf_mid_I[1:0] (
+		.X     ({ mid_data[1], mid_data[0] }),
+		.A     ({ mid_data[0], asw_data[26] }),
+		.VDPWR (VDPWR),
+		.VGND  (VGND)
 	);
 
-	sky130_fd_sc_hd__clkdlybuf4s50_2 dly_mid_I (
-		.X    (dev_data[0]),
-		.A    (mid_data[1]),
-		.VPWR (VDPWR),
-		.VGND (VGND),
-		.VPB  (VDPWR),
-		.VNB  (VGND)
+	sg13g2_dlybuf_1 dly_mid_I (
+		.X     (dev_data[0]),
+		.A     (mid_data[1]),
+		.VDPWR (VDPWR),
+		.VGND  (VGND)
 	);
 
 
@@ -264,17 +256,14 @@ module ctrl_top (
 	// Output buffer
 	// -------------
 
-	sky130_fd_sc_hd__clkbuf_16 buf_out_I (
-		.X    (data_out),
-		.A    (dev_data[7]),
-		.VPWR (VDPWR),
-		.VGND (VGND),
-		.VPB  (VDPWR),
-		.VNB  (VGND)
+	sg13g2_buf_16 buf_out_I (
+		.X     (data_out),
+		.A     (dev_data[7]),
+		.VDPWR (VDPWR),
+		.VGND  (VGND)
 	);
 
 endmodule /* ctrl_top */
 
 `include "ctrl_block.v"
 `include "stdcells.v"
-

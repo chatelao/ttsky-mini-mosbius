@@ -727,6 +727,44 @@ def check_git_submodule_and_checkout_config(repo_root="."):
     return True
 
 
+def check_stdcell_declarations(repo_root="."):
+    stdcells_path = os.path.join(repo_root, "src/stdcells.v")
+    ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
+    ctrl_top_path = os.path.join(repo_root, "src/ctrl_top.v")
+    project_path = os.path.join(repo_root, "src/project.v")
+
+    errors = []
+
+    if not os.path.exists(stdcells_path):
+        errors.append(f"Missing file: {stdcells_path}")
+    else:
+        with open(stdcells_path, "r") as f:
+            content = f.read()
+        if "sky130_fd_sc_hd" in content:
+            errors.append("Found legacy sky130_fd_sc_hd reference in src/stdcells.v")
+        if "sg13g2_" not in content:
+            errors.append("Missing sg13g2_ standard cell blackbox declarations in src/stdcells.v")
+
+    for path in [ctrl_block_path, ctrl_top_path, project_path]:
+        filename = os.path.basename(path)
+        if not os.path.exists(path):
+            errors.append(f"Missing file: {path}")
+        else:
+            with open(path, "r") as f:
+                content = f.read()
+            if "sky130_fd_sc_hd" in content:
+                errors.append(f"Found legacy sky130_fd_sc_hd reference in {filename}")
+
+    if errors:
+        print("FAILED stdcell declarations check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED stdcell declarations check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -752,6 +790,7 @@ def main():
     wf_summary_ok = check_workflow_execution_summary_config(repo_root)
     wf_trigger_ok = check_workflow_trigger_events_config(repo_root)
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
+    stdcell_decl_ok = check_stdcell_declarations(repo_root)
 
     if (
         gds_ok
@@ -773,6 +812,7 @@ def main():
         and wf_summary_ok
         and wf_trigger_ok
         and checkout_submodule_ok
+        and stdcell_decl_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)

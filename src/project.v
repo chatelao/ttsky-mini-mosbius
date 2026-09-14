@@ -7,7 +7,7 @@
 
 module tt_um_tnt_mosbius (
 		input  wire       VGND,
-		input  wire       VDPWR,    // 1.8v power supply
+		input  wire       VDPWR,    // 1.2v power supply
 		input  wire       VAPWR,    // 3.3v power supply
 		input  wire [7:0] ui_in,    // Dedicated inputs
 		output wire [7:0] uo_out,   // Dedicated outputs
@@ -35,7 +35,7 @@ module tt_um_tnt_mosbius (
 		.enable   (ui_in[1]),
 		.data_in  (ui_in[0]),
 		.data_out (uo_out[0]),
-		.ctrl_out (ctrl),
+		.ctrl_out (ctrl)
 	);
 
 	// Analog
@@ -107,14 +107,17 @@ module tt_um_tnt_mosbius (
 	assign ua[4] = bus_B[2];
 	assign ua[5] = bus_B[4];
 
-	// Tie off unused outputs
-	sky130_fd_sc_hd__conb_1 tie_I (
-		.HI   (k_one),
-		.LO   (k_zero),
-		.VPWR (VDPWR),
-		.VGND (VGND),
-		.VPB  (VDPWR),
-		.VNB  (VGND)
+	// Tie off unused outputs using IHP SG13G2 tie cells
+	sg13g2_tiel_1 tiel_I (
+		.X     (k_zero),
+		.VDPWR (VDPWR),
+		.VGND  (VGND)
+	);
+
+	sg13g2_tieh_1 tieh_I (
+		.X     (k_one),
+		.VDPWR (VDPWR),
+		.VGND  (VGND)
 	);
 
 	assign uio_out = {8{k_zero}};
