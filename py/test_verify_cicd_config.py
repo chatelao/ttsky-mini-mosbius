@@ -912,6 +912,36 @@ steps:
         ):
             self.assertFalse(check_stdcell_declarations())
 
+    def test_check_common_py_stdcells(self):
+        valid_common = "TAP = Cell('sg13g2_tap_1', 1)"
+        invalid_common = "TAP = Cell('sky130_fd_sc_hd__tapvpwrvgnd_1', 1)"
+
+        def mock_open_file_valid(filepath, mode="r"):
+            if "stdcells.v" in filepath:
+                return unittest.mock.mock_open(read_data="sg13g2_")()
+            elif "common.py" in filepath:
+                return unittest.mock.mock_open(read_data=valid_common)()
+            else:
+                return unittest.mock.mock_open(read_data="valid")()
+
+        def mock_open_file_invalid(filepath, mode="r"):
+            if "common.py" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_common)()
+            elif "stdcells.v" in filepath:
+                return unittest.mock.mock_open(read_data="sg13g2_")()
+            else:
+                return unittest.mock.mock_open(read_data="valid")()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file_valid
+        ):
+            self.assertTrue(check_stdcell_declarations())
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file_invalid
+        ):
+            self.assertFalse(check_stdcell_declarations())
+
 
 if __name__ == "__main__":
     unittest.main()
