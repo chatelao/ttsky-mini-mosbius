@@ -672,6 +672,61 @@ def check_workflow_execution_summary_config(repo_root="."):
     return True
 
 
+def check_workflow_trigger_events_config(repo_root="."):
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    docs_path = os.path.join(repo_root, ".github/workflows/docs.yaml")
+    errors = []
+
+    required_triggers = ["push:", "pull_request:", "workflow_dispatch:"]
+
+    for path in [gds_path, docs_path]:
+        filename = os.path.basename(path)
+        if not os.path.exists(path):
+            errors.append(f"Missing workflow file: {path}")
+        else:
+            with open(path, "r") as f:
+                content = f.read()
+            for trigger in required_triggers:
+                if trigger not in content:
+                    errors.append(f"Missing '{trigger[:-1]}' trigger event in {filename}")
+
+    if errors:
+        print("FAILED workflow trigger events config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED workflow trigger events config check")
+    return True
+
+
+def check_git_submodule_and_checkout_config(repo_root="."):
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    docs_path = os.path.join(repo_root, ".github/workflows/docs.yaml")
+    errors = []
+
+    for path in [gds_path, docs_path]:
+        filename = os.path.basename(path)
+        if not os.path.exists(path):
+            errors.append(f"Missing workflow file: {path}")
+        else:
+            with open(path, "r") as f:
+                content = f.read()
+            if "actions/checkout@v4" not in content:
+                errors.append(f"Missing 'actions/checkout@v4' step in {filename}")
+            if "submodules: recursive" not in content:
+                errors.append(f"Missing 'submodules: recursive' setting in {filename}")
+
+    if errors:
+        print("FAILED git submodule and checkout config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED git submodule and checkout config check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -695,6 +750,8 @@ def main():
     eda_toolchain_ok = check_eda_toolchain_and_container_config(repo_root)
     precheck_exec_ok = check_precheck_execution_and_reporting_config(repo_root)
     wf_summary_ok = check_workflow_execution_summary_config(repo_root)
+    wf_trigger_ok = check_workflow_trigger_events_config(repo_root)
+    checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
 
     if (
         gds_ok
@@ -714,6 +771,8 @@ def main():
         and eda_toolchain_ok
         and precheck_exec_ok
         and wf_summary_ok
+        and wf_trigger_ok
+        and checkout_submodule_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
