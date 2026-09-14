@@ -727,6 +727,35 @@ def check_git_submodule_and_checkout_config(repo_root="."):
     return True
 
 
+def check_synthesis_toolchain_config(repo_root="."):
+    makefile_path = os.path.join(repo_root, "src/Makefile")
+    errors = []
+
+    if not os.path.exists(makefile_path):
+        errors.append(f"Missing file: {makefile_path}")
+    else:
+        with open(makefile_path, "r") as f:
+            content = f.read()
+
+        if "%.synth.v: %.v" not in content:
+            errors.append("Missing '%.synth.v: %.v' elaboration rule in src/Makefile")
+        if "yosys" not in content:
+            errors.append("Missing Yosys synthesis invocation in src/Makefile")
+        if "hierarchy -top" not in content:
+            errors.append("Missing 'hierarchy -top' check in Yosys command in src/Makefile")
+        if "ctrl_top" not in content:
+            errors.append("Missing 'ctrl_top' target elaboration in src/Makefile")
+
+    if errors:
+        print("FAILED synthesis toolchain config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED synthesis toolchain config check")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -791,6 +820,7 @@ def main():
     wf_trigger_ok = check_workflow_trigger_events_config(repo_root)
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
+    synth_config_ok = check_synthesis_toolchain_config(repo_root)
 
     if (
         gds_ok
@@ -813,6 +843,7 @@ def main():
         and wf_trigger_ok
         and checkout_submodule_ok
         and stdcell_decl_ok
+        and synth_config_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
