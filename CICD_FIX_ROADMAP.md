@@ -243,3 +243,13 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
       - [x] **3.5.3.3.2** Verify digital and analog pinout mappings in `info.yaml` match hardware definitions and pass static verification in `py/verify_cicd_config.py`.
       - [x] **3.5.3.3.3** Verify clock, reset, and enable pin configurations match hardware specs in `info.yaml`.
       - [x] **3.5.3.3.4** Confirm required documentation sections (`How it works`, `How to test`) in `docs/info.md` exist and are verified by unit tests.
+
+- [x] **3.6 Workflow Trigger Events & Git Submodule Checkout Verification**
+  - [x] **3.6.1 Workflow Trigger Configuration Verification**
+    - [x] **3.6.1.1** Statically verify `.github/workflows/gds.yaml` declares `push`, `pull_request`, and `workflow_dispatch` trigger events via `check_workflow_trigger_events_config` in `py/verify_cicd_config.py`.
+    - [x] **3.6.1.2** Statically verify `.github/workflows/docs.yaml` declares `push`, `pull_request`, and `workflow_dispatch` trigger events via `check_workflow_trigger_events_config` in `py/verify_cicd_config.py`.
+  - [x] **3.6.2 Git Submodule Checkout Configuration Verification**
+    - [x] **3.6.2.1** Statically verify `.github/workflows/gds.yaml` uses `actions/checkout@v4` with `submodules: recursive` via `check_git_submodule_and_checkout_config` in `py/verify_cicd_config.py`.
+    - [x] **3.6.2.2** Statically verify `.github/workflows/docs.yaml` uses `actions/checkout@v4` with `submodules: recursive` via `check_git_submodule_and_checkout_config` in `py/verify_cicd_config.py`.
+  - [x] **3.6.3 Unit Testing & Integration**
+    - [x] **3.6.3.1** Add unit test suite assertions in `py/test_verify_cicd_config.py` validating valid and invalid configurations for `check_workflow_trigger_events_config` and `check_git_submodule_and_checkout_config`.

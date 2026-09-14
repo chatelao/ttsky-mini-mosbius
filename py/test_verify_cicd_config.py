@@ -13,6 +13,7 @@ from py.verify_cicd_config import (
     check_eda_toolchain_and_container_config,
     check_gds_lef_artifacts,
     check_gds_workflow,
+    check_git_submodule_and_checkout_config,
     check_info_yaml,
     check_klayout_drc_and_geometry_config,
     check_lef_pin_and_boundary_config,
@@ -24,6 +25,7 @@ from py.verify_cicd_config import (
     check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
     check_workflow_execution_summary_config,
+    check_workflow_trigger_events_config,
 )
 
 
@@ -838,6 +840,50 @@ jobs:
             "builtins.open", side_effect=mock_open_file
         ):
             self.assertFalse(check_workflow_execution_summary_config())
+
+    def test_check_workflow_trigger_events_config_valid(self):
+        valid_wf = """
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_wf)
+        ):
+            self.assertTrue(check_workflow_trigger_events_config())
+
+    def test_check_workflow_trigger_events_config_invalid(self):
+        invalid_wf = """
+on:
+  push:
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_wf)
+        ):
+            self.assertFalse(check_workflow_trigger_events_config())
+
+    def test_check_git_submodule_and_checkout_config_valid(self):
+        valid_wf = """
+steps:
+  - uses: actions/checkout@v4
+    with:
+      submodules: recursive
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_wf)
+        ):
+            self.assertTrue(check_git_submodule_and_checkout_config())
+
+    def test_check_git_submodule_and_checkout_config_invalid(self):
+        invalid_wf = """
+steps:
+  - uses: actions/checkout@v3
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_wf)
+        ):
+            self.assertFalse(check_git_submodule_and_checkout_config())
 
 
 if __name__ == "__main__":
