@@ -27,7 +27,14 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 │  - Execute local verification (make check, make lint) │
 │  - Trigger GitHub Actions CI run                      │
 │  - Verify green status on precheck & viewer jobs       │
-└───────────────────────────┴────────────────────────────┘
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│  Phase 4: Ongoing Maintenance & Health Checks          │
+│  - Continuous drift detection & rule maintenance       │
+│  - Precheck artifact & toolchain sign-off verification │
+└────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -73,15 +80,17 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 > **Objective:** Migrate GitHub Action references to match the `ihp-sg13g2` PDK toolchain tag (`@ttihp26b`).
 
 - [x] **2.1 Update `.github/workflows/gds.yaml`**
-  - Update action tags for `custom_gds`, `precheck`, and `viewer` steps:
-    - `TinyTapeout/tt-gds-action/custom_gds@ttihp26b`
-    - `TinyTapeout/tt-gds-action/precheck@ttihp26b`
-    - `TinyTapeout/tt-gds-action/viewer@ttihp26b`
-  - Confirm parameter `pdk: ihp-sg13g2` is present in `custom_gds`.
+  - [x] **2.1.1** Update `custom_gds` action tag reference to `TinyTapeout/tt-gds-action/custom_gds@ttihp26b`.
+  - [x] **2.1.2** Update `precheck` action tag reference to `TinyTapeout/tt-gds-action/precheck@ttihp26b`.
+  - [x] **2.1.3** Update `viewer` action tag reference to `TinyTapeout/tt-gds-action/viewer@ttihp26b`.
+  - [x] **2.1.4** Confirm parameter `pdk: ihp-sg13g2` is present in `custom_gds` step configuration.
+  - [x] **2.1.5** Verify runner environment `runs-on: ubuntu-24.04` and `submodules: recursive` checkout across all jobs in `gds.yaml`.
+  - [x] **2.1.6** Verify explicit permissions block (`pages: write`, `id-token: write`) in `viewer` job for GitHub Pages OIDC deployment.
 
 - [x] **2.2 Update `.github/workflows/docs.yaml`**
-  - Update action tag for `docs` step:
-    - `TinyTapeout/tt-gds-action/docs@ttihp26b`
+  - [x] **2.2.1** Update `docs` action tag reference to `TinyTapeout/tt-gds-action/docs@ttihp26b`.
+  - [x] **2.2.2** Verify runner environment `runs-on: ubuntu-24.04` and `submodules: recursive` checkout configuration in `docs.yaml`.
+  - [x] **2.2.3** Verify workflow trigger events (`push`, `pull_request`, `workflow_dispatch`) in `docs.yaml`.
 
 ---
 
@@ -253,3 +262,19 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **3.6.2.2** Statically verify `.github/workflows/docs.yaml` uses `actions/checkout@v4` with `submodules: recursive` via `check_git_submodule_and_checkout_config` in `py/verify_cicd_config.py`.
   - [x] **3.6.3 Unit Testing & Integration**
     - [x] **3.6.3.1** Add unit test suite assertions in `py/test_verify_cicd_config.py` validating valid and invalid configurations for `check_workflow_trigger_events_config` and `check_git_submodule_and_checkout_config`.
+
+---
+
+## Phase 4: Ongoing CI/CD Pipeline Maintenance & Health Checks
+
+> **Objective:** Ensure long-term stability, automated drift detection, and continuous compliance for all CI/CD workflows and toolchain dependencies.
+
+- [ ] **4.1 Continuous CI/CD Configuration Drift & Rule Set Maintenance**
+  - [ ] **4.1.1** Track upstream `TinyTapeout/tt-gds-action` release tags and `ihp-sg13g2` toolchain updates.
+  - [ ] **4.1.2** Maintain static verification assertions in `py/verify_cicd_config.py` for new action parameters or workflow schema changes.
+  - [ ] **4.1.3** Execute `python3 -m unittest discover -s py` in pull request workflows to prevent configuration regressions.
+
+- [ ] **4.2 Precheck Artifact & Toolchain Verification Sign-Off**
+  - [ ] **4.2.1** Validate precheck report artifacts across PDK toolchain minor version updates.
+  - [ ] **4.2.2** Verify KLayout DRC, antenna, and density rule check compatibility against future SG13G2 tech releases.
+  - [ ] **4.2.3** Ensure documentation rendering compatibility with future `info.yaml` schema updates.
