@@ -727,6 +727,36 @@ def check_git_submodule_and_checkout_config(repo_root="."):
     return True
 
 
+def check_verification_job_config(repo_root="."):
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    if not os.path.exists(gds_path):
+        print("FAILED verification job config check:")
+        print(f"  - Missing workflow file: {gds_path}")
+        return False
+
+    with open(gds_path, "r") as f:
+        content = f.read()
+
+    errors = []
+    if "check:" not in content:
+        errors.append("Missing 'check:' job definition in gds.yaml")
+    if "make check" not in content:
+        errors.append("Missing 'make check' verification command in gds.yaml")
+    if "runs-on: ubuntu-24.04" not in content:
+        errors.append("Missing 'runs-on: ubuntu-24.04' runner configuration in gds.yaml")
+    if "submodules: recursive" not in content:
+        errors.append("Missing 'submodules: recursive' setting in gds.yaml")
+
+    if errors:
+        print("FAILED verification job config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED verification job config check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -752,6 +782,7 @@ def main():
     wf_summary_ok = check_workflow_execution_summary_config(repo_root)
     wf_trigger_ok = check_workflow_trigger_events_config(repo_root)
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
+    verification_job_ok = check_verification_job_config(repo_root)
 
     if (
         gds_ok
@@ -773,6 +804,7 @@ def main():
         and wf_summary_ok
         and wf_trigger_ok
         and checkout_submodule_ok
+        and verification_job_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
