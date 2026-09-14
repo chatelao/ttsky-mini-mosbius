@@ -253,3 +253,10 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **3.6.2.2** Statically verify `.github/workflows/docs.yaml` uses `actions/checkout@v4` with `submodules: recursive` via `check_git_submodule_and_checkout_config` in `py/verify_cicd_config.py`.
   - [x] **3.6.3 Unit Testing & Integration**
     - [x] **3.6.3.1** Add unit test suite assertions in `py/test_verify_cicd_config.py` validating valid and invalid configurations for `check_workflow_trigger_events_config` and `check_git_submodule_and_checkout_config`.
+
+- [x] **3.7 Pre-GDS Verification Job Configuration Verification**
+  - [x] **3.7.1 Verification Job Rule Definition**
+    - [x] **3.7.1.1** Statically verify `.github/workflows/gds.yaml` declares a `check` job running `make check` via `check_verification_job_config` in `py/verify_cicd_config.py`.
+    - [x] **3.7.1.2** Verify `check` job uses `ubuntu-24.04` runner environment and `actions/checkout@v4` with `submodules: recursive`.
+  - [x] **3.7.2 Unit Testing & Integration**
+    - [x] **3.7.2.1** Add unit test suite assertions in `py/test_verify_cicd_config.py` validating valid and invalid configurations for `check_verification_job_config`.

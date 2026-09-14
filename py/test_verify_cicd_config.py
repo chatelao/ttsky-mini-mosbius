@@ -22,6 +22,7 @@ from py.verify_cicd_config import (
     check_precheck_def_and_pin_config,
     check_precheck_execution_and_reporting_config,
     check_top_module_step_config,
+    check_verification_job_config,
     check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
     check_workflow_execution_summary_config,
@@ -884,6 +885,36 @@ steps:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_wf)
         ):
             self.assertFalse(check_git_submodule_and_checkout_config())
+
+    def test_check_verification_job_config_valid(self):
+        valid_gds = """
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Run verification checks
+        run: |
+          make check
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_gds)
+        ):
+            self.assertTrue(check_verification_job_config())
+
+    def test_check_verification_job_config_invalid(self):
+        invalid_gds = """
+jobs:
+  gds:
+    runs-on: ubuntu-24.04
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_gds)
+        ):
+            self.assertFalse(check_verification_job_config())
 
 
 if __name__ == "__main__":
