@@ -36,8 +36,27 @@ The top priority is establishing and maintaining a functioning **CI/CD pipeline 
 > **Objective:** Transition circuit schematics and simulation testbenches from SkyWater 130nm primitives to IHP SG13G2 models.
 
 - [ ] **2.1 Re-bind Primitive Devices in Xschem (`xschem/`)**
-  - Replace `sky130_fd_pr__nfet_g5v0d10v5` and `pfet_g5v0d10v5` with `sg13g2_pr__nfet33` and `pfet33` in all sub-block schematics (`diff_n.sch`, `diff_p.sch`, `mirror_n.sch`, `mirror_p.sch`, `ota_n.sch`, `nmos_prog.sch`, `pmos_prog.sch`).
-  - Scale device W/L dimensions to achieve parity in $R_{on}$, transconductance, and drive current.
+  - [ ] **2.1.1 Re-bind NMOS differential pair schematic (`xschem/diff_n.sch`)**
+    - Replace `sky130_fd_pr__nfet_g5v0d10v5` symbol references with `sg13g2_pr__nfet33` (or equivalent SG13G2 3.3V NMOS primitive).
+    - Update transistor width/length parameters for SG13G2 process rules.
+  - [ ] **2.1.2 Re-bind PMOS differential pair schematic (`xschem/diff_p.sch`)**
+    - Replace `sky130_fd_pr__pfet_g5v0d10v5` symbol references with `sg13g2_pr__pfet33` (or equivalent SG13G2 3.3V PMOS primitive).
+    - Adjust PMOS aspect ratios ($W/L$) for target transconductance matching.
+  - [ ] **2.1.3 Re-bind NMOS current mirror schematic (`xschem/mirror_n.sch`)**
+    - Transition current mirror primitives to `sg13g2_pr__nfet33`.
+    - Set device dimensions to preserve mirror ratio and headroom.
+  - [ ] **2.1.4 Re-bind PMOS current mirror schematic (`xschem/mirror_p.sch`)**
+    - Transition current mirror primitives to `sg13g2_pr__pfet33`.
+    - Adjust device sizing for desired bias currents under SG13G2 model parameters.
+  - [ ] **2.1.5 Re-bind operational transconductance amplifier (`xschem/ota_n.sch`)**
+    - Re-bind internal diff pair and mirror transistors to SG13G2 3.3V primitives.
+    - Scale device geometries to maintain open-loop gain and bandwidth targets.
+  - [ ] **2.1.6 Re-bind programmable NMOS array block (`xschem/nmos_prog.sch`)**
+    - Replace SkyWater 130nm NFET primitives with `sg13g2_pr__nfet33`.
+    - Verify array device pin connections and parameters.
+  - [ ] **2.1.7 Re-bind programmable PMOS array block (`xschem/pmos_prog.sch`)**
+    - Replace SkyWater 130nm PFET primitives with `sg13g2_pr__pfet33`.
+    - Update symbol device properties and instance names.
 - [ ] **2.2 Analog Switch & Level Shifter Adaptation**
   - Update 3.3V transmission gate switches (`tt_asw_3v3.sch`) for `nfet33`/`pfet33`.
   - Re-design/re-bind level shifters (`tt_lvl_shift`) for 1.2V (digital) to 3.3V (analog) signal translation.
