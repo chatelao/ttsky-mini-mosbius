@@ -546,6 +546,42 @@ def check_pages_deployment_and_oidc_config(repo_root="."):
     return True
 
 
+def check_klayout_drc_and_geometry_config(repo_root="."):
+    drc_script_path = os.path.join(repo_root, "tcl/magic_drc.tcl")
+    gds_workflow_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+
+    errors = []
+
+    if not os.path.exists(drc_script_path):
+        errors.append(f"Missing DRC script file: {drc_script_path}")
+    else:
+        with open(drc_script_path, "r") as f:
+            drc_content = f.read()
+        if "drc euclidean on" not in drc_content:
+            errors.append("Missing 'drc euclidean on' setting in tcl/magic_drc.tcl")
+        if 'drc style "drc(full)"' not in drc_content and "drc style drc(full)" not in drc_content:
+            errors.append("Missing 'drc style \"drc(full)\"' setting in tcl/magic_drc.tcl")
+        if "drc check" not in drc_content:
+            errors.append("Missing 'drc check' command in tcl/magic_drc.tcl")
+
+    if not os.path.exists(gds_workflow_path):
+        errors.append(f"Missing workflow file: {gds_workflow_path}")
+    else:
+        with open(gds_workflow_path, "r") as f:
+            gds_content = f.read()
+        if "TinyTapeout/tt-gds-action/precheck@ttihp26b" not in gds_content:
+            errors.append("Missing 'precheck@ttihp26b' action in gds.yaml for DRC and geometry checks")
+
+    if errors:
+        print("FAILED DRC and geometry config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED DRC and geometry config check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -565,6 +601,7 @@ def main():
     docs_build_asset_ok = check_docs_build_and_asset_config(repo_root)
     viewer_artifact_ok = check_viewer_artifact_and_staging_config(repo_root)
     pages_deploy_ok = check_pages_deployment_and_oidc_config(repo_root)
+    drc_geom_ok = check_klayout_drc_and_geometry_config(repo_root)
 
     if (
         gds_ok
@@ -580,6 +617,7 @@ def main():
         and docs_build_asset_ok
         and viewer_artifact_ok
         and pages_deploy_ok
+        and drc_geom_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)

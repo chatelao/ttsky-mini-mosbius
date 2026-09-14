@@ -13,6 +13,7 @@ from py.verify_cicd_config import (
     check_gds_lef_artifacts,
     check_gds_workflow,
     check_info_yaml,
+    check_klayout_drc_and_geometry_config,
     check_lef_pin_and_boundary_config,
     check_pages_api_config,
     check_pages_deployment_and_oidc_config,
@@ -686,6 +687,50 @@ jobs:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_gds_wf)
         ):
             self.assertFalse(check_pages_deployment_and_oidc_config())
+
+    def test_check_klayout_drc_and_geometry_config_valid(self):
+        valid_drc = """
+drc euclidean on
+drc style "drc(full)"
+drc check
+"""
+        valid_gds_wf = """
+jobs:
+  precheck:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "magic_drc.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=valid_drc)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_gds_wf)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_klayout_drc_and_geometry_config())
+
+    def test_check_klayout_drc_and_geometry_config_invalid(self):
+        invalid_drc = """
+# Empty DRC script
+"""
+        invalid_gds_wf = """
+jobs:
+  precheck:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/precheck@ttsky26c
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "magic_drc.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_drc)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_gds_wf)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_klayout_drc_and_geometry_config())
 
 
 if __name__ == "__main__":

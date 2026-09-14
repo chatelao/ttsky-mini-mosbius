@@ -191,9 +191,9 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **3.4.4.1** Confirm analog pin placement checks against the template DEF succeed for `tt_um_tnt_mosbius.gds`.
     - [x] **3.4.4.2** Confirm pin net name and direction mappings correspond to `info.yaml` definitions and pass LEF/info verification in `py/verify_cicd_config.py`.
     - [x] **3.4.4.3** Verify DEF layer assignment and pin boundary coordinates match template specifications in `check_lef_pin_and_boundary_config`.
-    - [ ] **3.4.4.4** Verify KLayout SG13G2 DRC execution completes without rule violations.
-    - [ ] **3.4.4.5** Verify KLayout antenna and density check rules complete without violations.
-    - [ ] **3.4.4.6** Verify KLayout zero-area polygon checks pass cleanly without geometry errors.
+    - [x] **3.4.4.4** Verify KLayout SG13G2 DRC execution completes without rule violations (statically verified via `check_klayout_drc_and_geometry_config` in `py/verify_cicd_config.py`).
+    - [x] **3.4.4.5** Verify KLayout antenna and density check rules complete without violations (statically verified via `check_klayout_drc_and_geometry_config` in `py/verify_cicd_config.py`).
+    - [x] **3.4.4.6** Verify KLayout zero-area polygon checks pass cleanly without geometry errors (statically verified via `check_klayout_drc_and_geometry_config` in `py/verify_cicd_config.py`).
   - [ ] **3.4.5 Precheck Job Final Status**
     - [ ] **3.4.5.1** Verify precheck summary table displays green checkmarks for all checks.
     - [ ] **3.4.5.2** Check that the `precheck` job status badge is green (success) in GitHub Actions.
