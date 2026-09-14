@@ -254,16 +254,13 @@ class CellInstance:
 class Grid:
 
 	FILL = {
-		1:  Cell('sky130_fd_sc_hd__fill_1',    1),
-		2:  Cell('sky130_fd_sc_hd__fill_2',    2),
-		3:  Cell('sky130_fd_sc_hd__decap_3',   3),
-		4:  Cell('sky130_fd_sc_hd__decap_4',   4),
-		6:  Cell('sky130_fd_sc_hd__decap_6',   6),
-		8:  Cell('sky130_fd_sc_hd__decap_8',   8),
-		12: Cell('sky130_fd_sc_hd__decap_12', 12),
+		1:  Cell('sg13g2_fill_1',     1),
+		2:  Cell('sg13g2_fill_2',     2),
+		4:  Cell('sg13g2_decap_4',    4),
+		8:  Cell('sg13g2_decap_8',    8),
 	}
 
-	TAP = Cell('sky130_fd_sc_hd__tapvpwrvgnd_1', 1)
+	TAP = Cell('sg13g2_tap_1', 1)
 
 	def __init__(self, width, height):
 		self.width = width
@@ -449,16 +446,18 @@ class Grid:
 
 
 
-CELLS = { c.name.split('__')[1]:c for c in [
-	Cell('sky130_fd_sc_hd__and2_2',           6),
-	Cell('sky130_fd_sc_hd__and2_4',           7),
-	Cell('sky130_fd_sc_hd__clkbuf_4',         6),
-	Cell('sky130_fd_sc_hd__clkbuf_8',        11),
-	Cell('sky130_fd_sc_hd__clkbuf_16',       20),
-	Cell('sky130_fd_sc_hd__clkdlybuf4s50_2',  9),
-	Cell('sky130_fd_sc_hd__dfrtp_1',         20),
-	Cell('sky130_fd_sc_hd__dfxtp_1',         16),
-	Cell('sky130_fd_sc_hd__dfxtp_2',         17),
-	Cell('sky130_fd_sc_hd__dfxbp_2',         21),
-	Cell('sky130_fd_sc_hd__mux4_2',          18),
-]}
+_CELL_LIST = [
+	Cell('sg13g2_and2_2',       6),
+	Cell('sg13g2_and2_4',       7),
+	Cell('sg13g2_clkbuf_4',     6),
+	Cell('sg13g2_clkbuf_8',    11),
+	Cell('sg13g2_clkbuf_16',   20),
+	Cell('sg13g2_clkdlybuf4s50_2', 9),
+	Cell('sg13g2_dfrtp_1',     20),
+	Cell('sg13g2_dfxtp_1',     16),
+	Cell('sg13g2_dfxtp_2',     17),
+	Cell('sg13g2_dfxbp_2',     21),
+	Cell('sg13g2_mux4_2',      18),
+]
+
+CELLS = { (c.name.split('__')[1] if '__' in c.name else c.name.replace('sg13g2_', '')): c for c in _CELL_LIST }

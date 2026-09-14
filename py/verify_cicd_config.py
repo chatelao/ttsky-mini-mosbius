@@ -732,6 +732,7 @@ def check_stdcell_declarations(repo_root="."):
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
     ctrl_top_path = os.path.join(repo_root, "src/ctrl_top.v")
     project_path = os.path.join(repo_root, "src/project.v")
+    common_py_path = os.path.join(repo_root, "py/common.py")
 
     errors = []
 
@@ -745,7 +746,7 @@ def check_stdcell_declarations(repo_root="."):
         if "sg13g2_" not in content:
             errors.append("Missing sg13g2_ standard cell blackbox declarations in src/stdcells.v")
 
-    for path in [ctrl_block_path, ctrl_top_path, project_path]:
+    for path in [ctrl_block_path, ctrl_top_path, project_path, common_py_path]:
         filename = os.path.basename(path)
         if not os.path.exists(path):
             errors.append(f"Missing file: {path}")
