@@ -288,10 +288,23 @@ project:
         with patch("os.path.exists", return_value=True), patch(
             "os.path.getsize", return_value=1024
         ), patch(
+            "py.verify_cicd_config.parse_gds_layers", return_value={(189, 4)}
+        ), patch(
             "builtins.open",
             unittest.mock.mock_open(read_data='project:\n  top_module: "tt_um_tnt_mosbius"'),
         ):
             self.assertTrue(check_gds_lef_artifacts())
+
+    def test_check_gds_lef_artifacts_missing_prboundary(self):
+        with patch("os.path.exists", return_value=True), patch(
+            "os.path.getsize", return_value=1024
+        ), patch(
+            "py.verify_cicd_config.parse_gds_layers", return_value={(235, 4)}
+        ), patch(
+            "builtins.open",
+            unittest.mock.mock_open(read_data='project:\n  top_module: "tt_um_tnt_mosbius"'),
+        ):
+            self.assertFalse(check_gds_lef_artifacts())
 
     def test_check_gds_lef_artifacts_missing(self):
         with patch("os.path.exists", return_value=False):

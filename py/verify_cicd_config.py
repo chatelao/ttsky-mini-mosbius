@@ -155,6 +155,33 @@ def check_info_yaml(repo_root="."):
     return True
 
 
+import struct
+
+
+def parse_gds_layers(gds_filepath):
+    layers = set()
+    with open(gds_filepath, "rb") as f:
+        curr_layer = None
+        while True:
+            header = f.read(4)
+            if len(header) < 4:
+                break
+            length, rectype = struct.unpack(">HH", header)
+            if length < 4:
+                break
+            data = f.read(length - 4)
+            rec_id = rectype >> 8
+            if rec_id == 0x0D:  # LAYER
+                if len(data) >= 2:
+                    curr_layer = struct.unpack(">h", data[:2])[0]
+            elif rec_id in (0x0E, 0x16, 0x30):  # DATATYPE / TEXTTYPE / BOXTYPE
+                if len(data) >= 2:
+                    curr_dt = struct.unpack(">h", data[:2])[0]
+                    if curr_layer is not None:
+                        layers.add((curr_layer, curr_dt))
+    return layers
+
+
 def check_gds_lef_artifacts(repo_root="."):
     info_path = os.path.join(repo_root, "info.yaml")
     top_module = "tt_um_tnt_mosbius"
@@ -173,6 +200,15 @@ def check_gds_lef_artifacts(repo_root="."):
         errors.append(f"Missing GDS artifact file: {gds_file}")
     elif os.path.getsize(gds_file) == 0:
         errors.append(f"GDS artifact file is empty: {gds_file}")
+    else:
+        try:
+            layers = parse_gds_layers(gds_file)
+            if (189, 4) not in layers:
+                errors.append(f"GDS file {gds_file} missing IHP SG13G2 prBoundary layer (189, 4)")
+            if (235, 4) in layers:
+                errors.append(f"GDS file {gds_file} contains legacy SkyWater prBoundary layer (235, 4)")
+        except Exception as e:
+            errors.append(f"Failed to parse GDS file {gds_file}: {e}")
 
     if not os.path.exists(lef_file):
         errors.append(f"Missing LEF artifact file: {lef_file}")
