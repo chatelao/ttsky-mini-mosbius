@@ -53,7 +53,7 @@ The top priority is establishing and maintaining a functioning **CI/CD pipeline 
 
 > **Objective:** Re-target digital shift register control infrastructure (`ctrl_top.v`, `ctrl_block.v`) to IHP standard cells.
 
-- [ ] **3.1 Update Verilog Standard Cell Definitions**
+- [x] **3.1 Update Verilog Standard Cell Definitions**
   - Update `src/stdcells.v` to declare `sg13g2_stdcell_*` primitives (`sg13g2_and2_1`, `sg13g2_inv_1`, `sg13g2_buf_2`, `sg13g2_dfrpc_1`, `sg13g2_tiel_1`, etc.).
 - [ ] **3.2 Synthesis Toolchain Adaptation (`src/Makefile`)**
   - Update Yosys synthesis scripts in `src/Makefile` to target `sg13g2_stdcell.v` target library.

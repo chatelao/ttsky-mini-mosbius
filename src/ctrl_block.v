@@ -38,13 +38,11 @@ module ctrl_block #(
 
 		if (DELAY_PRE)
 		begin
-			sky130_fd_sc_hd__clkdlybuf4s50_2 in_dly (
-				.X    (shift[0]),
-				.A    (data_in),
-				.VPWR (VDPWR),
-				.VGND (VGND),
-				.VPB  (VDPWR),
-				.VNB  (VGND)
+			sg13g2_dlybuf_1 in_dly (
+				.X     (shift[0]),
+				.A     (data_in),
+				.VDPWR (VDPWR),
+				.VGND  (VGND)
 			);
 		end
 		else
@@ -55,38 +53,32 @@ module ctrl_block #(
 	endgenerate
 
 	// Local buffer for clk / rst_n / enable
-	sky130_fd_sc_hd__clkbuf_4 buf_I[2:0] (
-		.X    ({ l_clk, l_rst_n, l_enable }),
-		.A    ({   clk,   rst_n,   enable }),
-		.VPWR (VDPWR),
-		.VGND (VGND),
-		.VPB  (VDPWR),
-		.VNB  (VGND)
+	sg13g2_buf_4 buf_I[2:0] (
+		.X     ({ l_clk, l_rst_n, l_enable }),
+		.A     ({   clk,   rst_n,   enable }),
+		.VDPWR (VDPWR),
+		.VGND  (VGND)
 	);
 
 
 	// Shift register
 	// --------------
 
-	sky130_fd_sc_hd__dfrtp_1 ff_I[N-1:0] (
+	sg13g2_dfrpc_1 ff_I[N-1:0] (
 		.Q       (shift[N:1]),
 		.CLK     (l_clk),
 		.RESET_B (l_rst_n),
 		.D       (shift[N-1:0]),
-		.VPWR    (VDPWR),
-		.VGND    (VGND),
-		.VPB     (VDPWR),
-		.VNB     (VGND)
+		.VDPWR   (VDPWR),
+		.VGND    (VGND)
 	);
 
-	sky130_fd_sc_hd__and2_2 mask_I[N-1:0] (
-		.X    (ctrl_out),
-		.A    (shift[N:1]),
-		.B    (l_enable),
-		.VPWR (VDPWR),
-		.VGND (VGND),
-		.VPB  (VDPWR),
-		.VNB  (VGND)
+	sg13g2_and2_2 mask_I[N-1:0] (
+		.X     (ctrl_out),
+		.A     (shift[N:1]),
+		.B     (l_enable),
+		.VDPWR (VDPWR),
+		.VGND  (VGND)
 	);
 
 
@@ -97,13 +89,11 @@ module ctrl_block #(
 
 		if (DELAY_POST)
 		begin
-			sky130_fd_sc_hd__clkdlybuf4s50_2 out_dly (
-				.X    (data_out),
-				.A    (shift[N]),
-				.VPWR (VDPWR),
-				.VGND (VGND),
-				.VPB  (VDPWR),
-				.VNB  (VGND)
+			sg13g2_dlybuf_1 out_dly (
+				.X     (data_out),
+				.A     (shift[N]),
+				.VDPWR (VDPWR),
+				.VGND  (VGND)
 			);
 		end
 		else
