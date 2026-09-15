@@ -325,6 +325,18 @@ def check_def_template_config(repo_root="."):
     if not re.search(r"uses_vapwr:\s*true", content):
         errors.append("Expected 'uses_vapwr: true' for 3.3V analog power domain in info.yaml")
 
+    def_file = os.path.join(repo_root, "tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def")
+    if not os.path.exists(def_file):
+        errors.append(f"Missing template DEF file: {def_file}")
+
+    tt_tech_symlink = os.path.join(repo_root, "tt/tech")
+    if not os.path.exists(tt_tech_symlink):
+        errors.append(f"Missing symlink for precheck path resolution: {tt_tech_symlink}")
+
+    tt_precheck_tech_symlink = os.path.join(repo_root, "tt/precheck/tech")
+    if not os.path.exists(tt_precheck_tech_symlink):
+        errors.append(f"Missing symlink for precheck path resolution: {tt_precheck_tech_symlink}")
+
     if not os.path.exists(docs_info_path):
         errors.append(f"Missing documentation file: {docs_info_path}")
     else:
