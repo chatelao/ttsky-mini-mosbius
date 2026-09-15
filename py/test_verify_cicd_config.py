@@ -19,13 +19,16 @@ from py.verify_cicd_config import (
     check_lef_pin_and_boundary_config,
     check_pages_api_config,
     check_pages_deployment_and_oidc_config,
+    check_pdk_drc_rule_compatibility,
     check_precheck_def_and_pin_config,
     check_precheck_execution_and_reporting_config,
     check_stdcell_declarations,
     check_top_module_step_config,
+    check_upstream_pdk_action_tags,
     check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
     check_workflow_execution_summary_config,
+    check_workflow_schema_integrity,
     check_workflow_trigger_events_config,
 )
 
@@ -973,6 +976,126 @@ steps:
             "builtins.open", side_effect=mock_open_file_invalid
         ):
             self.assertFalse(check_stdcell_declarations())
+
+    def test_check_upstream_pdk_action_tags_valid(self):
+        valid_gds = """
+uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b
+uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
+uses: TinyTapeout/tt-gds-action/viewer@ttihp26b
+"""
+        valid_docs = """
+uses: TinyTapeout/tt-gds-action/docs@ttihp26b
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_upstream_pdk_action_tags())
+
+    def test_check_upstream_pdk_action_tags_invalid(self):
+        invalid_gds = """
+uses: TinyTapeout/tt-gds-action/custom_gds@ttsky26c
+"""
+        invalid_docs = """
+uses: TinyTapeout/tt-gds-action/docs@ttihp26b
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_upstream_pdk_action_tags())
+
+    def test_check_workflow_schema_integrity_valid(self):
+        valid_gds = """
+jobs:
+  check:
+  gds:
+  precheck:
+    needs: gds
+  viewer:
+    needs: gds
+    permissions:
+      pages: write
+      id-token: write
+"""
+        valid_docs = """
+jobs:
+  docs:
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_workflow_schema_integrity())
+
+    def test_check_workflow_schema_integrity_invalid(self):
+        invalid_gds = """
+jobs:
+  gds:
+"""
+        invalid_docs = """
+jobs:
+  docs:
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_workflow_schema_integrity())
+
+    def test_check_pdk_drc_rule_compatibility_valid(self):
+        valid_drc = """
+drc euclidean on
+drc style "drc(full)"
+"""
+        valid_info = """
+uses_vapwr: true
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "magic_drc.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=valid_drc)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_info)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_pdk_drc_rule_compatibility())
+
+    def test_check_pdk_drc_rule_compatibility_invalid(self):
+        invalid_drc = "# missing DRC options"
+        invalid_info = "# missing power domain"
+
+        def mock_open_file(filepath, mode="r"):
+            if "magic_drc.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_drc)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_info)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_pdk_drc_rule_compatibility())
 
 
 if __name__ == "__main__":
