@@ -815,6 +815,103 @@ def check_stdcell_declarations(repo_root="."):
     return True
 
 
+def check_upstream_pdk_action_tags(repo_root="."):
+    workflows_dir = os.path.join(repo_root, ".github/workflows")
+    errors = []
+
+    if not os.path.exists(workflows_dir):
+        errors.append(f"Missing workflows directory: {workflows_dir}")
+    else:
+        for fname in sorted(os.listdir(workflows_dir)):
+            if fname.endswith(".yaml") or fname.endswith(".yml"):
+                filepath = os.path.join(workflows_dir, fname)
+                with open(filepath, "r") as f:
+                    content = f.read()
+
+                action_matches = re.findall(r"TinyTapeout/tt-gds-action/([a-zA-Z0-9_-]+)@([a-zA-Z0-9_-]+)", content)
+                for action_name, tag in action_matches:
+                    if tag != "ttihp26b":
+                        errors.append(
+                            f"Action reference TinyTapeout/tt-gds-action/{action_name}@{tag} in {fname} does not use target tag @ttihp26b"
+                        )
+
+                if "ttsky26c" in content:
+                    errors.append(f"Found legacy tag 'ttsky26c' in {fname}")
+
+    if errors:
+        print("FAILED upstream PDK action tags check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED upstream PDK action tags check")
+    return True
+
+
+def check_verification_job_config(repo_root="."):
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    errors = []
+
+    if not os.path.exists(gds_path):
+        errors.append(f"Missing workflow file: {gds_path}")
+    else:
+        with open(gds_path, "r") as f:
+            content = f.read()
+
+        if "check:" not in content:
+            errors.append("Missing 'check' verification job in gds.yaml")
+        else:
+            check_match = re.search(r"check:\s*\n.*?(?=\n  [a-zA-Z0-9_-]+:|$)", content, re.DOTALL)
+            if check_match:
+                check_block = check_match.group(0)
+                if "runs-on: ubuntu-24.04" not in check_block:
+                    errors.append("Missing 'runs-on: ubuntu-24.04' in check job in gds.yaml")
+                if "actions/checkout@v4" not in check_block:
+                    errors.append("Missing 'actions/checkout@v4' step in check job in gds.yaml")
+                if "submodules: recursive" not in check_block:
+                    errors.append("Missing 'submodules: recursive' setting in check job in gds.yaml")
+                if "make check" not in check_block:
+                    errors.append("Missing 'make check' execution step in check job in gds.yaml")
+            else:
+                errors.append("Could not parse 'check' job block in gds.yaml")
+
+    if errors:
+        print("FAILED verification job config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED verification job config check")
+    return True
+
+
+def check_pdk_drc_rule_compatibility(repo_root="."):
+    drc_script_path = os.path.join(repo_root, "tcl/magic_drc.tcl")
+    errors = []
+
+    if not os.path.exists(drc_script_path):
+        errors.append(f"Missing DRC script file: {drc_script_path}")
+    else:
+        with open(drc_script_path, "r") as f:
+            content = f.read()
+
+        if "drc euclidean on" not in content:
+            errors.append("Missing 'drc euclidean on' setting in tcl/magic_drc.tcl")
+        if 'drc style "drc(full)"' not in content and "drc style drc(full)" not in content:
+            errors.append("Missing 'drc style \"drc(full)\"' setting in tcl/magic_drc.tcl")
+        if "drc check" not in content:
+            errors.append("Missing 'drc check' command in tcl/magic_drc.tcl")
+
+    if errors:
+        print("FAILED PDK DRC rule compatibility check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED PDK DRC rule compatibility check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -841,6 +938,9 @@ def main():
     wf_trigger_ok = check_workflow_trigger_events_config(repo_root)
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
+    upstream_tags_ok = check_upstream_pdk_action_tags(repo_root)
+    verification_job_ok = check_verification_job_config(repo_root)
+    pdk_drc_rules_ok = check_pdk_drc_rule_compatibility(repo_root)
 
     if (
         gds_ok
@@ -863,6 +963,9 @@ def main():
         and wf_trigger_ok
         and checkout_submodule_ok
         and stdcell_decl_ok
+        and upstream_tags_ok
+        and verification_job_ok
+        and pdk_drc_rules_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
