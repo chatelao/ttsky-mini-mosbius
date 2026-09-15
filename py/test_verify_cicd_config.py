@@ -1,3 +1,4 @@
+import io
 import os
 import sys
 import tempfile
@@ -22,6 +23,7 @@ from py.verify_cicd_config import (
     check_precheck_def_and_pin_config,
     check_precheck_execution_and_reporting_config,
     check_stdcell_declarations,
+    check_synthesis_makefile_config,
     check_top_module_step_config,
     check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
@@ -943,6 +945,33 @@ steps:
             "builtins.open", side_effect=mock_open_file
         ):
             self.assertFalse(check_stdcell_declarations())
+
+    def test_check_synthesis_makefile_config_valid(self):
+        valid_makefile = (
+            "ELABORATE_TGT=ctrl_top\n"
+            "%.synth.v: %.v\n"
+            "\tyosys -p \"read_verilog $*.v\"\n"
+            "ctrl_top.v: ctrl_asw.decap.v\n"
+        )
+        def mock_open_file(filepath, mode="r"):
+            if "src/Makefile" in filepath:
+                return io.StringIO(valid_makefile)
+            raise FileNotFoundError(filepath)
+
+        with unittest.mock.patch("os.path.exists", return_value=True):
+            with unittest.mock.patch("builtins.open", side_effect=mock_open_file):
+                self.assertTrue(check_synthesis_makefile_config("."))
+
+    def test_check_synthesis_makefile_config_invalid(self):
+        invalid_makefile = "all: clean\nclean:\n\trm -f *.o\n"
+        def mock_open_file(filepath, mode="r"):
+            if "src/Makefile" in filepath:
+                return io.StringIO(invalid_makefile)
+            raise FileNotFoundError(filepath)
+
+        with unittest.mock.patch("os.path.exists", return_value=True):
+            with unittest.mock.patch("builtins.open", side_effect=mock_open_file):
+                self.assertFalse(check_synthesis_makefile_config("."))
 
     def test_check_common_py_stdcells(self):
         valid_common = "TAP = Cell('sg13g2_tap_1', 1)"
