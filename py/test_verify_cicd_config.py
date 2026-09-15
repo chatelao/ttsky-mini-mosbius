@@ -7,6 +7,9 @@ from unittest.mock import patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from py.verify_cicd_config import (
+    check_pdk_drc_rule_compatibility,
+    check_precheck_report_artifacts,
+    check_upstream_pdk_action_tags,
     check_def_template_config,
     check_docs_build_and_asset_config,
     check_docs_workflow,
@@ -973,6 +976,93 @@ steps:
             "builtins.open", side_effect=mock_open_file_invalid
         ):
             self.assertFalse(check_stdcell_declarations())
+
+    def test_check_upstream_pdk_action_tags_valid(self):
+        valid_gds = "uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b"
+        valid_docs = "uses: TinyTapeout/tt-gds-action/docs@ttihp26b"
+
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_upstream_pdk_action_tags())
+
+    def test_check_upstream_pdk_action_tags_invalid(self):
+        invalid_gds = "uses: TinyTapeout/tt-gds-action/custom_gds@main"
+        valid_docs = "uses: TinyTapeout/tt-gds-action/docs@ttihp26b"
+
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_upstream_pdk_action_tags())
+
+    def test_check_precheck_report_artifacts_valid(self):
+        valid_gds = """
+jobs:
+  precheck:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_gds)
+        ):
+            self.assertTrue(check_precheck_report_artifacts())
+
+    def test_check_precheck_report_artifacts_invalid(self):
+        invalid_gds = """
+jobs:
+  precheck:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/precheck@ttsky26c
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_gds)
+        ):
+            self.assertFalse(check_precheck_report_artifacts())
+
+    def test_check_pdk_drc_rule_compatibility_valid(self):
+        valid_drc = """
+drc euclidean on
+drc style "drc(full)"
+"""
+        valid_gds = "pdk: ihp-sg13g2"
+
+        def mock_open_file(filepath, mode="r"):
+            if "magic_drc.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=valid_drc)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_gds)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_pdk_drc_rule_compatibility())
+
+    def test_check_pdk_drc_rule_compatibility_invalid(self):
+        invalid_drc = "# missing drc style"
+        valid_gds = "pdk: ihp-sg13g2"
+
+        def mock_open_file(filepath, mode="r"):
+            if "magic_drc.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_drc)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_gds)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_pdk_drc_rule_compatibility())
 
 
 if __name__ == "__main__":
