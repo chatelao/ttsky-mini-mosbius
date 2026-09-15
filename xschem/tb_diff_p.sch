@@ -95,7 +95,7 @@ N -660 -290 -640 -290 {
 lab=GND}
 N -660 -270 -640 -270 {
 lab=GND}
-C {sky130_fd_pr/corner.sym} 660 -510 0 0 {name=CORNER only_toplevel=true corner=tt}
+C {sg13g2_pr/corner.sym} 660 -510 0 0 {name=CORNER only_toplevel=true corner=tt}
 C {devices/code_shown.sym} 660 -320 0 0 {name=NGSPICE only_toplevel=true value=
 "
 *****************************************

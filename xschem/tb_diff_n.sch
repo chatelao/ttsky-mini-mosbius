@@ -98,7 +98,7 @@ lab=VINDIFF}
 N -240 -50 -200 -50 {
 lab=VINDIFF}
 C {diff_n.sym} -10 -250 0 0 {name=x1}
-C {sky130_fd_pr/corner.sym} 660 -510 0 0 {name=CORNER only_toplevel=true corner=tt}
+C {sg13g2_pr/corner.sym} 660 -510 0 0 {name=CORNER only_toplevel=true corner=tt}
 C {devices/code_shown.sym} 660 -320 0 0 {name=NGSPICE only_toplevel=true value=
 "
 *****************************************

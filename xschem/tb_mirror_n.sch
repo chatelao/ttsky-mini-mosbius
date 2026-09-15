@@ -85,7 +85,7 @@ C {devices/lab_pin.sym} -160 380 3 1 {name=p12 sig_type=std_logic lab=ictrl_2[1]
 C {devices/lab_pin.sym} -60 380 3 1 {name=p13 sig_type=std_logic lab=ictrl_2[0]}
 C {devices/lab_pin.sym} 80 -160 0 0 {name=p14 sig_type=std_logic lab=ictrl_1[1:0]}
 C {devices/lab_pin.sym} 80 -140 0 0 {name=p15 sig_type=std_logic lab=ictrl_2[1:0]}
-C {sky130_fd_pr/corner.sym} 890 -480 0 0 {name=CORNER only_toplevel=true corner=tt}
+C {sg13g2_pr/corner.sym} 890 -480 0 0 {name=CORNER only_toplevel=true corner=tt}
 C {devices/code_shown.sym} 890 -300 0 0 {name=NGSPICE only_toplevel=true value=
 "
 *****************************************

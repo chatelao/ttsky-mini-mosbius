@@ -125,7 +125,7 @@ C {devices/lab_pin.sym} 720 360 1 0 {name=p14 sig_type=std_logic lab=Vd}
 C {devices/lab_pin.sym} 760 490 0 1 {name=p15 sig_type=std_logic lab=Vd_1x}
 C {devices/lab_pin.sym} 760 650 0 1 {name=p16 sig_type=std_logic lab=Vd_2x}
 C {devices/lab_pin.sym} 760 810 0 1 {name=p17 sig_type=std_logic lab=Vs}
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 220 -70 0 0 {name=M1
+C {sg13g2_pr/pfet33.sym} 220 -70 0 0 {name=M1
 L=0.5
 W=30
 nf=4
@@ -136,10 +136,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 440 -70 0 0 {name=M2
+C {sg13g2_pr/pfet33.sym} 440 -70 0 0 {name=M2
 L=0.5
 W=30
 nf=4
@@ -150,10 +150,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 660 -70 0 0 {name=M3
+C {sg13g2_pr/pfet33.sym} 660 -70 0 0 {name=M3
 L=0.5
 W=60
 nf=8
@@ -164,7 +164,7 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
 C {devices/lab_pin.sym} 460 80 1 1 {name=p18 sig_type=std_logic lab=Vd_1x}

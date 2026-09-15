@@ -104,7 +104,7 @@ N 500 -80 580 -80 {
 lab=#net3}
 N 500 20 580 20 {
 lab=Vs}
-C {sky130_fd_pr/nfet_g5v0d10v5.sym} 80 -80 0 0 {name=M1
+C {sg13g2_pr/nfet33.sym} 80 -80 0 0 {name=M1
 L=0.5
 W=10
 nf=2
@@ -115,10 +115,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=nfet_g5v0d10v5
+model=nfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/nfet_g5v0d10v5.sym} 280 -80 0 0 {name=M2
+C {sg13g2_pr/nfet33.sym} 280 -80 0 0 {name=M2
 L=0.5
 W=10
 nf=2
@@ -129,10 +129,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=nfet_g5v0d10v5
+model=nfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/nfet_g5v0d10v5.sym} 480 -80 0 0 {name=M3
+C {sg13g2_pr/nfet33.sym} 480 -80 0 0 {name=M3
 L=0.5
 W=20
 nf=4
@@ -143,7 +143,7 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=nfet_g5v0d10v5
+model=nfet33
 spiceprefix=X
 }
 C {tt_asw_3v3.sym} 290 390 0 0 {name=x1}

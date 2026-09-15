@@ -82,7 +82,7 @@ lab=#net3}
 C {devices/iopin.sym} -280 -120 0 1 {name=p1 lab=pin sim_pinnumber=2}
 C {devices/iopin.sym} 380 -120 0 0 {name=p2 lab=mod sim_pinnumber=3}
 C {devices/iopin.sym} -270 200 0 1 {name=p3 lab=VGND sim_pinnumber=1}
-C {sky130_fd_pr/nfet3_g5v0d10v5.sym} 210 -20 3 0 {name=M1
+C {sg13g2_pr/nfet33.sym} 210 -20 3 0 {name=M1
 W=60
 L=0.5
 body=VGND
@@ -94,10 +94,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=nfet_g5v0d10v5
+model=nfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/pfet3_g5v0d10v5.sym} 210 -220 1 0 {name=M2
+C {sg13g2_pr/pfet33.sym} 210 -220 1 0 {name=M2
 W=180
 L=0.5
 body=VAPWR
@@ -109,7 +109,7 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
 C {devices/capa.sym} -240 -70 0 0 {name=C1
@@ -155,7 +155,7 @@ value=100f}
 C {vpwr_loc.sym} 210 100 0 0 {name=l9 lab=VAPWR}
 C {vgnd_loc.sym} 210 380 0 0 {name=l10 lab=VGND
 value=100f}
-C {sky130_fd_pr/nfet3_g5v0d10v5.sym} 210 340 3 0 {name=M3
+C {sg13g2_pr/nfet33.sym} 210 340 3 0 {name=M3
 W=60
 L=0.5
 body=VGND
@@ -167,10 +167,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=nfet_g5v0d10v5
+model=nfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/pfet3_g5v0d10v5.sym} 210 140 1 0 {name=M4
+C {sg13g2_pr/pfet33.sym} 210 140 1 0 {name=M4
 W=180
 L=0.5
 body=VAPWR
@@ -182,7 +182,7 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
 C {vgnd_loc.sym} 300 240 3 1 {name=l11 lab=VGND}

@@ -118,7 +118,7 @@ m=1
 value=1T
 footprint=1206
 device=inductor}
-C {sky130_fd_pr/corner.sym} 790 -430 0 0 {name=CORNER only_toplevel=true corner=tt}
+C {sg13g2_pr/corner.sym} 790 -430 0 0 {name=CORNER only_toplevel=true corner=tt}
 C {devices/code_shown.sym} 790 -240 0 0 {name=NGSPICE only_toplevel=true value=
 "
 *****************************************

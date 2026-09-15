@@ -138,7 +138,7 @@ C {devices/lab_pin.sym} -300 -280 0 0 {name=p1 sig_type=std_logic lab=VAPWR}
 C {devices/lab_pin.sym} -220 -260 0 0 {name=p2 sig_type=std_logic lab=VDPWR}
 C {devices/lab_pin.sym} 150 -150 0 0 {name=p14 sig_type=std_logic lab=ctrl_source}
 C {devices/lab_pin.sym} 150 -130 0 0 {name=p15 sig_type=std_logic lab=ctrl_width[1:0]}
-C {sky130_fd_pr/corner.sym} 690 -130 0 0 {name=CORNER only_toplevel=true corner=tt}
+C {sg13g2_pr/corner.sym} 690 -130 0 0 {name=CORNER only_toplevel=true corner=tt}
 C {devices/vsource.sym} -340 490 0 0 {name=VD value=0}
 C {devices/gnd.sym} -340 520 0 0 {name=l4 lab=GND}
 C {devices/vsource.sym} -220 490 2 0 {name=VG value=0}
@@ -195,7 +195,7 @@ C {devices/ammeter.sym} 60 910 0 0 {name=Vmeas_3x}
 C {pmos_prog.sym} 280 -210 0 0 {name=x1}
 C {devices/lab_pin.sym} -400 700 0 0 {name=p12 sig_type=std_logic lab=VAPWR}
 C {devices/lab_pin.sym} -480 810 2 1 {name=p16 sig_type=std_logic lab=VG}
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} -420 810 0 0 {name=M1
+C {sg13g2_pr/pfet33.sym} -420 810 0 0 {name=M1
 L=0.5
 W=30
 nf=4
@@ -206,11 +206,11 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
 C {devices/lab_pin.sym} -240 810 2 1 {name=p18 sig_type=std_logic lab=VG}
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} -180 810 0 0 {name=M3
+C {sg13g2_pr/pfet33.sym} -180 810 0 0 {name=M3
 L=0.5
 W=60
 nf=8
@@ -221,11 +221,11 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
 C {devices/lab_pin.sym} -20 810 2 1 {name=p20 sig_type=std_logic lab=VG}
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 40 810 0 0 {name=M6
+C {sg13g2_pr/pfet33.sym} 40 810 0 0 {name=M6
 L=0.5
 W=90
 nf=12
@@ -236,11 +236,11 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
 C {devices/lab_pin.sym} 220 810 2 1 {name=p22 sig_type=std_logic lab=VG}
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 280 810 0 0 {name=M8
+C {sg13g2_pr/pfet33.sym} 280 810 0 0 {name=M8
 L=0.5
 W=120
 nf=16
@@ -251,7 +251,7 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
 C {devices/lab_pin.sym} -400 1000 1 1 {name=p23 sig_type=std_logic lab=VD}

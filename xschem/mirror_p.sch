@@ -214,7 +214,7 @@ C {devices/lab_pin.sym} 1740 600 0 1 {name=p17 sig_type=std_logic lab=i2_2x}
 C {devices/lab_pin.sym} 910 790 3 0 {name=p19 sig_type=std_logic lab=GND}
 C {devices/lab_pin.sym} 1680 790 3 0 {name=p20 sig_type=std_logic lab=GND}
 C {devices/iopin.sym} -100 660 0 1 {name=p47 lab=GND}
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 500 -260 0 0 {name=M3
+C {sg13g2_pr/pfet33.sym} 500 -260 0 0 {name=M3
 L=1
 W=30
 nf=4
@@ -225,10 +225,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 20 -260 0 1 {name=M4
+C {sg13g2_pr/pfet33.sym} 20 -260 0 1 {name=M4
 L=1
 W=30
 nf=4
@@ -239,10 +239,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 680 -260 0 0 {name=M5
+C {sg13g2_pr/pfet33.sym} 680 -260 0 0 {name=M5
 L=1
 W=30
 nf=4
@@ -253,10 +253,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 860 -260 0 0 {name=M7
+C {sg13g2_pr/pfet33.sym} 860 -260 0 0 {name=M7
 L=1
 W=60
 nf=8
@@ -267,11 +267,11 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
 C {devices/lab_pin.sym} 460 -230 0 0 {name=p23 sig_type=std_logic lab=ibias}
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 1260 -260 0 0 {name=M1
+C {sg13g2_pr/pfet33.sym} 1260 -260 0 0 {name=M1
 L=1
 W=30
 nf=4
@@ -282,10 +282,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 1440 -260 0 0 {name=M2
+C {sg13g2_pr/pfet33.sym} 1440 -260 0 0 {name=M2
 L=1
 W=30
 nf=4
@@ -296,10 +296,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 1620 -260 0 0 {name=M6
+C {sg13g2_pr/pfet33.sym} 1620 -260 0 0 {name=M6
 L=1
 W=60
 nf=8
@@ -310,7 +310,7 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
 C {devices/lab_pin.sym} 1220 -230 0 0 {name=p41 sig_type=std_logic lab=ibias}
