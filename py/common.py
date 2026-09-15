@@ -9,8 +9,8 @@
 
 
 	# Cell sites
-ROW_PITCH = 2720
-COL_PITCH =  460
+ROW_PITCH = 3780
+COL_PITCH =  480
 
 	# Horizontal tracks
 TRACK_H_PITCH = 340
@@ -339,10 +339,8 @@ class Grid:
 				# Generate instance
 				lines.extend([
 					f"\t{ci_idx[0].cell.name} decap_{col}_{row}_I (",
-					"\t\t.VPWR (VDPWR),",
-					"\t\t.VGND (VGND),",
-					"\t\t.VPB  (VDPWR),",
-					"\t\t.VNB  (VGND)",
+					"\t\t.VDPWR (VDPWR),",
+					"\t\t.VGND (VGND)",
 					"\t);",
 				])
 
