@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from py.verify_cicd_config import (
     check_def_template_config,
+    check_upstream_pdk_action_tags,
     check_docs_build_and_asset_config,
     check_docs_workflow,
     check_eda_toolchain_and_container_config,
@@ -917,6 +918,48 @@ steps:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_wf)
         ):
             self.assertFalse(check_git_submodule_and_checkout_config())
+
+    def test_check_upstream_pdk_action_tags_valid(self):
+        valid_gds = """
+steps:
+  - uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b
+  - uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
+  - uses: TinyTapeout/tt-gds-action/viewer@ttihp26b
+"""
+        valid_docs = """
+steps:
+  - uses: TinyTapeout/tt-gds-action/docs@ttihp26b
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_upstream_pdk_action_tags())
+
+    def test_check_upstream_pdk_action_tags_invalid(self):
+        invalid_gds = """
+steps:
+  - uses: TinyTapeout/tt-gds-action/custom_gds@ttsky26c
+"""
+        valid_docs = """
+steps:
+  - uses: TinyTapeout/tt-gds-action/docs@ttihp26b
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_upstream_pdk_action_tags())
 
     def test_check_stdcell_declarations_valid(self):
         valid_stdcells = "module sg13g2_buf_2 (output wire X); endmodule"
