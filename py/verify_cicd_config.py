@@ -776,6 +776,36 @@ def check_git_submodule_and_checkout_config(repo_root="."):
     return True
 
 
+def check_synthesis_makefile_config(repo_root="."):
+    makefile_path = os.path.join(repo_root, "src/Makefile")
+    if not os.path.exists(makefile_path):
+        print(f"ERROR: {makefile_path} does not exist.")
+        return False
+
+    with open(makefile_path, "r") as f:
+        content = f.read()
+
+    errors = []
+
+    if "ctrl_top" not in content:
+        errors.append("Missing ctrl_top elaboration target in src/Makefile")
+
+    if "yosys" not in content:
+        errors.append("Missing yosys command in src/Makefile")
+
+    if "ctrl_asw.decap.v" not in content:
+        errors.append("Missing decap targets in src/Makefile")
+
+    if errors:
+        print(f"FAILED synthesis Makefile config check in {makefile_path}:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print(f"PASSED synthesis Makefile config check in {makefile_path}")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -841,6 +871,7 @@ def main():
     wf_trigger_ok = check_workflow_trigger_events_config(repo_root)
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
+    synthesis_makefile_ok = check_synthesis_makefile_config(repo_root)
 
     if (
         gds_ok
@@ -863,6 +894,7 @@ def main():
         and wf_trigger_ok
         and checkout_submodule_ok
         and stdcell_decl_ok
+        and synthesis_makefile_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
