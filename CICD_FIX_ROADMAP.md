@@ -273,7 +273,7 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
   - [ ] **4.1.1 Track Upstream Actions & PDK Toolchain Updates**
     - [x] **4.1.1.1** Verify all workflow action references in `.github/workflows/gds.yaml` (`custom_gds`, `precheck`, `viewer`) use `@ttihp26b`.
     - [x] **4.1.1.2** Verify workflow action references in `.github/workflows/docs.yaml` (`docs`) use `@ttihp26b`.
-    - [ ] **4.1.1.3** Monitor TinyTapeout upstream release channels for future PDK tag upgrades beyond `@ttihp26b`.
+    - [x] **4.1.1.3** Monitor TinyTapeout upstream release channels for future PDK tag upgrades beyond `@ttihp26b`.
   - [ ] **4.1.2 Maintain Static Verification Assertions & Workflow Schema Integrity**
     - [x] **4.1.2.1** Validate static verification rules covering action tags (`@ttihp26b`), PDK name (`ihp-sg13g2`), runner environment (`ubuntu-24.04`), and OIDC permissions in `py/verify_cicd_config.py`.
     - [x] **4.1.2.2** Ensure comprehensive unit test coverage in `py/test_verify_cicd_config.py` for all static verification functions.
