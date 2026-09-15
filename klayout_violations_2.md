@@ -32,7 +32,7 @@ The distribution of the **20,059 KLayout DRC violations** across DRC rule checks
 | **DRC-M3-W** | Metal3 | `50 / 0` | Minimum Metal3 Width | 0.21 µm | **2,150** | 10.72% |
 | **DRC-M3-S** | Metal3 | `50 / 0` | Minimum Metal3 Spacing | 0.21 µm | **3,180** | 15.85% |
 | **DRC-M4-W** | Metal4 | `67 / 0` | Minimum Metal4 Width | 0.21 µm | **1,240** | 6.18% |
-| **DRC-M4-S** | Metal4 | `67 / 0` | Minimum Metal4 Spacing | 0.21 µm | **1,850** | 9.22% |
+| **DRC-M4-S** | Metal4 | `67 / 0` | Minimum Metal4 Spacing | 0.1850 | **1,850** | 9.22% |
 | **DRC-M5-W** | Metal5 | `125 / 0` | Minimum Metal5 Width | 0.50 µm | **1,120** | 5.58% |
 | **DRC-M5-S** | Metal5 | `125 / 0` | Minimum Metal5 Spacing | 0.50 µm | **980** | 4.89% |
 | **DRC-POLY** | GatPoly | `10 / 0` | Poly Width / Gate Extension | 0.13 µm | **610** | 3.04% |
@@ -63,7 +63,20 @@ Distribution of the 20,059 violations across the top module sub-circuit instance
 
 ---
 
-## 4. Proposed Fix & Remediation Strategy
+## 4. Root Cause: Why SkyWater 130 Components Persist in Sub-Blocks
+
+A common question during IHP SG13G2 porting is why SkyWater 130 components (such as `sky130_fd_pr__pfet_g5v0d10v5_L2ZDNS`) are still present in sub-block layout files (`mag/dev_pmos_cm.mag`, `mag/dev_pmos_dual.mag`, etc.):
+
+1. **Legacy Layout Macro Heritage:**
+   The design originated in SkyWater 130nm (`sky130A`). Custom analog layout blocks (like current mirrors and differential pairs) instantiated pre-drawn `sky130_fd_pr` transistor cells.
+2. **Post-Processing Stream Remapping Strategy:**
+   Rather than manually re-layouting every transistor cell in Magic, the porting strategy relies on `py/fix_gds.py` to post-process the compiled GDSII stream. This translates legacy layer/datatype tuples (`68/20`, `69/20`, `235/4`) into official IHP SG13G2 layer definitions (Metal1 `8/0`, Metal2 `30/0`, prBoundary `189/4`).
+3. **Full Native PDK Migration Path:**
+   To completely eradicate `sky130` cell names from source `.mag` files in the future, the sub-block layouts must be re-instantiated using native IHP primitives (`sg13g2_pr__pfet33` / `sg13g2_pr__nfet33`) and re-routed on the IHP standard cell grid (3.78 µm × 0.48 µm).
+
+---
+
+## 5. Proposed Fix & Remediation Strategy
 
 To eliminate all 20,059 DRC violations and ensure precheck compliance, the following multi-stage remediation methodology is proposed:
 
