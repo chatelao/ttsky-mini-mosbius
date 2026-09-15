@@ -273,11 +273,19 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
   - [ ] **4.1.1 Track Upstream Actions & PDK Toolchain Updates**
     - [x] **4.1.1.1** Verify all workflow action references in `.github/workflows/gds.yaml` (`custom_gds`, `precheck`, `viewer`) use `@ttihp26b`.
     - [x] **4.1.1.2** Verify workflow action references in `.github/workflows/docs.yaml` (`docs`) use `@ttihp26b`.
-    - [ ] **4.1.1.3** Monitor TinyTapeout upstream release channels for future PDK tag upgrades beyond `@ttihp26b`.
+    - [ ] **4.1.1.3 Monitor Upstream Action Tag Upgrades**
+      - [ ] **4.1.1.3.1** Subscribe to TinyTapeout `tt-gds-action` release announcements for SG13G2 tag releases beyond `@ttihp26b`.
+      - [ ] **4.1.1.3.2** Audit action release notes for breaking changes in container environment, PDK dependencies, or parameter requirements.
+      - [ ] **4.1.1.3.3** Create a dedicated feature branch to bump action tags in `.github/workflows/gds.yaml` and `.github/workflows/docs.yaml`.
+      - [ ] **4.1.1.3.4** Update expected tag constants in `py/verify_cicd_config.py` and unit test assertions in `py/test_verify_cicd_config.py`.
   - [ ] **4.1.2 Maintain Static Verification Assertions & Workflow Schema Integrity**
     - [x] **4.1.2.1** Validate static verification rules covering action tags (`@ttihp26b`), PDK name (`ihp-sg13g2`), runner environment (`ubuntu-24.04`), and OIDC permissions in `py/verify_cicd_config.py`.
     - [x] **4.1.2.2** Ensure comprehensive unit test coverage in `py/test_verify_cicd_config.py` for all static verification functions.
-    - [ ] **4.1.2.3** Update assertion functions in `py/verify_cicd_config.py` whenever workflow triggers, steps, or permissions are modified.
+    - [ ] **4.1.2.3 Update & Register Workflow Verification Assertions**
+      - [ ] **4.1.2.3.1** Identify new workflow steps, permissions, or environment variables introduced during maintenance.
+      - [ ] **4.1.2.3.2** Implement corresponding validation functions in `py/verify_cicd_config.py`.
+      - [ ] **4.1.2.3.3** Write positive and negative unit test cases in `py/test_verify_cicd_config.py` for newly added assertion functions.
+      - [ ] **4.1.2.3.4** Register new validation checks in `main()` of `py/verify_cicd_config.py` to ensure execution during `make check`.
   - [x] **4.1.3 Execute Automated Unit Tests in Continuous Integration**
     - [x] **4.1.3.1** Include `python3 -m unittest discover -s py` in `make check` rule within `src/Makefile`.
     - [x] **4.1.3.2** Verify `check` job in `.github/workflows/gds.yaml` runs `make check` on `push`, `pull_request`, and `workflow_dispatch` events.
@@ -287,12 +295,24 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
   - [ ] **4.2.1 Precheck Artifact & Template Validation**
     - [x] **4.2.1.1** Validate DEF template settings (`tiles: 3x2`, `uses_vapwr: true`, `language: Analog`) mapping to `tt_analog_3x2_3v3.def` via `check_def_template_config`.
     - [x] **4.2.1.2** Verify top module pin definitions (`ua[0]`-`ua[5]`, `ena`, `rst_n`, etc.) in `info.yaml` via `check_precheck_def_and_pin_config`.
-    - [ ] **4.2.1.3** Inspect generated precheck reports and log artifacts following future toolchain minor version upgrades.
+    - [ ] **4.2.1.3 Inspect Precheck Log Artifacts & Reports**
+      - [ ] **4.2.1.3.1** Download and extract `precheck_logs.zip` build artifacts from GitHub Actions CI run summary page.
+      - [ ] **4.2.1.3.2** Confirm analog pin positioning and grid alignment against `tt_analog_3x2_3v3.def` template.
+      - [ ] **4.2.1.3.3** Review precheck output logs for new warning categories introduced by toolchain minor version upgrades.
+      - [ ] **4.2.1.3.4** Archive precheck execution summary report in project build records for sign-off audit.
   - [ ] **4.2.2 DRC, Antenna & Geometry Verification Rule Check Compatibility**
     - [x] **4.2.2.1** Verify Magic DRC configuration in `tcl/magic_drc.tcl` sets `drc euclidean on` and `drc style "drc(full)"`.
     - [x] **4.2.2.2** Validate static KLayout DRC and geometry assertions via `check_klayout_drc_and_geometry_config`.
-    - [ ] **4.2.2.3** Re-verify KLayout DRC execution clean status when updating SG13G2 PDK technology files.
+    - [ ] **4.2.2.3 Re-verify DRC Clean Status on PDK Upgrades**
+      - [ ] **4.2.2.3.1** Synchronize local/CI PDK technology files with upstream IHP SG13G2 PDK releases.
+      - [ ] **4.2.2.3.2** Execute KLayout DRC command line check (`klayout -b -r sg13g2.lydrc -rd input=gds/tt_um_tnt_mosbius.gds`).
+      - [ ] **4.2.2.3.3** Perform cross-verification using Magic DRC script (`tcl/magic_drc.tcl`) to ensure zero false positives.
+      - [ ] **4.2.2.3.4** Confirm remote `precheck` job reports 0 DRC, antenna, and geometry violations.
   - [ ] **4.2.3 Documentation Rendering & Schema Compatibility**
     - [x] **4.2.3.1** Verify `docs/info.md` contains required `## How it works` and `## How to test` sections.
     - [x] **4.2.3.2** Validate required metadata fields (`author`, `description`, `pinout`, `top_module`, `tiles`, `analog_pins`) in `info.yaml` via `check_docs_build_and_asset_config`.
-    - [ ] **4.2.3.3** Maintain documentation rendering compatibility when adding new schema parameters to `info.yaml`.
+    - [ ] **4.2.3.3 Maintain Documentation Rendering Compatibility**
+      - [ ] **4.2.3.3.1** Validate `info.yaml` schema compliance when introducing new configuration parameters.
+      - [ ] **4.2.3.3.2** Run `check_docs_build_and_asset_config` to verify documentation toolchain compatibility.
+      - [ ] **4.2.3.3.3** Trigger local and remote `docs` workflow runs to confirm error-free HTML rendering and pinout table generation.
+      - [ ] **4.2.3.3.4** Inspect published GitHub Pages documentation site to verify accurate rendering of pinout tables and SVG diagrams.
