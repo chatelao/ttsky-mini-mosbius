@@ -137,7 +137,7 @@ C {devices/lab_pin.sym} -300 -280 0 0 {name=p1 sig_type=std_logic lab=VAPWR}
 C {devices/lab_pin.sym} -220 -260 0 0 {name=p2 sig_type=std_logic lab=VDPWR}
 C {devices/lab_pin.sym} 150 -150 0 0 {name=p14 sig_type=std_logic lab=ctrl_source}
 C {devices/lab_pin.sym} 150 -130 0 0 {name=p15 sig_type=std_logic lab=ctrl_width[1:0]}
-C {sky130_fd_pr/corner.sym} 1120 -490 0 0 {name=CORNER only_toplevel=true corner=tt}
+C {sg13g2_pr/corner.sym} 1120 -490 0 0 {name=CORNER only_toplevel=true corner=tt}
 C {devices/vsource.sym} -340 490 0 0 {name=VD value=3.3}
 C {devices/gnd.sym} -340 520 0 0 {name=l4 lab=GND}
 C {devices/vsource.sym} -240 490 0 0 {name=VG value=0}
@@ -187,7 +187,7 @@ C {devices/code_shown.sym} 1140 -310 0 0 {name=NGSPICE only_toplevel=true value=
 .endc
 "}
 C {devices/switch_ngspice.sym} -60 390 1 0 {name=S1 model=switch}
-C {sky130_fd_pr/nfet_g5v0d10v5.sym} -420 940 0 0 {name=M1
+C {sg13g2_pr/nfet33.sym} -420 940 0 0 {name=M1
 L=0.5
 W=10
 nf=2
@@ -198,13 +198,13 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=nfet_g5v0d10v5
+model=nfet33
 spiceprefix=X
 }
 C {devices/gnd.sym} 120 520 0 0 {name=l11 lab=GND}
 C {devices/gnd.sym} -400 1040 0 0 {name=l12 lab=GND}
 C {devices/lab_pin.sym} -480 940 2 1 {name=p11 sig_type=std_logic lab=VG}
-C {sky130_fd_pr/nfet_g5v0d10v5.sym} -180 940 0 0 {name=M2
+C {sg13g2_pr/nfet33.sym} -180 940 0 0 {name=M2
 L=0.5
 W=20
 nf=4
@@ -215,12 +215,12 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=nfet_g5v0d10v5
+model=nfet33
 spiceprefix=X
 }
 C {devices/gnd.sym} -160 1040 0 0 {name=l14 lab=GND}
 C {devices/lab_pin.sym} -240 940 2 1 {name=p12 sig_type=std_logic lab=VG}
-C {sky130_fd_pr/nfet_g5v0d10v5.sym} 280 940 0 0 {name=M3
+C {sg13g2_pr/nfet33.sym} 280 940 0 0 {name=M3
 L=0.5
 W=40
 nf=8
@@ -231,7 +231,7 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=nfet_g5v0d10v5
+model=nfet33
 spiceprefix=X
 }
 C {devices/gnd.sym} 300 1040 0 0 {name=l15 lab=GND}
@@ -241,7 +241,7 @@ C {devices/ammeter.sym} 110 -230 3 0 {name=Vmeas_DUT}
 C {devices/ammeter.sym} -160 850 0 0 {name=Vmeas_2x}
 C {devices/ammeter.sym} 300 850 0 0 {name=Vmeas_4x}
 C {devices/lab_pin.sym} -400 760 2 1 {name=p17 sig_type=std_logic lab=VD}
-C {sky130_fd_pr/nfet_g5v0d10v5.sym} 40 940 0 0 {name=M4
+C {sg13g2_pr/nfet33.sym} 40 940 0 0 {name=M4
 L=0.5
 W=30
 nf=6
@@ -252,7 +252,7 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=nfet_g5v0d10v5
+model=nfet33
 spiceprefix=X
 }
 C {devices/gnd.sym} 60 1040 0 0 {name=l7 lab=GND}

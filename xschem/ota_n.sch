@@ -157,7 +157,7 @@ C {devices/iopin.sym} -670 210 0 1 {name=p47 lab=GND}
 C {devices/ipin.sym} -670 70 0 0 {name=p1 lab=ctrl_mode[1:0]}
 C {devices/ipin.sym} 180 -60 0 0 {name=p3 lab=inp}
 C {devices/ipin.sym} 690 -60 0 1 {name=p5 lab=inm}
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 300 -230 0 1 {name=M1
+C {sg13g2_pr/pfet33.sym} 300 -230 0 1 {name=M1
 L=1
 W=60
 nf=8
@@ -168,10 +168,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 570 -230 0 0 {name=M2
+C {sg13g2_pr/pfet33.sym} 570 -230 0 0 {name=M2
 L=1
 W=60
 nf=8
@@ -182,7 +182,7 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
 C {devices/lab_pin.sym} 200 -300 0 0 {name=p18 sig_type=std_logic lab=VAPWR}
@@ -204,7 +204,7 @@ C {devices/lab_pin.sym} 260 920 0 1 {name=p30 sig_type=std_logic lab=gate}
 C {devices/lab_pin.sym} 260 940 0 1 {name=p31 sig_type=std_logic lab=GND}
 C {devices/lab_pin.sym} -140 860 0 0 {name=p32 sig_type=std_logic lab=ctrl_mode[1]}
 C {devices/opin.sym} 690 -160 0 0 {name=p34 lab=outm}
-C {sky130_fd_pr/nfet_g5v0d10v5.sym} 260 -60 0 0 {name=M3
+C {sg13g2_pr/nfet33.sym} 260 -60 0 0 {name=M3
 L=0.5
 W=40
 nf=8
@@ -215,10 +215,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=nfet_g5v0d10v5
+model=nfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/nfet_g5v0d10v5.sym} 610 -60 0 1 {name=M4
+C {sg13g2_pr/nfet33.sym} 610 -60 0 1 {name=M4
 L=0.5
 W=40
 nf=8
@@ -229,10 +229,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=nfet_g5v0d10v5
+model=nfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/nfet_g5v0d10v5.sym} 420 430 0 0 {name=M6
+C {sg13g2_pr/nfet33.sym} 420 430 0 0 {name=M6
 L=1
 W=20
 nf=4
@@ -243,10 +243,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=nfet_g5v0d10v5
+model=nfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/nfet_g5v0d10v5.sym} 240 430 0 0 {name=M8
+C {sg13g2_pr/nfet33.sym} 240 430 0 0 {name=M8
 L=1
 W=20
 nf=4
@@ -257,10 +257,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=nfet_g5v0d10v5
+model=nfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/nfet_g5v0d10v5.sym} 600 430 0 0 {name=M10
+C {sg13g2_pr/nfet33.sym} 600 430 0 0 {name=M10
 L=1
 W=40
 nf=8
@@ -271,7 +271,7 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=nfet_g5v0d10v5
+model=nfet33
 spiceprefix=X
 }
 C {devices/lab_pin.sym} 260 310 3 1 {name=p6 sig_type=std_logic lab=itail}

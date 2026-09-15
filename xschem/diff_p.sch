@@ -155,7 +155,7 @@ C {devices/lab_pin.sym} 140 -170 0 0 {name=p13 sig_type=std_logic lab=inp}
 C {devices/lab_pin.sym} 680 -170 0 1 {name=p14 sig_type=std_logic lab=inm}
 C {devices/lab_pin.sym} 240 -40 0 0 {name=p15 sig_type=std_logic lab=outp}
 C {devices/lab_pin.sym} 580 -40 0 1 {name=p16 sig_type=std_logic lab=outm}
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 220 -170 0 0 {name=M3
+C {sg13g2_pr/pfet33.sym} 220 -170 0 0 {name=M3
 L=0.5
 W=120
 nf=16
@@ -166,10 +166,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 600 -170 0 1 {name=M4
+C {sg13g2_pr/pfet33.sym} 600 -170 0 1 {name=M4
 L=0.5
 W=120
 nf=16
@@ -180,13 +180,13 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
 C {devices/lab_pin.sym} 1100 -140 1 1 {name=p2 sig_type=std_logic lab=itail}
 C {devices/lab_pin.sym} 1280 -140 1 1 {name=p21 sig_type=std_logic lab=itail_1x}
 C {devices/lab_pin.sym} 1460 -140 1 1 {name=p22 sig_type=std_logic lab=itail_2x}
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 1080 -260 0 0 {name=M1
+C {sg13g2_pr/pfet33.sym} 1080 -260 0 0 {name=M1
 L=1
 W=60
 nf=8
@@ -197,10 +197,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 1260 -260 0 0 {name=M5
+C {sg13g2_pr/pfet33.sym} 1260 -260 0 0 {name=M5
 L=1
 W=60
 nf=8
@@ -211,10 +211,10 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 1440 -260 0 0 {name=M7
+C {sg13g2_pr/pfet33.sym} 1440 -260 0 0 {name=M7
 L=1
 W=120
 nf=16
@@ -225,7 +225,7 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
 C {devices/lab_pin.sym} 1040 -230 0 0 {name=p23 sig_type=std_logic lab=vbias}

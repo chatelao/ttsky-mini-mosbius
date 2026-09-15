@@ -304,7 +304,7 @@ m=1
 value=1T
 footprint=1206
 device=inductor}
-C {sky130_fd_pr/corner.sym} 1530 170 0 0 {name=CORNER only_toplevel=true corner=tt}
+C {sg13g2_pr/corner.sym} 1530 170 0 0 {name=CORNER only_toplevel=true corner=tt}
 C {devices/code_shown.sym} 1460 390 0 0 {name=NGSPICE only_toplevel=true value=
 "
 *****************************************
@@ -409,7 +409,7 @@ C {devices/lab_wire.sym} 740 -810 0 0 {name=p60 sig_type=std_logic lab=v}
 C {devices/lab_wire.sym} 740 -730 0 0 {name=p61 sig_type=std_logic lab=v}
 C {devices/lab_wire.sym} 740 -770 0 0 {name=p62 sig_type=std_logic lab=v,v}
 C {devices/lab_wire.sym} 740 -690 0 0 {name=p63 sig_type=std_logic lab=v,v}
-C {sky130_fd_pr/pfet_g5v0d10v5.sym} 2300 -830 0 0 {name=M1
+C {sg13g2_pr/pfet33.sym} 2300 -830 0 0 {name=M1
 L=0.5
 W=120
 nf=16
@@ -420,7 +420,7 @@ as="'int((nf+2)/2) * W/nf * 0.29'"
 ps="'2*int((nf+2)/2) * (W/nf + 0.29)'"
 nrd="'0.29 / W'" nrs="'0.29 / W'"
 sa=0 sb=0 sd=0
-model=pfet_g5v0d10v5
+model=pfet33
 spiceprefix=X
 }
 C {devices/lab_pin.sym} 1440 -620 0 0 {name=p65 sig_type=std_logic lab=VDPWR}

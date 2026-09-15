@@ -267,7 +267,7 @@ C {devices/vsource.sym} 520 310 0 0 {name=VSIG value=0}
 C {devices/vsource.sym} 680 210 0 0 {name=VCM value=1.8}
 C {devices/gnd.sym} 680 260 0 0 {name=l9 lab=GND}
 C {devices/lab_pin.sym} 760 60 1 0 {name=p10 sig_type=std_logic lab=vinp}
-C {sky130_fd_pr/corner.sym} 950 -350 0 0 {name=CORNER only_toplevel=true corner=tt}
+C {sg13g2_pr/corner.sym} 950 -350 0 0 {name=CORNER only_toplevel=true corner=tt}
 C {devices/code_shown.sym} 1420 -590 0 0 {name=NGSPICE only_toplevel=true value=
 "
 *****************************************
