@@ -83,7 +83,7 @@ The top priority is establishing and maintaining a functioning **CI/CD pipeline 
 > **Objective:** Generate full GDS/LEF layout, verify DRC/LVS compliance, and extract parasitic models.
 
 - [ ] **5.1 Layout Migration in KLayout / Magic VLSI (`mag/`)**
-  - Re-layout analog switch matrix (`asw_matrix.mag`) and sub-blocks using SG13G2 design rules.
+  - Re-layout analog switch matrix (`asw_matrix.mag`) and sub-blocks using native IHP primitives (`sg13g2_pr__pfet33` / `sg13g2_pr__nfet33`) re-routed on the IHP standard cell grid (3.78 µm × 0.48 µm) to eradicate legacy `sky130` cell names from source `.mag` files.
   - Assemble top-level design (`tt_um_tnt_mosbius.mag`).
 - [ ] **5.2 Design Rule Checking (DRC)**
   - Execute DRC checks using KLayout DRC (`sg13g2.lydrc`) and Magic DRC (`tcl/magic_drc.tcl`).
