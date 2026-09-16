@@ -273,7 +273,15 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
   - [ ] **4.1.1 Track Upstream Actions & PDK Toolchain Updates**
     - [x] **4.1.1.1** Verify all workflow action references in `.github/workflows/gds.yaml` (`custom_gds`, `precheck`, `viewer`) use `@ttihp26b`.
     - [x] **4.1.1.2** Verify workflow action references in `.github/workflows/docs.yaml` (`docs`) use `@ttihp26b`.
-    - [ ] **4.1.1.3** Monitor TinyTapeout upstream release channels for future PDK tag upgrades beyond `@ttihp26b`.
+    - [ ] **4.1.1.3 Monitor TinyTapeout Upstream Release Channels & Manage PDK Tag Upgrades**
+      - [ ] **4.1.1.3.1 Track Upstream Release Channels**
+        - Monitor `TinyTapeout/tt-gds-action` repository releases and announcements for new IHP SG13G2 toolchain tags beyond `@ttihp26b`.
+      - [ ] **4.1.1.3.2 Test PDK Candidate Upgrades in Isolation**
+        - Test candidate PDK tags on a feature branch or via `workflow_dispatch` before modifying production workflow definitions.
+      - [ ] **4.1.1.3.3 Update Workflow Tag References Across CI Configuration**
+        - Update action tag references across `.github/workflows/gds.yaml` and `.github/workflows/docs.yaml` to the newly validated tag.
+      - [ ] **4.1.1.3.4 Synchronize Static Verification Rules and Unit Tests**
+        - Update expected action tags in `py/verify_cicd_config.py` and `py/test_verify_cicd_config.py` to ensure local static checks pass with the updated tag.
   - [ ] **4.1.2 Maintain Static Verification Assertions & Workflow Schema Integrity**
     - [x] **4.1.2.1** Validate static verification rules covering action tags (`@ttihp26b`), PDK name (`ihp-sg13g2`), runner environment (`ubuntu-24.04`), and OIDC permissions in `py/verify_cicd_config.py`.
     - [x] **4.1.2.2** Ensure comprehensive unit test coverage in `py/test_verify_cicd_config.py` for all static verification functions.
