@@ -776,6 +776,115 @@ def check_git_submodule_and_checkout_config(repo_root="."):
     return True
 
 
+def check_upstream_pdk_action_tags(repo_root="."):
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    docs_path = os.path.join(repo_root, ".github/workflows/docs.yaml")
+    errors = []
+
+    expected_tag = "@ttihp26b"
+
+    for path in [gds_path, docs_path]:
+        filename = os.path.basename(path)
+        if not os.path.exists(path):
+            errors.append(f"Missing workflow file: {path}")
+        else:
+            with open(path, "r") as f:
+                content = f.read()
+
+            matches = re.findall(r"TinyTapeout/tt-gds-action/[a-zA-Z0-9_-]+@([a-zA-Z0-9_.-]+)", content)
+            if not matches:
+                errors.append(f"No TinyTapeout/tt-gds-action actions found in {filename}")
+            else:
+                for tag in matches:
+                    if tag != "ttihp26b":
+                        errors.append(f"Found invalid action tag '@{tag}' in {filename}, expected '{expected_tag}'")
+
+    if errors:
+        print("FAILED upstream PDK action tags check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED upstream PDK action tags check")
+    return True
+
+
+def check_info_yaml_schema_compatibility(repo_root="."):
+    info_path = os.path.join(repo_root, "info.yaml")
+    if not os.path.exists(info_path):
+        print(f"ERROR: {info_path} does not exist.")
+        return False
+
+    with open(info_path, "r") as f:
+        content = f.read()
+
+    errors = []
+
+    if "project:" not in content:
+        errors.append("Missing 'project:' root section in info.yaml")
+
+    if not re.search(r"top_module:\s*[\"']?tt_um_tnt_mosbius[\"']?", content):
+        errors.append("Missing or incorrect 'top_module: tt_um_tnt_mosbius' in info.yaml")
+
+    if not re.search(r"language:\s*[\"']?Analog[\"']?", content, re.IGNORECASE):
+        errors.append("Missing or incorrect 'language: Analog' in info.yaml")
+
+    if not re.search(r"tiles:\s*[\"']?3x2[\"']?", content):
+        errors.append("Missing or incorrect 'tiles: 3x2' in info.yaml")
+
+    if not re.search(r"uses_vapwr:\s*true", content):
+        errors.append("Missing or incorrect 'uses_vapwr: true' in info.yaml")
+
+    if not re.search(r"analog_pins:\s*6", content):
+        errors.append("Missing or incorrect 'analog_pins: 6' in info.yaml")
+
+    if "pinout:" not in content:
+        errors.append("Missing 'pinout:' section in info.yaml")
+    else:
+        for idx in range(6):
+            if f"ua[{idx}]:" not in content:
+                errors.append(f"Missing 'ua[{idx}]' pin in pinout section of info.yaml")
+
+    if errors:
+        print(f"FAILED info.yaml schema compatibility check in {info_path}:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print(f"PASSED info.yaml schema compatibility check in {info_path}")
+    return True
+
+
+def check_pdk_drc_rule_compatibility(repo_root="."):
+    drc_path = os.path.join(repo_root, "tcl/magic_drc.tcl")
+    if not os.path.exists(drc_path):
+        print(f"ERROR: {drc_path} does not exist.")
+        return False
+
+    with open(drc_path, "r") as f:
+        content = f.read()
+
+    errors = []
+
+    if "drc euclidean on" not in content:
+        errors.append("Missing 'drc euclidean on' in tcl/magic_drc.tcl")
+
+    if 'drc style "drc(full)"' not in content and "drc style drc(full)" not in content:
+        errors.append("Missing 'drc style \"drc(full)\"' in tcl/magic_drc.tcl")
+
+    if "drc check" not in content and "drc catchup" not in content:
+        errors.append("Missing DRC execution command ('drc check' or 'drc catchup') in tcl/magic_drc.tcl")
+
+    if errors:
+        print(f"FAILED PDK DRC rule compatibility check in {drc_path}:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print(f"PASSED PDK DRC rule compatibility check in {drc_path}")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -841,6 +950,9 @@ def main():
     wf_trigger_ok = check_workflow_trigger_events_config(repo_root)
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
+    upstream_tags_ok = check_upstream_pdk_action_tags(repo_root)
+    info_schema_ok = check_info_yaml_schema_compatibility(repo_root)
+    pdk_drc_rules_ok = check_pdk_drc_rule_compatibility(repo_root)
 
     if (
         gds_ok
@@ -863,6 +975,9 @@ def main():
         and wf_trigger_ok
         and checkout_submodule_ok
         and stdcell_decl_ok
+        and upstream_tags_ok
+        and info_schema_ok
+        and pdk_drc_rules_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
