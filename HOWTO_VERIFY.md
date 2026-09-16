@@ -20,6 +20,47 @@ Before performing schematic simulation, layout extraction, LVS, or DRC verificat
 
 Ensure `PDK_ROOT` environment variable is defined (e.g. `export PDK_ROOT=/path/to/pdk_root`).
 
+### 1.1 Installing and Loading the IHP SG13G2 PDK
+
+To perform local simulation, extraction, LVS, or DRC verification, follow these steps to clone, install, and load the IHP Open PDK (`ihp-sg13g2`):
+
+1. **Clone the IHP Open PDK repository:**
+   ```bash
+   # Clone the open-source IHP PDK repository into your chosen PDK root directory
+   export PDK_ROOT=${HOME}/pdk
+   mkdir -p ${PDK_ROOT}
+   git clone https://github.com/IHP-GmbH/IHP-Open-PDK.git ${PDK_ROOT}/IHP-Open-PDK
+   ```
+
+2. **Set up environment variables:**
+   Add the following exports to your shell environment or session script:
+   ```bash
+   export PDK_ROOT=${HOME}/pdk
+   export PDK=ihp-sg13g2
+   # If installed in IHP-Open-PDK subdirectory, create a symlink or point directly:
+   ln -sfn ${PDK_ROOT}/IHP-Open-PDK/ihp-sg13g2 ${PDK_ROOT}/ihp-sg13g2
+   ```
+
+3. **Loading PDK configuration into EDA Tools:**
+
+   - **Magic VLSI:** Point Magic to the PDK technology startup script:
+     ```bash
+     export MAGIC_RC=${PDK_ROOT}/ihp-sg13g2/libs.tech/magic/ihp-sg13g2.magicrc
+     magic -rcfile ${MAGIC_RC}
+     ```
+   - **Xschem:** Include the IHP symbol library in `xschemrc` or export symbol search path:
+     ```bash
+     export XSCHEM_SHARE_DIR=${PDK_ROOT}/ihp-sg13g2/libs.tech/xschem
+     ```
+   - **Netgen (LVS):** Load Netgen setup configuration file:
+     ```bash
+     netgen -batch lvs ... ${PDK_ROOT}/ihp-sg13g2/libs.tech/netgen/sg13g2_setup.tcl
+     ```
+   - **KLayout:** Load KLayout technology files and DRC rule scripts:
+     ```bash
+     klayout -b -r ${PDK_ROOT}/ihp-sg13g2/libs.tech/klayout/drc/sg13g2_drc.lydrc ...
+     ```
+
 ---
 
 ## 2. Schematic Verification & Simulation with Xschem
