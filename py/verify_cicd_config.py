@@ -776,6 +776,38 @@ def check_git_submodule_and_checkout_config(repo_root="."):
     return True
 
 
+def check_upstream_pdk_action_tags(repo_root="."):
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    docs_path = os.path.join(repo_root, ".github/workflows/docs.yaml")
+    errors = []
+
+    expected_tag = "@ttihp26b"
+    action_pattern = re.compile(r"TinyTapeout/tt-gds-action/[a-zA-Z0-9_-]+(@[a-zA-Z0-9._-]+)")
+
+    for path in [gds_path, docs_path]:
+        filename = os.path.basename(path)
+        if not os.path.exists(path):
+            errors.append(f"Missing workflow file: {path}")
+        else:
+            with open(path, "r") as f:
+                content = f.read()
+            matches = action_pattern.findall(content)
+            if not matches:
+                errors.append(f"No tt-gds-action references found in {filename}")
+            for tag in matches:
+                if tag != expected_tag:
+                    errors.append(f"Found non-matching upstream PDK action tag '{tag}' in {filename} (expected '{expected_tag}')")
+
+    if errors:
+        print("FAILED upstream PDK action tags check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED upstream PDK action tags check")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -840,6 +872,7 @@ def main():
     wf_summary_ok = check_workflow_execution_summary_config(repo_root)
     wf_trigger_ok = check_workflow_trigger_events_config(repo_root)
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
+    upstream_tags_ok = check_upstream_pdk_action_tags(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
 
     if (
@@ -862,6 +895,7 @@ def main():
         and wf_summary_ok
         and wf_trigger_ok
         and checkout_submodule_ok
+        and upstream_tags_ok
         and stdcell_decl_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
