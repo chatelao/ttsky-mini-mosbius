@@ -1,0 +1,28 @@
+# Xschem configuration file for IHP SG13G2 PDK
+
+if { [info exists env(PDK_ROOT)] && $env(PDK_ROOT) != "" } {
+    set PDK_ROOT $env(PDK_ROOT)
+} else {
+    set PDK_ROOT /app/tech
+}
+set PDK ihp-sg13g2
+
+# Define symbol search paths
+set XSCHEM_LIBRARY_PATH {}
+append XSCHEM_LIBRARY_PATH [pwd]
+append XSCHEM_LIBRARY_PATH :[pwd]/xschem
+append XSCHEM_LIBRARY_PATH :$PDK_ROOT/$PDK/libs.tech/xschem
+
+if { [info exists env(XSCHEM_SHARE_DIR)] && $env(XSCHEM_SHARE_DIR) != "" } {
+    append XSCHEM_LIBRARY_PATH :$env(XSCHEM_SHARE_DIR)/xschem_library
+} else {
+    append XSCHEM_LIBRARY_PATH :/usr/share/xschem/xschem_library
+    append XSCHEM_LIBRARY_PATH :/usr/local/share/xschem/xschem_library
+}
+
+# Netlist directory
+set netlist_dir [pwd]/simulation
+
+# Xschem appearance and behavior settings
+set bus_dir_style 1
+set line_width 1

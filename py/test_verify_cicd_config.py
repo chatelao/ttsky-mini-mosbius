@@ -23,6 +23,7 @@ from py.verify_cicd_config import (
     check_precheck_execution_and_reporting_config,
     check_stdcell_declarations,
     check_top_module_step_config,
+    check_xschem_config,
     check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
     check_workflow_execution_summary_config,
@@ -973,6 +974,46 @@ steps:
             "builtins.open", side_effect=mock_open_file_invalid
         ):
             self.assertFalse(check_stdcell_declarations())
+
+    def test_check_xschem_config_valid(self):
+        valid_xschemrc = "XSCHEM_LIBRARY_PATH ihp-sg13g2 libs.tech/xschem"
+        valid_sch = "C {sg13g2_pr/nfet33.sym} 0 0 0 0 {name=M1}\nC {devices/lab_pin.sym} 0 0 0 0 {name=p1}"
+
+        def mock_open_file(filepath, mode="r"):
+            if "xschemrc" in filepath:
+                return unittest.mock.mock_open(read_data=valid_xschemrc)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_sch)()
+
+        def mock_listdir(path):
+            if path.endswith("xschem"):
+                return ["diff_n.sch", "diff_n.sym"]
+            return []
+
+        with patch("os.path.exists", return_value=True), patch(
+            "os.listdir", side_effect=mock_listdir
+        ), patch("builtins.open", side_effect=mock_open_file):
+            self.assertTrue(check_xschem_config())
+
+    def test_check_xschem_config_legacy_sky130(self):
+        valid_xschemrc = "XSCHEM_LIBRARY_PATH ihp-sg13g2 libs.tech/xschem"
+        invalid_sch = "C {sky130_fd_pr/nfet_g5v0d10v5.sym} 0 0 0 0 {name=M1}"
+
+        def mock_open_file(filepath, mode="r"):
+            if "xschemrc" in filepath:
+                return unittest.mock.mock_open(read_data=valid_xschemrc)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_sch)()
+
+        def mock_listdir(path):
+            if path.endswith("xschem"):
+                return ["diff_n.sch"]
+            return []
+
+        with patch("os.path.exists", return_value=True), patch(
+            "os.listdir", side_effect=mock_listdir
+        ), patch("builtins.open", side_effect=mock_open_file):
+            self.assertFalse(check_xschem_config())
 
 
 if __name__ == "__main__":

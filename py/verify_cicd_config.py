@@ -776,6 +776,66 @@ def check_git_submodule_and_checkout_config(repo_root="."):
     return True
 
 
+def check_xschem_config(repo_root="."):
+    """Verifies xschem configuration files and schematic symbol references."""
+    xschemrc_path = os.path.join(repo_root, "xschem", "xschemrc")
+    root_xschemrc_path = os.path.join(repo_root, "xschemrc")
+
+    if not os.path.exists(xschemrc_path):
+        print("ERROR: xschem/xschemrc does not exist!")
+        return False
+
+    with open(xschemrc_path, "r") as f:
+        content = f.read()
+        if "XSCHEM_LIBRARY_PATH" not in content or "ihp-sg13g2" not in content or "libs.tech/xschem" not in content:
+            print("ERROR: xschem/xschemrc missing required PDK symbol search paths!")
+            return False
+
+    if not os.path.exists(root_xschemrc_path):
+        print("ERROR: root xschemrc does not exist!")
+        return False
+
+    with open(root_xschemrc_path, "r") as f:
+        content = f.read()
+        if "XSCHEM_LIBRARY_PATH" not in content or "ihp-sg13g2" not in content:
+            print("ERROR: root xschemrc missing required PDK symbol search paths!")
+            return False
+
+    xschem_dir = os.path.join(repo_root, "xschem")
+    if not os.path.exists(xschem_dir):
+        print("ERROR: xschem directory does not exist!")
+        return False
+
+    local_syms = {f for f in os.listdir(xschem_dir) if f.endswith(".sym")}
+    sch_files = [f for f in os.listdir(xschem_dir) if f.endswith(".sch")]
+
+    if not sch_files:
+        print("ERROR: No schematic (.sch) files found in xschem directory!")
+        return False
+
+    for sch in sch_files:
+        sch_path = os.path.join(xschem_dir, sch)
+        with open(sch_path, "r") as f:
+            for line in f:
+                if "sky130" in line:
+                    print(f"ERROR: Legacy Sky130 reference in {sch}: {line.strip()}")
+                    return False
+                if line.startswith("C {"):
+                    m = re.match(r"^C \{([^}]+)\}", line)
+                    if m:
+                        sym_path = m.group(1)
+                        if (
+                            not sym_path.startswith("devices/")
+                            and not sym_path.startswith("sg13g2_pr/")
+                            and sym_path not in local_syms
+                        ):
+                            print(f"ERROR: Unknown or unresolvable symbol reference '{sym_path}' in {sch}")
+                            return False
+
+    print("xschem configuration and schematic symbol references check passed.")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -841,6 +901,7 @@ def main():
     wf_trigger_ok = check_workflow_trigger_events_config(repo_root)
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
+    xschem_config_ok = check_xschem_config(repo_root)
 
     if (
         gds_ok
@@ -863,6 +924,7 @@ def main():
         and wf_trigger_ok
         and checkout_submodule_ok
         and stdcell_decl_ok
+        and xschem_config_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
