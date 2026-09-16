@@ -815,6 +815,125 @@ def check_stdcell_declarations(repo_root="."):
     return True
 
 
+def check_pdk_drc_rule_compatibility(repo_root="."):
+    drc_script_path = os.path.join(repo_root, "tcl/magic_drc.tcl")
+    gds_workflow_path = os.path.join(repo_root, "gds.yaml")
+    if not os.path.exists(gds_workflow_path):
+        gds_workflow_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+
+    info_path = os.path.join(repo_root, "info.yaml")
+    top_module = "tt_um_tnt_mosbius"
+    if os.path.exists(info_path):
+        with open(info_path, "r") as f:
+            content = f.read()
+            match = re.search(r"top_module:\s*[\"']?([a-zA-Z0-9_]+)[\"']?", content)
+            if match:
+                top_module = match.group(1)
+
+    gds_file = os.path.join(repo_root, "gds", f"{top_module}.gds")
+    errors = []
+
+    if not os.path.exists(drc_script_path):
+        errors.append(f"Missing DRC script file: {drc_script_path}")
+    else:
+        with open(drc_script_path, "r") as f:
+            drc_content = f.read()
+        if "drc euclidean on" not in drc_content:
+            errors.append("Missing 'drc euclidean on' setting in tcl/magic_drc.tcl")
+        if 'drc style "drc(full)"' not in drc_content and "drc style drc(full)" not in drc_content:
+            errors.append("Missing 'drc style \"drc(full)\"' setting in tcl/magic_drc.tcl")
+
+    if not os.path.exists(gds_workflow_path):
+        errors.append(f"Missing workflow file: {gds_workflow_path}")
+    else:
+        with open(gds_workflow_path, "r") as f:
+            gds_content = f.read()
+        if "TinyTapeout/tt-gds-action/precheck@ttihp26b" not in gds_content:
+            errors.append("Missing 'precheck@ttihp26b' action in gds.yaml for DRC rule checks")
+        if "pdk: ihp-sg13g2" not in gds_content:
+            errors.append("Missing 'pdk: ihp-sg13g2' parameter in gds.yaml")
+
+    if not os.path.exists(gds_file) or os.path.getsize(gds_file) == 0:
+        errors.append(f"Missing or empty GDS layout artifact: {gds_file}")
+    else:
+        try:
+            layers = parse_gds_layers(gds_file)
+            if (189, 4) not in layers:
+                errors.append(f"GDS file {gds_file} missing IHP SG13G2 prBoundary layer (189, 4)")
+            if (235, 4) in layers:
+                errors.append(f"GDS file {gds_file} contains legacy SkyWater prBoundary layer (235, 4)")
+            legacy_layers = [(68, 20), (69, 20), (70, 20), (71, 20), (72, 20)]
+            for leg in legacy_layers:
+                if leg in layers:
+                    errors.append(f"GDS file {gds_file} contains unmapped legacy layer {leg}")
+        except Exception as e:
+            errors.append(f"Failed to parse GDS file {gds_file}: {e}")
+
+    if errors:
+        print("FAILED PDK DRC rule compatibility check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED PDK DRC rule compatibility check")
+    return True
+
+
+def check_precheck_report_artifacts(repo_root="."):
+    gds_workflow_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    errors = []
+
+    if not os.path.exists(gds_workflow_path):
+        errors.append(f"Missing workflow file: {gds_workflow_path}")
+    else:
+        with open(gds_workflow_path, "r") as f:
+            content = f.read()
+        if "precheck:" not in content:
+            errors.append("Missing 'precheck' job definition in gds.yaml")
+        if "needs: gds" not in content:
+            errors.append("Missing 'needs: gds' dependency in precheck job in gds.yaml")
+        if "TinyTapeout/tt-gds-action/precheck@ttihp26b" not in content:
+            errors.append("Missing 'precheck@ttihp26b' action tag in gds.yaml")
+        if "continue-on-error: true" not in content:
+            errors.append("Missing 'continue-on-error: true' setting in precheck job in gds.yaml")
+
+    if errors:
+        print("FAILED precheck report artifacts check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED precheck report artifacts check")
+    return True
+
+
+def check_upstream_pdk_action_tags(repo_root="."):
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    docs_path = os.path.join(repo_root, ".github/workflows/docs.yaml")
+    errors = []
+
+    for path in [gds_path, docs_path]:
+        filename = os.path.basename(path)
+        if not os.path.exists(path):
+            errors.append(f"Missing workflow file: {path}")
+        else:
+            with open(path, "r") as f:
+                content = f.read()
+            if "ttsky26c" in content:
+                errors.append(f"Found legacy action tag 'ttsky26c' in {filename}")
+            if "@ttihp26b" not in content:
+                errors.append(f"Missing expected action tag '@ttihp26b' in {filename}")
+
+    if errors:
+        print("FAILED upstream PDK action tags check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED upstream PDK action tags check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -841,6 +960,9 @@ def main():
     wf_trigger_ok = check_workflow_trigger_events_config(repo_root)
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
+    pdk_drc_compat_ok = check_pdk_drc_rule_compatibility(repo_root)
+    precheck_reports_ok = check_precheck_report_artifacts(repo_root)
+    upstream_tags_ok = check_upstream_pdk_action_tags(repo_root)
 
     if (
         gds_ok
@@ -863,6 +985,9 @@ def main():
         and wf_trigger_ok
         and checkout_submodule_ok
         and stdcell_decl_ok
+        and pdk_drc_compat_ok
+        and precheck_reports_ok
+        and upstream_tags_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
