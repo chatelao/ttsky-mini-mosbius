@@ -10,6 +10,10 @@ from py.verify_cicd_config import (
     check_def_template_config,
     check_docs_build_and_asset_config,
     check_docs_workflow,
+    check_info_yaml_schema_compatibility,
+    check_pdk_drc_rule_compatibility,
+    check_precheck_report_artifacts,
+    check_upstream_pdk_action_tags,
     check_eda_toolchain_and_container_config,
     check_gds_lef_artifacts,
     check_gds_workflow,
@@ -973,6 +977,102 @@ steps:
             "builtins.open", side_effect=mock_open_file_invalid
         ):
             self.assertFalse(check_stdcell_declarations())
+
+
+    def test_check_upstream_pdk_action_tags_valid(self):
+        valid_wf = """
+steps:
+  - uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_wf)
+        ):
+            self.assertTrue(check_upstream_pdk_action_tags())
+
+    def test_check_upstream_pdk_action_tags_invalid(self):
+        invalid_wf = """
+steps:
+  - uses: TinyTapeout/tt-gds-action/custom_gds@ttsky26c
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_wf)
+        ):
+            self.assertFalse(check_upstream_pdk_action_tags())
+
+    def test_check_precheck_report_artifacts_valid(self):
+        valid_wf = """
+jobs:
+  precheck:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_wf)
+        ):
+            self.assertTrue(check_precheck_report_artifacts())
+
+    def test_check_precheck_report_artifacts_invalid(self):
+        def mock_exists(path):
+            if "tt_analog_3x2_3v3.def" in path:
+                return False
+            return True
+
+        valid_wf = "jobs:\n  precheck:\n    steps:\n      - uses: TinyTapeout/tt-gds-action/precheck@ttihp26b"
+        with patch("os.path.exists", side_effect=mock_exists), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_wf)
+        ):
+            self.assertFalse(check_precheck_report_artifacts())
+
+    def test_check_pdk_drc_rule_compatibility_valid(self):
+        valid_drc = "drc euclidean on\n"
+        valid_gds = "pdk: ihp-sg13g2\n"
+
+        def mock_open_file(filepath, mode="r"):
+            if "magic_drc.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=valid_drc)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_gds)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_pdk_drc_rule_compatibility())
+
+    def test_check_pdk_drc_rule_compatibility_invalid(self):
+        invalid_drc = "# missing drc euclidean"
+        invalid_gds = "pdk: sky130\n"
+
+        def mock_open_file(filepath, mode="r"):
+            if "magic_drc.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_drc)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_gds)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_pdk_drc_rule_compatibility())
+
+    def test_check_info_yaml_schema_compatibility_valid(self):
+        valid_info = """
+top_module: tt_um_tnt_mosbius
+language: Analog
+tiles: 3x2
+uses_vapwr: true
+analog_pins: 6
+pinout:
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_info)
+        ):
+            self.assertTrue(check_info_yaml_schema_compatibility())
+
+    def test_check_info_yaml_schema_compatibility_invalid(self):
+        invalid_info = "top_module: tt_um_tnt_mosbius\n"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
+        ):
+            self.assertFalse(check_info_yaml_schema_compatibility())
 
 
 if __name__ == "__main__":
