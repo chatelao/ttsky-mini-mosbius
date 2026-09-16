@@ -1,6 +1,6 @@
 PROJECT_NAME ?= tt_um_tnt_mosbius
 
-MAGIC_RC ?= $(PDK_ROOT)/sky130A/libs.tech/magic/sky130A.magicrc
+MAGIC_RC ?= $(PDK_ROOT)/ihp-sg13g2/libs.tech/magic/ihp-sg13g2.magicrc
 TCL_BASE = $(dir $(lastword $(MAKEFILE_LIST)))/../tcl
 
 %.lvs.spice: %.mag
