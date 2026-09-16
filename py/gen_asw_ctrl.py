@@ -47,15 +47,13 @@ grid.fill()
 # Outputs
 if OP_MODE == 'magic':
 	# Generate main output
-	#print('\n'.join(grid.gen_script()))
-
-	# Create power rails
-	#print('\n'.join(grid.gen_rail(   100, 1200, True)))
-	#print('\n'.join(grid.gen_rail(  1700, 1200, False)))
 	pass
 
 elif OP_MODE == 'decap':
-	print('\n'.join(grid.gen_decap()))
+	decap_lines = grid.gen_decap()
+	if not decap_lines:
+		raise RuntimeError('gen_asw_ctrl decap output is empty')
+	print('\n'.join(decap_lines))
 
 
 # Routing
@@ -167,4 +165,7 @@ if OP_MODE == 'magic':
 	r.move_rel( (2, 0, 0) )
 	r.end()
 
-	print('\n'.join(r.gen_script()))
+	script_lines = r.gen_script()
+	if not script_lines:
+		raise RuntimeError('gen_asw_ctrl magic script output is empty')
+	print('\n'.join(script_lines))
