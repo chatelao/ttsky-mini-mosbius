@@ -12,7 +12,7 @@ To run all manual compilation and verification steps, the following toolchain co
 - **Yosys** (Open Synthesis Suite)
 - **Magic VLSI** (Layout editing, extraction, DRC, and GDS/LEF export)
 - **Netgen** (LVS tool)
-- **IHP SG13G2 / SkyWater 130 PDK Setup** (`PDK_ROOT` environment variable configured if running full Magic/Netgen LVS/DRC)
+- **IHP SG13G2 PDK Setup** (`PDK_ROOT` environment variable configured if running full Magic/Netgen LVS/DRC)
 
 ---
 
@@ -69,7 +69,7 @@ To export GDS and LEF files using Magic:
 ```bash
 cd mag
 PROJECT_NAME=tt_um_tnt_mosbius
-MAGIC_RC=${PDK_ROOT}/sky130A/libs.tech/magic/sky130A.magicrc
+MAGIC_RC=${PDK_ROOT}/ihp-sg13g2/libs.tech/magic/ihp-sg13g2.magicrc
 
 # Run Magic in batch mode to export GDS and LEF
 magic -rcfile ${MAGIC_RC} -noconsole -dnull ../tcl/update_gds_lef.tcl ${PROJECT_NAME}
