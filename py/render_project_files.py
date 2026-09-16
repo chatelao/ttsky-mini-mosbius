@@ -14,6 +14,10 @@ user_site = site.getusersitepackages()
 if os.path.exists(user_site) and user_site not in sys.path:
     sys.path.insert(0, user_site)
 
+# Dynamically add KLayout library paths if present
+if os.path.exists("/usr/lib/klayout/pymod") and "/usr/lib/klayout/pymod" not in sys.path:
+    sys.path.insert(0, "/usr/lib/klayout/pymod")
+
 import pya
 from playwright.async_api import async_playwright
 
