@@ -44,6 +44,9 @@ def check_gds_workflow(repo_root="."):
         errors.append("Missing required Pages/OIDC write permissions in gds.yaml")
 
     # Check job dependencies
+    if "needs: check" not in content:
+        errors.append("Missing required job dependency 'needs: check' in gds.yaml")
+
     if "needs: gds" not in content:
         errors.append("Missing required job dependency 'needs: gds' in gds.yaml")
 

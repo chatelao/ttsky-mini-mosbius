@@ -263,17 +263,33 @@ class Grid:
 	TAP = Cell('sg13g2_tap_1', 1)
 
 	def __init__(self, width, height):
+		if width <= 0 or height <= 0:
+			raise ValueError(f'Invalid Grid dimensions: width={width}, height={height}')
 		self.width = width
 		self.height = height
 		self.grid = [ None ] * (width * height)
 
 	def _idx(self, pos):
-		return pos[1] * self.width + pos[0]
+		x, y = pos[0], pos[1]
+		if x < 0 or x >= self.width or y < 0 or y >= self.height:
+			raise IndexError(f'Grid position {pos} out of bounds ({self.width}x{self.height})')
+		return y * self.width + x
 
 	def add_cell(self, inst_name, cell, pos, orient):
+		if not inst_name:
+			raise ValueError('Cell instance name cannot be empty')
+		if cell is None or cell.width <= 0:
+			raise ValueError(f'Invalid cell: {cell}')
+		if orient not in (0, 1):
+			raise ValueError(f'Invalid orientation {orient} for instance {inst_name}')
+
+		pos_x, pos_y = pos[0], pos[1]
+		if pos_x < 0 or pos_x + cell.width > self.width or pos_y < 0 or pos_y >= self.height:
+			raise ValueError(f'Cell placement {inst_name} ({cell.name}, width {cell.width}) at {pos} exceeds grid bounds ({self.width}x{self.height})')
+
 		ci = CellInstance(inst_name, cell, pos, orient)
 		for i in range(cell.width):
-			idx = self._idx( (pos[0]+i, pos[1]) )
+			idx = self._idx( (pos_x + i, pos_y) )
 			if self.grid[idx] is not None:
 				raise RuntimeError(f'Grid conflict placing {cell.name} at {pos}')
 			self.grid[idx] = (ci, i)

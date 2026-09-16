@@ -38,6 +38,7 @@ class TestVerifyCICDConfig(unittest.TestCase):
 name: gds
 jobs:
   gds:
+    needs: check
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
