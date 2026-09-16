@@ -448,6 +448,60 @@ project:
         ):
             self.assertFalse(check_def_template_config())
 
+    def test_check_def_template_config_missing_def_file(self):
+        valid_info = """
+project:
+  language: "Analog"
+  tiles: "3x2"
+  uses_vapwr: true
+"""
+        valid_docs = """
+## How it works
+## How to test
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_info)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        def mock_exists(path):
+            if "tt_analog_3x2_3v3.def" in path:
+                return False
+            return True
+
+        with patch("os.path.exists", side_effect=mock_exists), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_def_template_config())
+
+    def test_check_def_template_config_missing_symlink(self):
+        valid_info = """
+project:
+  language: "Analog"
+  tiles: "3x2"
+  uses_vapwr: true
+"""
+        valid_docs = """
+## How it works
+## How to test
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_info)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        def mock_exists(path):
+            if "tt/tech" in path or "tt/precheck/tech" in path:
+                return False
+            return True
+
+        with patch("os.path.exists", side_effect=mock_exists), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_def_template_config())
+
     def test_check_lef_pin_and_boundary_config_valid(self):
         valid_lef = """
 MACRO tt_um_tnt_mosbius
