@@ -53,6 +53,7 @@ jobs:
       - name: Create tech symlinks for precheck
         run: |
           mkdir -p tt/precheck
+          ln -sf $(pwd)/tech ../tech
           ln -sf ../tech tt/tech
           ln -sf ../../tech tt/precheck/tech
 
