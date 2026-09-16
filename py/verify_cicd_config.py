@@ -676,8 +676,8 @@ def check_precheck_execution_and_reporting_config(repo_root="."):
                 errors.append("Missing 'actions/checkout@v4' step in precheck job in gds.yaml")
             if "submodules: recursive" not in precheck_block:
                 errors.append("Missing 'submodules: recursive' setting in precheck job in gds.yaml")
-            if "ln -sf $(pwd)/tech ../tech" not in precheck_block:
-                errors.append("Missing 'ln -sf $(pwd)/tech ../tech' symlink creation in precheck job in gds.yaml")
+            if "cp -r tech/* ../tech/" not in precheck_block and "cp -r tech" not in precheck_block:
+                errors.append("Missing 'cp -r tech' directory preparation in precheck job in gds.yaml")
         else:
             errors.append("Could not parse precheck job block in gds.yaml")
 

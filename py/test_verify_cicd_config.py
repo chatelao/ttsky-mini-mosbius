@@ -803,12 +803,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Create tech symlinks for precheck
+      - name: Prepare tech directory for precheck
         run: |
-          mkdir -p tt/precheck
-          ln -sf $(pwd)/tech ../tech
-          ln -sf ../tech tt/tech
-          ln -sf ../../tech tt/precheck/tech
+          mkdir -p ../tech tt/tech tt/precheck/tech
+          cp -r tech/* ../tech/
+          cp -r tech/* tt/tech/
+          cp -r tech/* tt/precheck/tech/
       - uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
   viewer:
     steps: []
