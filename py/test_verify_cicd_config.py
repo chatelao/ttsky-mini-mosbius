@@ -24,6 +24,9 @@ from py.verify_cicd_config import (
     check_stdcell_declarations,
     check_top_module_step_config,
     check_xschem_config,
+    check_upstream_pdk_tag_pinning,
+    check_precheck_report_structure,
+    check_info_yaml_extended_schema,
     check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
     check_workflow_execution_summary_config,
@@ -1020,6 +1023,110 @@ steps:
             "os.listdir", side_effect=mock_listdir
         ), patch("builtins.open", side_effect=mock_open_file):
             self.assertFalse(check_xschem_config())
+
+    def test_check_upstream_pdk_tag_pinning_valid(self):
+        valid_gds = "uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b"
+        valid_docs = "uses: TinyTapeout/tt-gds-action/docs@ttihp26b"
+
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_upstream_pdk_tag_pinning())
+
+    def test_check_upstream_pdk_tag_pinning_invalid(self):
+        invalid_gds = "uses: TinyTapeout/tt-gds-action/custom_gds@ttsky26c"
+        valid_docs = "uses: TinyTapeout/tt-gds-action/docs@ttihp26b"
+
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_upstream_pdk_tag_pinning())
+
+    def test_check_precheck_report_structure_valid(self):
+        valid_gds = """
+jobs:
+  precheck:
+    needs: gds
+    steps:
+      - uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_gds)
+        ):
+            self.assertTrue(check_precheck_report_structure())
+
+    def test_check_precheck_report_structure_invalid(self):
+        invalid_gds = """
+jobs:
+  precheck:
+    steps: []
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_gds)
+        ):
+            self.assertFalse(check_precheck_report_structure())
+
+    def test_check_info_yaml_extended_schema_valid(self):
+        valid_info = """
+title: "Mini-MOSbius"
+author: "Sylvain Munaut"
+description: "Mini-MOSbius variant"
+language: "Analog"
+tiles: "3x2"
+uses_vapwr: true
+top_module: "tt_um_tnt_mosbius"
+analog_pins: 6
+pinout:
+  ua[0]: "bias"
+"""
+        valid_docs = """
+## How it works
+Description
+
+## How to test
+Instructions
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_info)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_info_yaml_extended_schema())
+
+    def test_check_info_yaml_extended_schema_invalid(self):
+        invalid_info = """
+title: "Mini-MOSbius"
+"""
+        valid_docs = """
+## How it works
+## How to test
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_info)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_info_yaml_extended_schema())
 
 
 if __name__ == "__main__":
