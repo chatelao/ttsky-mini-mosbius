@@ -877,6 +877,79 @@ def check_stdcell_declarations(repo_root="."):
     return True
 
 
+def check_upstream_pdk_action_tags(repo_root="."):
+    """Verifies that all TinyTapeout action references in workflow files use the ihp-sg13g2 tag @ttihp26b."""
+    workflows_dir = os.path.join(repo_root, ".github/workflows")
+    if not os.path.exists(workflows_dir):
+        print(f"ERROR: {workflows_dir} directory does not exist.")
+        return False
+
+    errors = []
+    wf_files = [f for f in os.listdir(workflows_dir) if f.endswith(".yaml") or f.endswith(".yml")]
+
+    if not wf_files:
+        errors.append("No workflow files found in .github/workflows/")
+
+    for wf in wf_files:
+        wf_path = os.path.join(workflows_dir, wf)
+        with open(wf_path, "r") as f:
+            content = f.read()
+
+        # Find all TinyTapeout action references
+        tt_actions = re.findall(r"TinyTapeout/tt-gds-action/[a-zA-Z0-9_-]+@([a-zA-Z0-9_-]+)", content)
+        for tag in tt_actions:
+            if tag != "ttihp26b":
+                errors.append(f"Workflow {wf} has action tag '{tag}' instead of expected 'ttihp26b'")
+
+        if "ttsky" in content:
+            errors.append(f"Workflow {wf} contains legacy SkyWater tag reference 'ttsky'")
+
+    if errors:
+        print("FAILED upstream PDK action tag drift check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED upstream PDK action tag drift check")
+    return True
+
+
+def check_info_yaml_schema_compatibility(repo_root="."):
+    """Verifies complete TinyTapeout info.yaml schema fields and compatibility."""
+    filepath = os.path.join(repo_root, "info.yaml")
+    if not os.path.exists(filepath):
+        print(f"ERROR: {filepath} does not exist.")
+        return False
+
+    with open(filepath, "r") as f:
+        content = f.read()
+
+    errors = []
+
+    required_project_fields = [
+        "title:", "author:", "discord:", "description:", "language:",
+        "clock_hz:", "tiles:", "analog_pins:", "uses_vapwr:", "top_module:", "source_files:"
+    ]
+    for field in required_project_fields:
+        if field not in content:
+            errors.append(f"Missing required schema field '{field}' in info.yaml")
+
+    if "yaml_version:" not in content:
+        errors.append("Missing required 'yaml_version:' in info.yaml")
+
+    if "pinout:" not in content:
+        errors.append("Missing required 'pinout:' block in info.yaml")
+
+    if errors:
+        print(f"FAILED info.yaml schema compatibility check in {filepath}:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print(f"PASSED info.yaml schema compatibility check in {filepath}")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -904,6 +977,8 @@ def main():
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
     xschem_config_ok = check_xschem_config(repo_root)
+    tags_drift_ok = check_upstream_pdk_action_tags(repo_root)
+    schema_compat_ok = check_info_yaml_schema_compatibility(repo_root)
 
     if (
         gds_ok
@@ -927,6 +1002,8 @@ def main():
         and checkout_submodule_ok
         and stdcell_decl_ok
         and xschem_config_ok
+        and tags_drift_ok
+        and schema_compat_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
