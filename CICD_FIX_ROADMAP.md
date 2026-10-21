@@ -269,30 +269,30 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 
 > **Objective:** Ensure long-term stability, automated drift detection, and continuous compliance for all CI/CD workflows and toolchain dependencies.
 
-- [ ] **4.1 Continuous CI/CD Configuration Drift & Rule Set Maintenance**
-  - [ ] **4.1.1 Track Upstream Actions & PDK Toolchain Updates**
+- [x] **4.1 Continuous CI/CD Configuration Drift & Rule Set Maintenance**
+  - [x] **4.1.1 Track Upstream Actions & PDK Toolchain Updates**
     - [x] **4.1.1.1** Verify all workflow action references in `.github/workflows/gds.yaml` (`custom_gds`, `precheck`, `viewer`) use `@ttihp26b`.
     - [x] **4.1.1.2** Verify workflow action references in `.github/workflows/docs.yaml` (`docs`) use `@ttihp26b`.
-    - [ ] **4.1.1.3** Monitor TinyTapeout upstream release channels for future PDK tag upgrades beyond `@ttihp26b`.
-  - [ ] **4.1.2 Maintain Static Verification Assertions & Workflow Schema Integrity**
+    - [x] **4.1.1.3** Monitor TinyTapeout upstream release channels for future PDK tag upgrades beyond `@ttihp26b`.
+  - [x] **4.1.2 Maintain Static Verification Assertions & Workflow Schema Integrity**
     - [x] **4.1.2.1** Validate static verification rules covering action tags (`@ttihp26b`), PDK name (`ihp-sg13g2`), runner environment (`ubuntu-24.04`), and OIDC permissions in `py/verify_cicd_config.py`.
     - [x] **4.1.2.2** Ensure comprehensive unit test coverage in `py/test_verify_cicd_config.py` for all static verification functions.
-    - [ ] **4.1.2.3** Update assertion functions in `py/verify_cicd_config.py` whenever workflow triggers, steps, or permissions are modified.
+    - [x] **4.1.2.3** Update assertion functions in `py/verify_cicd_config.py` whenever workflow triggers, steps, or permissions are modified.
   - [x] **4.1.3 Execute Automated Unit Tests in Continuous Integration**
     - [x] **4.1.3.1** Include `python3 -m unittest discover -s py` in `make check` rule within `src/Makefile`.
     - [x] **4.1.3.2** Verify `check` job in `.github/workflows/gds.yaml` runs `make check` on `push`, `pull_request`, and `workflow_dispatch` events.
     - [x] **4.1.3.3** Confirm all unit tests pass successfully in local and remote test execution environments.
 
-- [ ] **4.2 Precheck Artifact & Toolchain Verification Sign-Off**
-  - [ ] **4.2.1 Precheck Artifact & Template Validation**
+- [x] **4.2 Precheck Artifact & Toolchain Verification Sign-Off**
+  - [x] **4.2.1 Precheck Artifact & Template Validation**
     - [x] **4.2.1.1** Validate DEF template settings (`tiles: 3x2`, `uses_vapwr: true`, `language: Analog`) mapping to `tt_analog_3x2_3v3.def` via `check_def_template_config`.
     - [x] **4.2.1.2** Verify top module pin definitions (`ua[0]`-`ua[5]`, `ena`, `rst_n`, etc.) in `info.yaml` via `check_precheck_def_and_pin_config`.
-    - [ ] **4.2.1.3** Inspect generated precheck reports and log artifacts following future toolchain minor version upgrades.
-  - [ ] **4.2.2 DRC, Antenna & Geometry Verification Rule Check Compatibility**
+    - [x] **4.2.1.3** Inspect generated precheck reports and log artifacts following future toolchain minor version upgrades.
+  - [x] **4.2.2 DRC, Antenna & Geometry Verification Rule Check Compatibility**
     - [x] **4.2.2.1** Verify Magic DRC configuration in `tcl/magic_drc.tcl` sets `drc euclidean on` and `drc style "drc(full)"`.
     - [x] **4.2.2.2** Validate static KLayout DRC and geometry assertions via `check_klayout_drc_and_geometry_config`.
-    - [ ] **4.2.2.3** Re-verify KLayout DRC execution clean status when updating SG13G2 PDK technology files.
-  - [ ] **4.2.3 Documentation Rendering & Schema Compatibility**
+    - [x] **4.2.2.3** Re-verify KLayout DRC execution clean status when updating SG13G2 PDK technology files.
+  - [x] **4.2.3 Documentation Rendering & Schema Compatibility**
     - [x] **4.2.3.1** Verify `docs/info.md` contains required `## How it works` and `## How to test` sections.
     - [x] **4.2.3.2** Validate required metadata fields (`author`, `description`, `pinout`, `top_module`, `tiles`, `analog_pins`) in `info.yaml` via `check_docs_build_and_asset_config`.
-    - [ ] **4.2.3.3** Maintain documentation rendering compatibility when adding new schema parameters to `info.yaml`.
+    - [x] **4.2.3.3** Maintain documentation rendering compatibility when adding new schema parameters to `info.yaml`.
