@@ -15,14 +15,18 @@ from py.verify_cicd_config import (
     check_gds_workflow,
     check_git_submodule_and_checkout_config,
     check_info_yaml,
+    check_info_yaml_extended_schema,
     check_klayout_drc_and_geometry_config,
     check_lef_pin_and_boundary_config,
     check_pages_api_config,
     check_pages_deployment_and_oidc_config,
+    check_pdk_tech_and_drc_rules,
     check_precheck_def_and_pin_config,
     check_precheck_execution_and_reporting_config,
+    check_precheck_reports_and_logs,
     check_stdcell_declarations,
     check_top_module_step_config,
+    check_upstream_tag_and_pdk_compatibility,
     check_xschem_config,
     check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
@@ -1020,6 +1024,91 @@ steps:
             "os.listdir", side_effect=mock_listdir
         ), patch("builtins.open", side_effect=mock_open_file):
             self.assertFalse(check_xschem_config())
+
+    def test_check_upstream_tag_and_pdk_compatibility_valid(self):
+        valid_gds = "custom_gds@ttihp26b precheck@ttihp26b viewer@ttihp26b pdk: ihp-sg13g2"
+        valid_docs = "docs@ttihp26b"
+
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_upstream_tag_and_pdk_compatibility())
+
+    def test_check_upstream_tag_and_pdk_compatibility_invalid(self):
+        invalid_gds = "custom_gds@ttsky26c"
+        invalid_docs = "docs@ttsky26c"
+
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_upstream_tag_and_pdk_compatibility())
+
+    def test_check_info_yaml_extended_schema_valid(self):
+        valid_info = """
+title: "Test"
+author: "Test"
+description: "Test"
+language: "Analog"
+tiles: "3x2"
+analog_pins: 6
+uses_vapwr: true
+top_module: "tt_um_tnt_mosbius"
+yaml_version: 6
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_info)
+        ):
+            self.assertTrue(check_info_yaml_extended_schema())
+
+    def test_check_info_yaml_extended_schema_invalid(self):
+        invalid_info = "title: 'Test'"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
+        ):
+            self.assertFalse(check_info_yaml_extended_schema())
+
+    def test_check_precheck_reports_and_logs_valid(self):
+        valid_gds = """
+jobs:
+  precheck:
+    continue-on-error: true
+    steps:
+      - uses: TinyTapeout/tt-gds-action/precheck@ttihp26b
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_gds)
+        ):
+            self.assertTrue(check_precheck_reports_and_logs())
+
+    def test_check_precheck_reports_and_logs_invalid(self):
+        invalid_gds = "jobs: {}"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_gds)
+        ):
+            self.assertFalse(check_precheck_reports_and_logs())
+
+    def test_check_pdk_tech_and_drc_rules_valid(self):
+        valid_drc = "drc euclidean on"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_drc)
+        ):
+            self.assertTrue(check_pdk_tech_and_drc_rules())
+
+    def test_check_pdk_tech_and_drc_rules_invalid(self):
+        with patch("os.path.exists", return_value=False):
+            self.assertFalse(check_pdk_tech_and_drc_rules())
 
 
 if __name__ == "__main__":
