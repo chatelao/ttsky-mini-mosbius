@@ -877,6 +877,186 @@ def check_stdcell_declarations(repo_root="."):
     return True
 
 
+def check_upstream_tag_and_pdk_compatibility(repo_root="."):
+    """Verifies that workflow files align tt-gds-action tags with the ihp-sg13g2 PDK tag family."""
+    workflows = [
+        os.path.join(repo_root, ".github/workflows/gds.yaml"),
+        os.path.join(repo_root, ".github/workflows/docs.yaml"),
+    ]
+    errors = []
+
+    for path in workflows:
+        if not os.path.exists(path):
+            errors.append(f"Missing workflow file: {path}")
+            continue
+        with open(path, "r") as f:
+            content = f.read()
+
+        tt_actions = re.findall(r"TinyTapeout/tt-gds-action/([\w-]+)@([\w\.\-]+)", content)
+        for action_name, tag in tt_actions:
+            if not tag.startswith("ttihp"):
+                errors.append(
+                    f"Incompatible action tag '{tag}' for action '{action_name}' in {os.path.basename(path)}. Expected ttihp* tag (e.g., ttihp26b)."
+                )
+            if "sky" in tag.lower():
+                errors.append(
+                    f"Legacy SkyWater tag family '{tag}' detected in {os.path.basename(path)} for action '{action_name}'."
+                )
+
+    if errors:
+        print("FAILED upstream tag and PDK compatibility check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED upstream tag and PDK compatibility check")
+    return True
+
+
+def check_workflow_schema_integrity(repo_root="."):
+    """Validates top-level YAML keys and required job definitions across workflows."""
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    docs_path = os.path.join(repo_root, ".github/workflows/docs.yaml")
+    errors = []
+
+    for path in [gds_path, docs_path]:
+        filename = os.path.basename(path)
+        if not os.path.exists(path):
+            errors.append(f"Missing file: {path}")
+            continue
+        with open(path, "r") as f:
+            content = f.read()
+
+        for top_key in ["name:", "on:", "jobs:"]:
+            if top_key not in content:
+                errors.append(f"Missing top-level YAML key '{top_key}' in {filename}")
+
+    if os.path.exists(gds_path):
+        with open(gds_path, "r") as f:
+            gds_content = f.read()
+        for job in ["gds:", "precheck:", "viewer:"]:
+            if job not in gds_content:
+                errors.append(f"Missing required job '{job[:-1]}' in gds.yaml")
+
+    if os.path.exists(docs_path):
+        with open(docs_path, "r") as f:
+            docs_content = f.read()
+        if "docs:" not in docs_content:
+            errors.append("Missing required job 'docs' in docs.yaml")
+
+    if errors:
+        print("FAILED workflow schema integrity check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED workflow schema integrity check")
+    return True
+
+
+def check_precheck_reports_and_logs(repo_root="."):
+    """Validates precheck log execution steps and pathing configuration."""
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    errors = []
+
+    if not os.path.exists(gds_path):
+        errors.append(f"Missing workflow file: {gds_path}")
+    else:
+        with open(gds_path, "r") as f:
+            content = f.read()
+
+        if "precheck:" not in content:
+            errors.append("Missing precheck job definition in gds.yaml")
+        if "TinyTapeout/tt-gds-action/precheck@ttihp26b" not in content:
+            errors.append("Missing precheck@ttihp26b step in gds.yaml")
+        if "cp -r tech/*" not in content:
+            errors.append("Missing tech directory copy step for precheck DEF resolution in gds.yaml")
+
+    if errors:
+        print("FAILED precheck reports and logs check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED precheck reports and logs check")
+    return True
+
+
+def check_pdk_tech_and_drc_rules(repo_root="."):
+    """Verifies existence of SG13G2 technology DEF templates and DRC rule configuration."""
+    def_template_path = os.path.join(
+        repo_root, "tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def"
+    )
+    drc_script_path = os.path.join(repo_root, "tcl/magic_drc.tcl")
+    errors = []
+
+    if not os.path.exists(def_template_path):
+        errors.append(f"Missing SG13G2 DEF template file: {def_template_path}")
+    else:
+        with open(def_template_path, "r") as f:
+            def_content = f.read()
+        if "DESIGN tt_" not in def_content:
+            errors.append(f"Invalid DESIGN name in DEF template {def_template_path}")
+        if "DIEAREA" not in def_content:
+            errors.append(f"Missing DIEAREA declaration in DEF template {def_template_path}")
+
+    if not os.path.exists(drc_script_path):
+        errors.append(f"Missing Magic DRC script file: {drc_script_path}")
+    else:
+        with open(drc_script_path, "r") as f:
+            drc_content = f.read()
+        if "drc euclidean on" not in drc_content:
+            errors.append("Missing 'drc euclidean on' in tcl/magic_drc.tcl")
+        if "drc style" not in drc_content:
+            errors.append("Missing 'drc style' definition in tcl/magic_drc.tcl")
+
+    if errors:
+        print("FAILED PDK tech and DRC rules check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED PDK tech and DRC rules check")
+    return True
+
+
+def check_info_yaml_extended_schema(repo_root="."):
+    """Validates extended metadata fields in info.yaml required for TinyTapeout sign-off."""
+    info_path = os.path.join(repo_root, "info.yaml")
+    errors = []
+
+    if not os.path.exists(info_path):
+        errors.append(f"Missing file: {info_path}")
+    else:
+        with open(info_path, "r") as f:
+            content = f.read()
+
+        required_fields = [
+            "title:",
+            "author:",
+            "description:",
+            "language:",
+            "tiles:",
+            "analog_pins:",
+            "uses_vapwr:",
+            "top_module:",
+            "pinout:",
+            "yaml_version:",
+        ]
+        for field in required_fields:
+            if field not in content:
+                errors.append(f"Missing required field '{field}' in info.yaml")
+
+    if errors:
+        print("FAILED info.yaml extended schema check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED info.yaml extended schema check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -904,6 +1084,11 @@ def main():
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
     xschem_config_ok = check_xschem_config(repo_root)
+    upstream_tag_ok = check_upstream_tag_and_pdk_compatibility(repo_root)
+    wf_schema_ok = check_workflow_schema_integrity(repo_root)
+    precheck_logs_ok = check_precheck_reports_and_logs(repo_root)
+    pdk_tech_ok = check_pdk_tech_and_drc_rules(repo_root)
+    info_ext_ok = check_info_yaml_extended_schema(repo_root)
 
     if (
         gds_ok
@@ -927,6 +1112,11 @@ def main():
         and checkout_submodule_ok
         and stdcell_decl_ok
         and xschem_config_ok
+        and upstream_tag_ok
+        and wf_schema_ok
+        and precheck_logs_ok
+        and pdk_tech_ok
+        and info_ext_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
