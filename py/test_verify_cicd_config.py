@@ -1021,6 +1021,110 @@ steps:
         ), patch("builtins.open", side_effect=mock_open_file):
             self.assertFalse(check_xschem_config())
 
+    def test_check_upstream_tag_and_pdk_compatibility_valid(self):
+        valid_wf = "uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b\n  pdk: ihp-sg13g2"
+
+        def mock_listdir(path):
+            return ["gds.yaml", "docs.yaml"]
+
+        with patch("os.path.exists", return_value=True), patch(
+            "os.listdir", side_effect=mock_listdir
+        ), patch("builtins.open", unittest.mock.mock_open(read_data=valid_wf)):
+            from py.verify_cicd_config import check_upstream_tag_and_pdk_compatibility
+            self.assertTrue(check_upstream_tag_and_pdk_compatibility())
+
+    def test_check_upstream_tag_and_pdk_compatibility_invalid(self):
+        invalid_wf = "uses: TinyTapeout/tt-gds-action/custom_gds@ttsky26c\n  pdk: sky130"
+
+        def mock_listdir(path):
+            return ["gds.yaml"]
+
+        with patch("os.path.exists", return_value=True), patch(
+            "os.listdir", side_effect=mock_listdir
+        ), patch("builtins.open", unittest.mock.mock_open(read_data=invalid_wf)):
+            from py.verify_cicd_config import check_upstream_tag_and_pdk_compatibility
+            self.assertFalse(check_upstream_tag_and_pdk_compatibility())
+
+    def test_check_precheck_reports_and_logs_valid(self):
+        valid_gds = "precheck:\n  steps:\n    - run: cp -r tech/* ../tech/"
+
+        def mock_open_file(filepath, mode="r"):
+            return unittest.mock.mock_open(read_data=valid_gds)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            from py.verify_cicd_config import check_precheck_reports_and_logs
+            self.assertTrue(check_precheck_reports_and_logs())
+
+    def test_check_precheck_reports_and_logs_invalid(self):
+        invalid_gds = "precheck:\n  steps: []"
+
+        def mock_open_file(filepath, mode="r"):
+            return unittest.mock.mock_open(read_data=invalid_gds)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            from py.verify_cicd_config import check_precheck_reports_and_logs
+            self.assertFalse(check_precheck_reports_and_logs())
+
+    def test_check_pdk_tech_and_drc_rules_valid(self):
+        valid_def = "DESIGN tt_analog_3x2_3v3"
+        valid_drc = "drc euclidean on"
+
+        def mock_open_file(filepath, mode="r"):
+            if "def" in filepath:
+                return unittest.mock.mock_open(read_data=valid_def)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_drc)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            from py.verify_cicd_config import check_pdk_tech_and_drc_rules
+            self.assertTrue(check_pdk_tech_and_drc_rules())
+
+    def test_check_pdk_tech_and_drc_rules_invalid(self):
+        invalid_def = ""
+        invalid_drc = "# No rules"
+
+        def mock_open_file(filepath, mode="r"):
+            if "def" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_def)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_drc)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            from py.verify_cicd_config import check_pdk_tech_and_drc_rules
+            self.assertFalse(check_pdk_tech_and_drc_rules())
+
+    def test_check_info_yaml_extended_schema_valid(self):
+        valid_info = "yaml_version: 6\npinout:\n  ui[0]: 'data'\n  uo[0]: 'out'\n  ua[0]: 'ref'"
+
+        def mock_open_file(filepath, mode="r"):
+            return unittest.mock.mock_open(read_data=valid_info)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            from py.verify_cicd_config import check_info_yaml_extended_schema
+            self.assertTrue(check_info_yaml_extended_schema())
+
+    def test_check_info_yaml_extended_schema_invalid(self):
+        invalid_info = "title: 'test'"
+
+        def mock_open_file(filepath, mode="r"):
+            return unittest.mock.mock_open(read_data=invalid_info)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            from py.verify_cicd_config import check_info_yaml_extended_schema
+            self.assertFalse(check_info_yaml_extended_schema())
+
 
 if __name__ == "__main__":
     unittest.main()
