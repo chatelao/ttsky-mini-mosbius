@@ -838,6 +838,110 @@ def check_xschem_config(repo_root="."):
     return True
 
 
+def check_upstream_pdk_tag_pinning(repo_root="."):
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    docs_path = os.path.join(repo_root, ".github/workflows/docs.yaml")
+    errors = []
+
+    for path in [gds_path, docs_path]:
+        filename = os.path.basename(path)
+        if not os.path.exists(path):
+            errors.append(f"Missing file: {path}")
+        else:
+            with open(path, "r") as f:
+                content = f.read()
+            # Find all TinyTapeout/tt-gds-action references
+            tt_actions = re.findall(r"TinyTapeout/tt-gds-action/[a-zA-Z0-9_-]+@\S+", content)
+            if not tt_actions:
+                errors.append(f"No TinyTapeout action references found in {filename}")
+            for action in tt_actions:
+                if not action.endswith("@ttihp26b"):
+                    errors.append(f"Action reference '{action}' in {filename} is not pinned to @ttihp26b")
+
+    if errors:
+        print("FAILED upstream PDK tag pinning check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED upstream PDK tag pinning check")
+    return True
+
+
+def check_precheck_report_structure(repo_root="."):
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    errors = []
+
+    if not os.path.exists(gds_path):
+        errors.append(f"Missing file: {gds_path}")
+    else:
+        with open(gds_path, "r") as f:
+            content = f.read()
+
+        if "precheck:" not in content:
+            errors.append("Missing 'precheck' job in gds.yaml")
+        if "TinyTapeout/tt-gds-action/precheck@ttihp26b" not in content:
+            errors.append("Missing precheck@ttihp26b action step in gds.yaml")
+        if "needs: gds" not in content:
+            errors.append("Precheck job missing 'needs: gds' dependency in gds.yaml")
+
+    if errors:
+        print("FAILED precheck report structure check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED precheck report structure check")
+    return True
+
+
+def check_info_yaml_extended_schema(repo_root="."):
+    info_path = os.path.join(repo_root, "info.yaml")
+    docs_info_path = os.path.join(repo_root, "docs/info.md")
+    errors = []
+
+    if not os.path.exists(info_path):
+        errors.append(f"Missing file: {info_path}")
+    else:
+        with open(info_path, "r") as f:
+            content = f.read()
+
+        required_keys = [
+            "title:",
+            "author:",
+            "description:",
+            "language:",
+            "tiles:",
+            "uses_vapwr:",
+            "top_module:",
+            "analog_pins:",
+            "pinout:",
+        ]
+        for key in required_keys:
+            if key not in content:
+                errors.append(f"Missing schema key '{key}' in info.yaml")
+
+    if not os.path.exists(docs_info_path):
+        errors.append(f"Missing file: {docs_info_path}")
+    else:
+        with open(docs_info_path, "r") as f:
+            docs_content = f.read()
+
+        if "## How it works" not in docs_content:
+            errors.append("Missing '## How it works' section in docs/info.md")
+        if "## How to test" not in docs_content:
+            errors.append("Missing '## How to test' section in docs/info.md")
+
+    if errors:
+        print("FAILED info.yaml extended schema check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED info.yaml extended schema check")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -904,6 +1008,9 @@ def main():
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
     xschem_config_ok = check_xschem_config(repo_root)
+    tag_pinning_ok = check_upstream_pdk_tag_pinning(repo_root)
+    precheck_struct_ok = check_precheck_report_structure(repo_root)
+    info_schema_ok = check_info_yaml_extended_schema(repo_root)
 
     if (
         gds_ok
@@ -927,6 +1034,9 @@ def main():
         and checkout_submodule_ok
         and stdcell_decl_ok
         and xschem_config_ok
+        and tag_pinning_ok
+        and precheck_struct_ok
+        and info_schema_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
