@@ -877,6 +877,201 @@ def check_stdcell_declarations(repo_root="."):
     return True
 
 
+def check_upstream_tag_and_pdk_compatibility(repo_root="."):
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    docs_path = os.path.join(repo_root, ".github/workflows/docs.yaml")
+
+    errors = []
+
+    if not os.path.exists(gds_path):
+        errors.append(f"Missing file: {gds_path}")
+    else:
+        with open(gds_path, "r") as f:
+            gds_content = f.read()
+
+        tags = re.findall(r"TinyTapeout/tt-gds-action/[a-zA-Z0-9_-]+@([a-zA-Z0-9_-]+)", gds_content)
+        if not tags:
+            errors.append("No TinyTapeout/tt-gds-action action tags found in gds.yaml")
+        for tag in tags:
+            if tag != "ttihp26b":
+                errors.append(f"Incompatible action tag '@{tag}' found in gds.yaml (expected '@ttihp26b')")
+
+        if "pdk: ihp-sg13g2" not in gds_content:
+            errors.append("Missing expected 'pdk: ihp-sg13g2' parameter in gds.yaml")
+
+    if not os.path.exists(docs_path):
+        errors.append(f"Missing file: {docs_path}")
+    else:
+        with open(docs_path, "r") as f:
+            docs_content = f.read()
+
+        tags = re.findall(r"TinyTapeout/tt-gds-action/[a-zA-Z0-9_-]+@([a-zA-Z0-9_-]+)", docs_content)
+        if not tags:
+            errors.append("No TinyTapeout/tt-gds-action action tags found in docs.yaml")
+        for tag in tags:
+            if tag != "ttihp26b":
+                errors.append(f"Incompatible action tag '@{tag}' found in docs.yaml (expected '@ttihp26b')")
+
+    if errors:
+        print("FAILED upstream tag and PDK compatibility check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED upstream tag and PDK compatibility check")
+    return True
+
+
+def check_workflow_schema_integrity(repo_root="."):
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    docs_path = os.path.join(repo_root, ".github/workflows/docs.yaml")
+
+    errors = []
+
+    if not os.path.exists(gds_path):
+        errors.append(f"Missing file: {gds_path}")
+    else:
+        with open(gds_path, "r") as f:
+            content = f.read()
+
+        for trigger in ["push:", "pull_request:", "workflow_dispatch:"]:
+            if trigger not in content:
+                errors.append(f"Missing required trigger event '{trigger[:-1]}' in gds.yaml")
+
+        for job in ["gds:", "precheck:", "viewer:"]:
+            if job not in content:
+                errors.append(f"Missing required job '{job[:-1]}' in gds.yaml")
+
+        if "runs-on: ubuntu-24.04" not in content:
+            errors.append("Missing 'runs-on: ubuntu-24.04' runner specification in gds.yaml")
+
+    if not os.path.exists(docs_path):
+        errors.append(f"Missing file: {docs_path}")
+    else:
+        with open(docs_path, "r") as f:
+            content = f.read()
+
+        for trigger in ["push:", "pull_request:", "workflow_dispatch:"]:
+            if trigger not in content:
+                errors.append(f"Missing required trigger event '{trigger[:-1]}' in docs.yaml")
+
+        if "docs:" not in content:
+            errors.append("Missing required job 'docs' in docs.yaml")
+
+        if "runs-on: ubuntu-24.04" not in content:
+            errors.append("Missing 'runs-on: ubuntu-24.04' runner specification in docs.yaml")
+
+    if errors:
+        print("FAILED workflow schema integrity check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED workflow schema integrity check")
+    return True
+
+
+def check_precheck_reports_and_logs(repo_root="."):
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+
+    errors = []
+
+    if not os.path.exists(gds_path):
+        errors.append(f"Missing file: {gds_path}")
+    else:
+        with open(gds_path, "r") as f:
+            content = f.read()
+
+        if "precheck:" not in content:
+            errors.append("Missing 'precheck' job in gds.yaml")
+        if "continue-on-error: true" not in content:
+            errors.append("Missing 'continue-on-error: true' flag in precheck job in gds.yaml")
+        if "TinyTapeout/tt-gds-action/precheck@ttihp26b" not in content:
+            errors.append("Missing 'precheck@ttihp26b' action step in gds.yaml")
+        if "cp -r tech" not in content:
+            errors.append("Missing tech directory copy step for precheck report resolution in gds.yaml")
+
+    if errors:
+        print("FAILED precheck reports and logs check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED precheck reports and logs check")
+    return True
+
+
+def check_pdk_tech_and_drc_rules(repo_root="."):
+    def_path = os.path.join(repo_root, "tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def")
+    drc_path = os.path.join(repo_root, "tcl/magic_drc.tcl")
+
+    errors = []
+
+    if not os.path.exists(def_path):
+        errors.append(f"Missing analog DEF template: {def_path}")
+    else:
+        with open(def_path, "r") as f:
+            def_content = f.read()
+        if "DESIGN tt_um_tnt_mosbius" not in def_content and "DESIGN tt_analog_3x2_3v3" not in def_content:
+            errors.append(f"Invalid DESIGN name in DEF template {def_path}")
+
+    if not os.path.exists(drc_path):
+        errors.append(f"Missing DRC script: {drc_path}")
+    else:
+        with open(drc_path, "r") as f:
+            drc_content = f.read()
+        if "drc euclidean on" not in drc_content:
+            errors.append("Missing 'drc euclidean on' setting in tcl/magic_drc.tcl")
+        if 'drc style "drc(full)"' not in drc_content and "drc style drc(full)" not in drc_content:
+            errors.append("Missing 'drc style \"drc(full)\"' setting in tcl/magic_drc.tcl")
+
+    if errors:
+        print("FAILED PDK tech and DRC rules check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED PDK tech and DRC rules check")
+    return True
+
+
+def check_info_yaml_extended_schema(repo_root="."):
+    info_path = os.path.join(repo_root, "info.yaml")
+
+    errors = []
+
+    if not os.path.exists(info_path):
+        errors.append(f"Missing file: {info_path}")
+    else:
+        with open(info_path, "r") as f:
+            content = f.read()
+
+        required_fields = [
+            "top_module:",
+            "language:",
+            "tiles:",
+            "uses_vapwr:",
+            "analog_pins:",
+            "title:",
+            "author:",
+            "description:",
+            "pinout:",
+        ]
+
+        for field in required_fields:
+            if field not in content:
+                errors.append(f"Missing required schema field '{field}' in info.yaml")
+
+    if errors:
+        print("FAILED info.yaml extended schema check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED info.yaml extended schema check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -904,6 +1099,11 @@ def main():
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
     xschem_config_ok = check_xschem_config(repo_root)
+    upstream_tag_pdk_ok = check_upstream_tag_and_pdk_compatibility(repo_root)
+    wf_schema_ok = check_workflow_schema_integrity(repo_root)
+    precheck_reports_ok = check_precheck_reports_and_logs(repo_root)
+    pdk_drc_rules_ok = check_pdk_tech_and_drc_rules(repo_root)
+    info_schema_ok = check_info_yaml_extended_schema(repo_root)
 
     if (
         gds_ok
@@ -927,6 +1127,11 @@ def main():
         and checkout_submodule_ok
         and stdcell_decl_ok
         and xschem_config_ok
+        and upstream_tag_pdk_ok
+        and wf_schema_ok
+        and precheck_reports_ok
+        and pdk_drc_rules_ok
+        and info_schema_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
