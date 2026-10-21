@@ -21,8 +21,10 @@ from py.verify_cicd_config import (
     check_pages_deployment_and_oidc_config,
     check_precheck_def_and_pin_config,
     check_precheck_execution_and_reporting_config,
+    check_precheck_report_and_drc_schema_config,
     check_stdcell_declarations,
     check_top_module_step_config,
+    check_upstream_action_tag_consistency,
     check_xschem_config,
     check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
@@ -262,6 +264,11 @@ project:
   uses_vapwr: true
   tiles: "3x2"
   analog_pins: 6
+  source_files:
+    - "project.v"
+pinout:
+  ua[0]: "bias"
+yaml_version: 6
 """
         with patch("os.path.exists", return_value=True), patch(
             "builtins.open", unittest.mock.mock_open(read_data=valid_info)
@@ -1020,6 +1027,41 @@ steps:
             "os.listdir", side_effect=mock_listdir
         ), patch("builtins.open", side_effect=mock_open_file):
             self.assertFalse(check_xschem_config())
+
+    def test_check_upstream_action_tag_consistency_valid(self):
+        valid_wf = "uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b"
+        def mock_walk(path):
+            return [("/app/.github/workflows", [], ["gds.yaml"])]
+
+        with patch("os.path.exists", return_value=True), patch(
+            "os.walk", side_effect=mock_walk
+        ), patch("builtins.open", unittest.mock.mock_open(read_data=valid_wf)):
+            self.assertTrue(check_upstream_action_tag_consistency())
+
+    def test_check_upstream_action_tag_consistency_invalid(self):
+        invalid_wf = "uses: TinyTapeout/tt-gds-action/custom_gds@ttsky26c"
+        def mock_walk(path):
+            return [("/app/.github/workflows", [], ["gds.yaml"])]
+
+        with patch("os.path.exists", return_value=True), patch(
+            "os.walk", side_effect=mock_walk
+        ), patch("builtins.open", unittest.mock.mock_open(read_data=invalid_wf)):
+            self.assertFalse(check_upstream_action_tag_consistency())
+
+    def test_check_precheck_report_and_drc_schema_config_valid(self):
+        valid_drc = "drc check\ndrc catch"
+        valid_gds = "precheck@ttihp26b"
+
+        def mock_open_file(filepath, mode="r"):
+            if "magic_drc.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=valid_drc)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_gds)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_precheck_report_and_drc_schema_config())
 
 
 if __name__ == "__main__":
