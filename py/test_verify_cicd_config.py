@@ -15,6 +15,7 @@ from py.verify_cicd_config import (
     check_gds_workflow,
     check_git_submodule_and_checkout_config,
     check_info_yaml,
+    check_info_yaml_schema_compatibility,
     check_klayout_drc_and_geometry_config,
     check_lef_pin_and_boundary_config,
     check_pages_api_config,
@@ -23,6 +24,7 @@ from py.verify_cicd_config import (
     check_precheck_execution_and_reporting_config,
     check_stdcell_declarations,
     check_top_module_step_config,
+    check_upstream_pdk_action_tags,
     check_xschem_config,
     check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
@@ -1020,6 +1022,60 @@ steps:
             "os.listdir", side_effect=mock_listdir
         ), patch("builtins.open", side_effect=mock_open_file):
             self.assertFalse(check_xschem_config())
+
+    def test_check_upstream_pdk_action_tags_valid(self):
+        valid_wf = "uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b"
+        def mock_listdir(path):
+            return ["gds.yaml"]
+
+        with patch("os.path.exists", return_value=True), patch(
+            "os.listdir", side_effect=mock_listdir
+        ), patch("builtins.open", unittest.mock.mock_open(read_data=valid_wf)):
+            self.assertTrue(check_upstream_pdk_action_tags())
+
+    def test_check_upstream_pdk_action_tags_invalid(self):
+        invalid_wf = "uses: TinyTapeout/tt-gds-action/custom_gds@ttsky26c"
+        def mock_listdir(path):
+            return ["gds.yaml"]
+
+        with patch("os.path.exists", return_value=True), patch(
+            "os.listdir", side_effect=mock_listdir
+        ), patch("builtins.open", unittest.mock.mock_open(read_data=invalid_wf)):
+            self.assertFalse(check_upstream_pdk_action_tags())
+
+    def test_check_info_yaml_schema_compatibility_valid(self):
+        valid_info = """
+yaml_version: 6
+project:
+  title: "Title"
+  author: "Author"
+  discord: "User"
+  description: "Desc"
+  language: "Analog"
+  clock_hz: 0
+  tiles: "3x2"
+  analog_pins: 6
+  uses_vapwr: true
+  top_module: "tt_um_tnt_mosbius"
+  source_files:
+    - "project.v"
+pinout:
+  ua[0]: "Ref"
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_info)
+        ):
+            self.assertTrue(check_info_yaml_schema_compatibility())
+
+    def test_check_info_yaml_schema_compatibility_missing_fields(self):
+        invalid_info = """
+project:
+  top_module: "tt_um_tnt_mosbius"
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
+        ):
+            self.assertFalse(check_info_yaml_schema_compatibility())
 
 
 if __name__ == "__main__":
