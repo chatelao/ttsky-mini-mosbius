@@ -146,6 +146,12 @@ def check_info_yaml(repo_root="."):
     if not re.search(r"tiles:\s*[\"']?\d+x\d+[\"']?", content):
         errors.append("Missing or invalid 'tiles' parameter in info.yaml")
 
+    if not re.search(r"yaml_version:\s*6", content):
+        errors.append("Missing or invalid 'yaml_version: 6' in info.yaml")
+
+    if "pinout:" not in content or "source_files:" not in content:
+        errors.append("Missing 'pinout:' or 'source_files:' section in info.yaml")
+
     if errors:
         print(f"FAILED {filepath}:")
         for err in errors:
@@ -838,6 +844,71 @@ def check_xschem_config(repo_root="."):
     return True
 
 
+def check_upstream_action_tag_consistency(repo_root="."):
+    """Verifies that all TinyTapeout action references across workflows use @ttihp26b."""
+    workflows_dir = os.path.join(repo_root, ".github/workflows")
+    if not os.path.exists(workflows_dir):
+        print(f"ERROR: {workflows_dir} directory does not exist!")
+        return False
+
+    errors = []
+    expected_tag = "@ttihp26b"
+
+    for root, _, files in os.walk(workflows_dir):
+        for file in files:
+            if file.endswith(".yaml") or file.endswith(".yml"):
+                wf_path = os.path.join(root, file)
+                with open(wf_path, "r") as f:
+                    content = f.read()
+
+                # Find all TinyTapeout action uses
+                tt_uses = re.findall(r"uses:\s*(TinyTapeout/tt-gds-action/[a-zA-Z0-9_-]+@[^\s]+)", content)
+                for action in tt_uses:
+                    if not action.endswith(expected_tag):
+                        errors.append(f"Inconsistent action tag in {file}: {action} (expected tag '{expected_tag}')")
+
+    if errors:
+        print("FAILED upstream action tag consistency check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED upstream action tag consistency check")
+    return True
+
+
+def check_precheck_report_and_drc_schema_config(repo_root="."):
+    """Validates precheck report/log expectations and DRC compatibility rules."""
+    drc_script_path = os.path.join(repo_root, "tcl/magic_drc.tcl")
+    gds_workflow_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    errors = []
+
+    if not os.path.exists(drc_script_path):
+        errors.append(f"Missing DRC script file: {drc_script_path}")
+    else:
+        with open(drc_script_path, "r") as f:
+            drc_content = f.read()
+        if "drc catch" not in drc_content and "drc count" not in drc_content and "drc check" not in drc_content:
+            errors.append("Missing DRC execution command in tcl/magic_drc.tcl")
+
+    if not os.path.exists(gds_workflow_path):
+        errors.append(f"Missing workflow file: {gds_workflow_path}")
+    else:
+        with open(gds_workflow_path, "r") as f:
+            gds_content = f.read()
+        if "precheck@ttihp26b" not in gds_content:
+            errors.append("Missing 'precheck@ttihp26b' action tag in gds.yaml")
+
+    if errors:
+        print("FAILED precheck report and DRC schema config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED precheck report and DRC schema config check")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -904,6 +975,8 @@ def main():
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
     xschem_config_ok = check_xschem_config(repo_root)
+    action_tag_ok = check_upstream_action_tag_consistency(repo_root)
+    precheck_report_drc_ok = check_precheck_report_and_drc_schema_config(repo_root)
 
     if (
         gds_ok
@@ -927,6 +1000,8 @@ def main():
         and checkout_submodule_ok
         and stdcell_decl_ok
         and xschem_config_ok
+        and action_tag_ok
+        and precheck_report_drc_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
