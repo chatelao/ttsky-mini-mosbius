@@ -15,18 +15,23 @@ from py.verify_cicd_config import (
     check_gds_workflow,
     check_git_submodule_and_checkout_config,
     check_info_yaml,
+    check_info_yaml_extended_schema,
     check_klayout_drc_and_geometry_config,
     check_lef_pin_and_boundary_config,
     check_pages_api_config,
     check_pages_deployment_and_oidc_config,
+    check_pdk_tech_and_drc_rules,
     check_precheck_def_and_pin_config,
     check_precheck_execution_and_reporting_config,
+    check_precheck_reports_and_logs,
     check_stdcell_declarations,
     check_top_module_step_config,
+    check_upstream_tag_and_pdk_compatibility,
     check_xschem_config,
     check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
     check_workflow_execution_summary_config,
+    check_workflow_schema_integrity,
     check_workflow_trigger_events_config,
 )
 
@@ -1020,6 +1025,112 @@ steps:
             "os.listdir", side_effect=mock_listdir
         ), patch("builtins.open", side_effect=mock_open_file):
             self.assertFalse(check_xschem_config())
+
+    def test_check_upstream_tag_and_pdk_compatibility_valid(self):
+        valid_wf = "custom_gds@ttihp26b\npdk: ihp-sg13g2"
+        valid_def = "VERSION 5.8 ;\nDESIGN tt_analog_3x2_3v3 ;"
+
+        def mock_open_file(filepath, mode="r"):
+            if "def" in filepath:
+                return unittest.mock.mock_open(read_data=valid_def)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_wf)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "os.path.getsize", return_value=1024
+        ), patch("builtins.open", side_effect=mock_open_file):
+            self.assertTrue(check_upstream_tag_and_pdk_compatibility())
+
+    def test_check_upstream_tag_and_pdk_compatibility_invalid(self):
+        invalid_wf = "custom_gds@ttsky26c"
+
+        with patch("os.path.exists", return_value=True), patch(
+            "os.path.getsize", return_value=1024
+        ), patch("builtins.open", unittest.mock.mock_open(read_data=invalid_wf)):
+            self.assertFalse(check_upstream_tag_and_pdk_compatibility())
+
+    def test_check_workflow_schema_integrity_valid(self):
+        valid_wf = "name: workflow\non: push\njobs:\n  build:\n    runs-on: ubuntu-24.04"
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_wf)
+        ):
+            self.assertTrue(check_workflow_schema_integrity())
+
+    def test_check_workflow_schema_integrity_invalid(self):
+        invalid_wf = "name: workflow\njobs:\n  build:\n    runs-on: ubuntu-20.04"
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_wf)
+        ):
+            self.assertFalse(check_workflow_schema_integrity())
+
+    def test_check_precheck_reports_and_logs_valid(self):
+        valid_gds_wf = """
+jobs:
+  precheck:
+    continue-on-error: true
+    steps:
+      - run: cp -r tech/* ../tech/
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_gds_wf)
+        ):
+            self.assertTrue(check_precheck_reports_and_logs())
+
+    def test_check_precheck_reports_and_logs_invalid(self):
+        invalid_gds_wf = "jobs:\n  other:\n    steps: []"
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_gds_wf)
+        ):
+            self.assertFalse(check_precheck_reports_and_logs())
+
+    def test_check_pdk_tech_and_drc_rules_valid(self):
+        valid_drc = "drc euclidean on"
+        valid_fix = "189"
+
+        def mock_open_file(filepath, mode="r"):
+            if "magic_drc" in filepath:
+                return unittest.mock.mock_open(read_data=valid_drc)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_fix)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_pdk_tech_and_drc_rules())
+
+    def test_check_pdk_tech_and_drc_rules_invalid(self):
+        invalid_drc = "# No DRC rules"
+        invalid_fix = "0"
+
+        def mock_open_file(filepath, mode="r"):
+            if "magic_drc" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_drc)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_fix)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_pdk_tech_and_drc_rules())
+
+    def test_check_info_yaml_extended_schema_valid(self):
+        valid_info = "clock_hz: 0\nsource_files:\n  - project.v\ndiscord: 246tnt"
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_info)
+        ):
+            self.assertTrue(check_info_yaml_extended_schema())
+
+    def test_check_info_yaml_extended_schema_invalid(self):
+        invalid_info = "clock_hz: 0"
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
+        ):
+            self.assertFalse(check_info_yaml_extended_schema())
 
 
 if __name__ == "__main__":
