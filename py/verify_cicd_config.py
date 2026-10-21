@@ -838,6 +838,131 @@ def check_xschem_config(repo_root="."):
     return True
 
 
+def check_upstream_pdk_and_action_tag_compatibility(repo_root="."):
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    docs_path = os.path.join(repo_root, ".github/workflows/docs.yaml")
+    errors = []
+
+    expected_tag = "@ttihp26b"
+    expected_pdk = "pdk: ihp-sg13g2"
+
+    if os.path.exists(gds_path):
+        with open(gds_path, "r") as f:
+            content = f.read()
+        if expected_tag not in content:
+            errors.append(f"gds.yaml missing uniform action tag '{expected_tag}'")
+        if expected_pdk not in content:
+            errors.append(f"gds.yaml missing expected PDK parameter '{expected_pdk}'")
+        if "@ttsky" in content or "ttsky26c" in content:
+            errors.append("gds.yaml contains legacy SkyWater action tag drift")
+
+    if os.path.exists(docs_path):
+        with open(docs_path, "r") as f:
+            content = f.read()
+        if expected_tag not in content:
+            errors.append(f"docs.yaml missing uniform action tag '{expected_tag}'")
+        if "@ttsky" in content or "ttsky26c" in content:
+            errors.append("docs.yaml contains legacy SkyWater action tag drift")
+
+    if errors:
+        print("FAILED upstream PDK and action tag compatibility check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED upstream PDK and action tag compatibility check")
+    return True
+
+
+def check_precheck_report_artifacts(repo_root="."):
+    def_template_path = os.path.join(
+        repo_root, "tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def"
+    )
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    errors = []
+
+    if not os.path.exists(def_template_path):
+        errors.append(f"Missing precheck analog DEF template file: {def_template_path}")
+    elif os.path.getsize(def_template_path) == 0:
+        errors.append(f"Precheck analog DEF template file is empty: {def_template_path}")
+
+    if os.path.exists(gds_path):
+        with open(gds_path, "r") as f:
+            content = f.read()
+        if "cp -r tech/*" not in content and "cp -r tech" not in content:
+            errors.append("gds.yaml precheck job step missing tech directory preparation ('cp -r tech/*')")
+
+    if errors:
+        print("FAILED precheck report artifacts check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED precheck report artifacts check")
+    return True
+
+
+def check_pdk_drc_technology_rules(repo_root="."):
+    fix_gds_path = os.path.join(repo_root, "py/fix_gds.py")
+    mag_makefile_path = os.path.join(repo_root, "mag/Makefile")
+    errors = []
+
+    if not os.path.exists(fix_gds_path):
+        errors.append(f"Missing GDS post-processing script: {fix_gds_path}")
+    else:
+        with open(fix_gds_path, "r") as f:
+            content = f.read()
+        if "ihp-sg13g2" not in content and "189" not in content:
+            errors.append("fix_gds.py missing layer remapping rules for IHP SG13G2")
+
+    if not os.path.exists(mag_makefile_path):
+        errors.append(f"Missing Makefile in mag/: {mag_makefile_path}")
+    else:
+        with open(mag_makefile_path, "r") as f:
+            content = f.read()
+        if "ihp-sg13g2.magicrc" not in content:
+            errors.append("mag/Makefile missing 'ihp-sg13g2.magicrc' configuration reference")
+
+    if errors:
+        print("FAILED PDK DRC technology rules check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED PDK DRC technology rules check")
+    return True
+
+
+def check_info_yaml_schema_compatibility(repo_root="."):
+    info_path = os.path.join(repo_root, "info.yaml")
+    errors = []
+
+    if not os.path.exists(info_path):
+        errors.append(f"Missing file: {info_path}")
+    else:
+        with open(info_path, "r") as f:
+            content = f.read()
+
+        if "yaml_version: 6" not in content and "yaml_version:" not in content:
+            errors.append("Missing or invalid 'yaml_version' specification in info.yaml")
+
+        if "pinout:" not in content:
+            errors.append("Missing 'pinout:' dictionary declaration in info.yaml")
+
+        for key in ["ui[0]:", "uo[0]:", "uio[0]:", "ua[0]:"]:
+            if key not in content:
+                errors.append(f"Missing pinout key '{key}' in info.yaml schema")
+
+    if errors:
+        print("FAILED info.yaml schema compatibility check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED info.yaml schema compatibility check")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -904,6 +1029,10 @@ def main():
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
     xschem_config_ok = check_xschem_config(repo_root)
+    tag_compat_ok = check_upstream_pdk_and_action_tag_compatibility(repo_root)
+    precheck_art_ok = check_precheck_report_artifacts(repo_root)
+    pdk_drc_rules_ok = check_pdk_drc_technology_rules(repo_root)
+    info_schema_ok = check_info_yaml_schema_compatibility(repo_root)
 
     if (
         gds_ok
@@ -927,6 +1056,10 @@ def main():
         and checkout_submodule_ok
         and stdcell_decl_ok
         and xschem_config_ok
+        and tag_compat_ok
+        and precheck_art_ok
+        and pdk_drc_rules_ok
+        and info_schema_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
