@@ -1057,6 +1057,155 @@ def check_cicd_fix_roadmap_config(repo_root="."):
     return True
 
 
+def check_drc_config_consistency(repo_root="."):
+    drc_tcl_path = os.path.join(repo_root, "tcl/magic_drc.tcl")
+    def_template_path = os.path.join(repo_root, "tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def")
+    errors = []
+
+    if not os.path.exists(drc_tcl_path):
+        errors.append(f"Missing Magic DRC TCL configuration script: {drc_tcl_path}")
+    else:
+        with open(drc_tcl_path, "r") as f:
+            content = f.read()
+        if "drc euclidean on" not in content:
+            errors.append("Missing 'drc euclidean on' in tcl/magic_drc.tcl")
+        if 'drc style "drc(full)"' not in content and "drc style drc(full)" not in content:
+            errors.append("Missing 'drc style \"drc(full)\"' in tcl/magic_drc.tcl")
+        if "drc check" not in content:
+            errors.append("Missing 'drc check' in tcl/magic_drc.tcl")
+        if "drc listall why" not in content:
+            errors.append("Missing 'drc listall why' in tcl/magic_drc.tcl")
+
+    if not os.path.exists(def_template_path):
+        errors.append(f"Missing SG13G2 DEF template file: {def_template_path}")
+
+    if errors:
+        print("FAILED DRC config consistency check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED DRC config consistency check")
+    return True
+
+
+def check_drc_violation_reporting_config(repo_root="."):
+    violations_doc_path_1 = os.path.join(repo_root, "klayout_violations.md")
+    violations_doc_path_2 = os.path.join(repo_root, "klayout_violations_2.md")
+    errors = []
+
+    if not os.path.exists(violations_doc_path_1) and not os.path.exists(violations_doc_path_2):
+        errors.append(f"Missing DRC violations report file: {violations_doc_path_1} or {violations_doc_path_2}")
+    else:
+        doc_path = violations_doc_path_1 if os.path.exists(violations_doc_path_1) else violations_doc_path_2
+        with open(doc_path, "r") as f:
+            content = f.read()
+        if "KLayout DRC" not in content and "DRC" not in content:
+            errors.append("DRC violation documentation missing expected DRC content")
+
+    if errors:
+        print("FAILED DRC violation reporting config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED DRC violation reporting config check")
+    return True
+
+
+def check_layer_remapping_config(repo_root="."):
+    fix_gds_path = os.path.join(repo_root, "py/fix_gds.py")
+    errors = []
+
+    if not os.path.exists(fix_gds_path):
+        errors.append(f"Missing GDS layer remapping script: {fix_gds_path}")
+    else:
+        with open(fix_gds_path, "r") as f:
+            content = f.read()
+        if "remapping" not in content and "LAYER_MAP" not in content and "remap" not in content.lower():
+            errors.append("py/fix_gds.py missing layer remapping routines")
+
+    if errors:
+        print("FAILED layer remapping config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED layer remapping config check")
+    return True
+
+
+def check_netgen_lvs_config(repo_root="."):
+    lvs_tcl_path = os.path.join(repo_root, "tcl/lvs.tcl")
+    errors = []
+
+    if not os.path.exists(lvs_tcl_path):
+        errors.append(f"Missing Netgen LVS script: {lvs_tcl_path}")
+    else:
+        with open(lvs_tcl_path, "r") as f:
+            content = f.read()
+        if "readnet spice" not in content:
+            errors.append("Missing 'readnet spice' command in tcl/lvs.tcl")
+        if "sg13g2_stdcell.spice" not in content:
+            errors.append("Missing SG13G2 stdcell SPICE library reference in tcl/lvs.tcl")
+        if "sg13g2_setup.tcl" not in content:
+            errors.append("Missing SG13G2 Netgen setup script reference in tcl/lvs.tcl")
+        if "lvs " not in content or "-blackbox" not in content:
+            errors.append("Missing lvs command with -blackbox in tcl/lvs.tcl")
+
+    if errors:
+        print("FAILED Netgen LVS config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED Netgen LVS config check")
+    return True
+
+
+def check_lvs_schematic_and_power_isolation_config(repo_root="."):
+    lvs_tcl_path = os.path.join(repo_root, "tcl/lvs.tcl")
+    extract_lvs_tcl_path = os.path.join(repo_root, "tcl/magic_extract_lvs.tcl")
+    project_v_path = os.path.join(repo_root, "src/project.v")
+
+    errors = []
+
+    if not os.path.exists(lvs_tcl_path):
+        errors.append(f"Missing Netgen LVS script: {lvs_tcl_path}")
+    else:
+        with open(lvs_tcl_path, "r") as f:
+            content = f.read()
+        if "mosbius.spice" not in content:
+            errors.append("Missing schematic netlist 'mosbius.spice' reference in tcl/lvs.tcl")
+        if "ctrl_top.synth.v" not in content or "project.v" not in content:
+            errors.append("Missing Verilog netlist references in tcl/lvs.tcl")
+
+    if not os.path.exists(extract_lvs_tcl_path):
+        errors.append(f"Missing Magic extraction script: {extract_lvs_tcl_path}")
+    else:
+        with open(extract_lvs_tcl_path, "r") as f:
+            content = f.read()
+        if "ext2spice lvs" not in content:
+            errors.append("Missing 'ext2spice lvs' command in tcl/magic_extract_lvs.tcl")
+
+    if not os.path.exists(project_v_path):
+        errors.append(f"Missing Verilog top file: {project_v_path}")
+    else:
+        with open(project_v_path, "r") as f:
+            content = f.read()
+        if "VDPWR" not in content or "VAPWR" not in content:
+            errors.append("Missing dual power domain (VDPWR / VAPWR) declarations in src/project.v")
+
+    if errors:
+        print("FAILED LVS schematic and power isolation config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED LVS schematic and power isolation config check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -1089,6 +1238,11 @@ def main():
     pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
     info_extended_ok = check_info_yaml_extended_schema(repo_root)
     cicd_roadmap_ok = check_cicd_fix_roadmap_config(repo_root)
+    drc_config_ok = check_drc_config_consistency(repo_root)
+    drc_violation_ok = check_drc_violation_reporting_config(repo_root)
+    layer_remap_ok = check_layer_remapping_config(repo_root)
+    netgen_lvs_ok = check_netgen_lvs_config(repo_root)
+    lvs_schematic_power_ok = check_lvs_schematic_and_power_isolation_config(repo_root)
 
     if (
         gds_ok
@@ -1117,6 +1271,11 @@ def main():
         and pdk_tech_drc_ok
         and info_extended_ok
         and cicd_roadmap_ok
+        and drc_config_ok
+        and drc_violation_ok
+        and layer_remap_ok
+        and netgen_lvs_ok
+        and lvs_schematic_power_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)

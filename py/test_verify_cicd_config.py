@@ -11,13 +11,18 @@ from py.verify_cicd_config import (
     check_def_template_config,
     check_docs_build_and_asset_config,
     check_docs_workflow,
+    check_drc_config_consistency,
+    check_drc_violation_reporting_config,
     check_eda_toolchain_and_container_config,
     check_gds_lef_artifacts,
     check_gds_workflow,
     check_git_submodule_and_checkout_config,
     check_info_yaml,
     check_klayout_drc_and_geometry_config,
+    check_layer_remapping_config,
     check_lef_pin_and_boundary_config,
+    check_lvs_schematic_and_power_isolation_config,
+    check_netgen_lvs_config,
     check_pages_api_config,
     check_pages_deployment_and_oidc_config,
     check_precheck_def_and_pin_config,
@@ -1117,6 +1122,94 @@ Assertion: check_cicd_fix_roadmap_config
             "builtins.open", unittest.mock.mock_open(read_data=invalid_roadmap)
         ):
             self.assertFalse(check_cicd_fix_roadmap_config())
+
+    def test_check_drc_config_consistency_valid(self):
+        valid_drc = "drc euclidean on\ndrc style \"drc(full)\"\ndrc check\ndrc listall why"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_drc)
+        ):
+            self.assertTrue(check_drc_config_consistency())
+
+    def test_check_drc_config_consistency_invalid(self):
+        invalid_drc = "drc check"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_drc)
+        ):
+            self.assertFalse(check_drc_config_consistency())
+
+    def test_check_drc_violation_reporting_config_valid(self):
+        valid_violations = "# KLayout DRC Violations Report"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_violations)
+        ):
+            self.assertTrue(check_drc_violation_reporting_config())
+
+    def test_check_drc_violation_reporting_config_invalid(self):
+        invalid_violations = "# Empty Report"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_violations)
+        ):
+            self.assertFalse(check_drc_violation_reporting_config())
+
+    def test_check_layer_remapping_config_valid(self):
+        valid_fix_gds = "# remapping rules for IHP SG13G2 LAYER_MAP"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_fix_gds)
+        ):
+            self.assertTrue(check_layer_remapping_config())
+
+    def test_check_layer_remapping_config_invalid(self):
+        invalid_fix_gds = "# empty script"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_fix_gds)
+        ):
+            self.assertFalse(check_layer_remapping_config())
+
+    def test_check_netgen_lvs_config_valid(self):
+        valid_lvs = "readnet spice sg13g2_stdcell.spice\nsg13g2_setup.tcl\nlvs $layout $schem -blackbox"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_lvs)
+        ):
+            self.assertTrue(check_netgen_lvs_config())
+
+    def test_check_netgen_lvs_config_invalid(self):
+        invalid_lvs = "invalid lvs script"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_lvs)
+        ):
+            self.assertFalse(check_netgen_lvs_config())
+
+    def test_check_lvs_schematic_and_power_isolation_config_valid(self):
+        valid_lvs = "mosbius.spice ctrl_top.synth.v project.v"
+        valid_extract = "ext2spice lvs"
+        valid_project_v = "wire VDPWR; wire VAPWR;"
+
+        def mock_open_file(filepath, mode="r"):
+            if "magic_extract_lvs.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=valid_extract)()
+            elif "lvs.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=valid_lvs)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_project_v)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_lvs_schematic_and_power_isolation_config())
+
+    def test_check_lvs_schematic_and_power_isolation_config_invalid(self):
+        invalid_project_v = "module project; endmodule"
+
+        def mock_open_file(filepath, mode="r"):
+            if "project.v" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_project_v)()
+            else:
+                return unittest.mock.mock_open(read_data="valid")()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_lvs_schematic_and_power_isolation_config())
 
 
 if __name__ == "__main__":
