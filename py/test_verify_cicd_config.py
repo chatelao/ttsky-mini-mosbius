@@ -33,6 +33,12 @@ from py.verify_cicd_config import (
     check_precheck_reports_and_logs,
     check_pdk_tech_and_drc_rules,
     check_info_yaml_extended_schema,
+    check_drc_config_consistency,
+    check_drc_violation_reporting_config,
+    check_layer_remapping_config,
+    check_netgen_lvs_config,
+    check_schematic_alignment_config,
+    check_power_domain_isolation_config,
 )
 
 
@@ -1117,6 +1123,109 @@ Assertion: check_cicd_fix_roadmap_config
             "builtins.open", unittest.mock.mock_open(read_data=invalid_roadmap)
         ):
             self.assertFalse(check_cicd_fix_roadmap_config())
+
+    def test_check_drc_config_consistency_valid(self):
+        valid_drc = "drc euclidean on\ndrc style \"drc(full)\""
+        valid_wf = "precheck@ttihp26b"
+        def mock_open_file(filepath, mode="r"):
+            if "magic_drc.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=valid_drc)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_wf)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_drc_config_consistency())
+
+    def test_check_drc_config_consistency_invalid(self):
+        with patch("os.path.exists", return_value=False):
+            self.assertFalse(check_drc_config_consistency())
+
+    def test_check_drc_violation_reporting_config_valid(self):
+        valid_doc = "# SG13G2 DRC Violation Analysis"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_doc)
+        ):
+            self.assertTrue(check_drc_violation_reporting_config())
+
+    def test_check_drc_violation_reporting_config_invalid(self):
+        with patch("os.path.exists", return_value=False):
+            self.assertFalse(check_drc_violation_reporting_config())
+
+    def test_check_layer_remapping_config_valid(self):
+        valid_script = "prBoundary 189"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_script)
+        ):
+            self.assertTrue(check_layer_remapping_config())
+
+    def test_check_layer_remapping_config_invalid(self):
+        with patch("os.path.exists", return_value=False):
+            self.assertFalse(check_layer_remapping_config())
+
+    def test_check_netgen_lvs_config_valid(self):
+        valid_lvs = "sg13g2_setup.tcl sg13g2_stdcell.spice"
+        valid_ext = "ext2spice lvs"
+        def mock_open_file(filepath, mode="r"):
+            if "magic_extract_lvs.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=valid_ext)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_lvs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_netgen_lvs_config())
+
+    def test_check_netgen_lvs_config_invalid(self):
+        with patch("os.path.exists", return_value=False):
+            self.assertFalse(check_netgen_lvs_config())
+
+    def test_check_schematic_alignment_config_valid(self):
+        valid_sch = "sg13g2_pr/nfet33.sym"
+        valid_xschemrc = "XSCHEM_LIBRARY_PATH"
+        def mock_open_file(filepath, mode="r"):
+            if "mosbius.sch" in filepath:
+                return unittest.mock.mock_open(read_data=valid_sch)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_xschemrc)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_schematic_alignment_config())
+
+    def test_check_schematic_alignment_config_invalid(self):
+        invalid_sch = "sky130_fd_pr/nfet_g5v0d10v5.sym"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_sch)
+        ):
+            self.assertFalse(check_schematic_alignment_config())
+
+    def test_check_power_domain_isolation_config_valid(self):
+        valid_info = "uses_vapwr: true"
+        valid_v = "VDPWR"
+        valid_py = "VDPWR"
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_info)()
+            elif "project.v" in filepath:
+                return unittest.mock.mock_open(read_data=valid_v)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_py)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_power_domain_isolation_config())
+
+    def test_check_power_domain_isolation_config_invalid(self):
+        invalid_info = "uses_vapwr: false"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
+        ):
+            self.assertFalse(check_power_domain_isolation_config())
 
 
 if __name__ == "__main__":
