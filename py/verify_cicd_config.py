@@ -838,6 +838,49 @@ def check_xschem_config(repo_root="."):
     return True
 
 
+def check_upstream_pdk_tag_consistency(repo_root="."):
+    """Verifies that all workflows consistently use the expected PDK tag (@ttihp26b) and PDK name (ihp-sg13g2)."""
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    docs_path = os.path.join(repo_root, ".github/workflows/docs.yaml")
+    info_path = os.path.join(repo_root, "info.yaml")
+
+    errors = []
+    expected_tag = "@ttihp26b"
+    expected_pdk = "ihp-sg13g2"
+
+    for path in [gds_path, docs_path]:
+        filename = os.path.basename(path)
+        if not os.path.exists(path):
+            errors.append(f"Missing workflow file: {path}")
+            continue
+
+        with open(path, "r") as f:
+            content = f.read()
+
+        # Find all tt-gds-action references
+        action_refs = re.findall(r"TinyTapeout/tt-gds-action/[a-zA-Z0-9_-]+@([a-zA-Z0-9_\.-]+)", content)
+        for tag in action_refs:
+            if tag != "ttihp26b":
+                errors.append(f"Inconsistent action tag '@{tag}' found in {filename}, expected '{expected_tag}'")
+
+    if not os.path.exists(gds_path):
+        errors.append(f"Missing workflow file: {gds_path}")
+    else:
+        with open(gds_path, "r") as f:
+            gds_content = f.read()
+        if f"pdk: {expected_pdk}" not in gds_content:
+            errors.append(f"Missing 'pdk: {expected_pdk}' in gds.yaml")
+
+    if errors:
+        print("FAILED upstream PDK tag consistency check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED upstream PDK tag consistency check")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -904,6 +947,7 @@ def main():
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
     xschem_config_ok = check_xschem_config(repo_root)
+    pdk_tag_ok = check_upstream_pdk_tag_consistency(repo_root)
 
     if (
         gds_ok
@@ -927,6 +971,7 @@ def main():
         and checkout_submodule_ok
         and stdcell_decl_ok
         and xschem_config_ok
+        and pdk_tag_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
