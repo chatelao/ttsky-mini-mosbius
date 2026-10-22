@@ -15,6 +15,7 @@ from py.verify_cicd_config import (
     check_gds_workflow,
     check_git_submodule_and_checkout_config,
     check_info_yaml,
+    check_image_rendering_and_asset_config,
     check_klayout_drc_and_geometry_config,
     check_lef_pin_and_boundary_config,
     check_pages_api_config,
@@ -1092,6 +1093,32 @@ pinout:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
         ):
             self.assertFalse(check_info_yaml_extended_schema())
+
+    def test_check_image_rendering_and_asset_config_valid(self):
+        valid_script = "def render_klayout_file(): pass\ndef render_xschem_files(): pass"
+
+        def mock_listdir(path):
+            if path.endswith("img"):
+                return ["test.png"]
+            return []
+
+        with patch("os.path.exists", return_value=True), patch(
+            "os.listdir", side_effect=mock_listdir
+        ), patch("builtins.open", unittest.mock.mock_open(read_data=valid_script)):
+            self.assertTrue(check_image_rendering_and_asset_config())
+
+    def test_check_image_rendering_and_asset_config_invalid(self):
+        invalid_script = "def other(): pass"
+
+        def mock_listdir(path):
+            if path.endswith("img"):
+                return []
+            return []
+
+        with patch("os.path.exists", return_value=True), patch(
+            "os.listdir", side_effect=mock_listdir
+        ), patch("builtins.open", unittest.mock.mock_open(read_data=invalid_script)):
+            self.assertFalse(check_image_rendering_and_asset_config())
 
 
 if __name__ == "__main__":

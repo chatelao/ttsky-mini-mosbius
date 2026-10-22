@@ -296,3 +296,11 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **4.2.3.1** Verify `docs/info.md` contains required `## How it works` and `## How to test` sections.
     - [x] **4.2.3.2** Validate required metadata fields (`author`, `description`, `pinout`, `top_module`, `tiles`, `analog_pins`) in `info.yaml` via `check_docs_build_and_asset_config`.
     - [x] **4.2.3.3** Maintain documentation rendering compatibility when adding new schema parameters to `info.yaml`.
+
+- [x] **4.3 Asset Rendering, Image Generation & Asset Configuration Drift Checks**
+  - [x] **4.3.1 Asset Rendering Script & Output Verification**
+    - [x] **4.3.1.1** Implement `check_image_rendering_and_asset_config` in `py/verify_cicd_config.py` to verify `py/render_project_files.py` existence, functions (`render_klayout_file`, `render_xschem_files`), and `img/` image assets.
+  - [x] **4.3.2 Unit Test Coverage for Asset Verification**
+    - [x] **4.3.2.1** Add unit test cases in `py/test_verify_cicd_config.py` validating valid and invalid configurations for `check_image_rendering_and_asset_config`.
+  - [x] **4.3.3 Verification Suite Integration**
+    - [x] **4.3.3.1** Integrate `check_image_rendering_and_asset_config` into `main()` of `py/verify_cicd_config.py` and ensure clean execution via `make check`.
