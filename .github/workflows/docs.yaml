@@ -14,5 +14,11 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Setup Typst
+        uses: typst-community/setup-typst@v5
+        with:
+          typst-version: "0.13.1"
+          allow-prereleases: true
+
       - name: Build docs
         uses: TinyTapeout/tt-gds-action/docs@ttihp26b
