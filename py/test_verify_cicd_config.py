@@ -11,13 +11,16 @@ from py.verify_cicd_config import (
     check_def_template_config,
     check_docs_build_and_asset_config,
     check_docs_workflow,
+    check_drc_config_consistency,
     check_eda_toolchain_and_container_config,
     check_gds_lef_artifacts,
     check_gds_workflow,
     check_git_submodule_and_checkout_config,
     check_info_yaml,
     check_klayout_drc_and_geometry_config,
+    check_layer_remapping_config,
     check_lef_pin_and_boundary_config,
+    check_netgen_lvs_config,
     check_pages_api_config,
     check_pages_deployment_and_oidc_config,
     check_precheck_def_and_pin_config,
@@ -1117,6 +1120,83 @@ Assertion: check_cicd_fix_roadmap_config
             "builtins.open", unittest.mock.mock_open(read_data=invalid_roadmap)
         ):
             self.assertFalse(check_cicd_fix_roadmap_config())
+
+    def test_check_drc_config_consistency_valid(self):
+        valid_drc = "load top\ndrc euclidean on\ndrc check\ndrc listall why\n"
+        valid_wf = "precheck@ttihp26b"
+
+        def mock_open_file(filepath, mode="r"):
+            if "magic_drc.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=valid_drc)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_wf)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_drc_config_consistency())
+
+    def test_check_drc_config_consistency_invalid(self):
+        invalid_drc = "# missing directives"
+
+        def mock_open_file(filepath, mode="r"):
+            return unittest.mock.mock_open(read_data=invalid_drc)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_drc_config_consistency())
+
+    def test_check_layer_remapping_config_valid(self):
+        valid_fix_gds = """
+LAYER_MAP = {
+    (235, 4): (189, 4),
+    (68, 20): (30, 0),
+    (71, 20): (125, 0),
+}
+def remap_gds_stream():
+    pass
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_fix_gds)
+        ):
+            self.assertTrue(check_layer_remapping_config())
+
+    def test_check_layer_remapping_config_invalid(self):
+        invalid_fix_gds = "# Empty script"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_fix_gds)
+        ):
+            self.assertFalse(check_layer_remapping_config())
+
+    def test_check_netgen_lvs_config_valid(self):
+        valid_lvs = """
+readnet spice sg13g2_stdcell.spice
+lvs sg13g2_setup.tcl mosbius.spice ctrl_top.synth.v project.v lvs.report
+"""
+        valid_ext = "ext2spice lvs\next2spice short resistor\n"
+
+        def mock_open_file(filepath, mode="r"):
+            if "lvs.tcl" in filepath and "extract" not in filepath:
+                return unittest.mock.mock_open(read_data=valid_lvs)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_ext)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_netgen_lvs_config())
+
+    def test_check_netgen_lvs_config_invalid(self):
+        invalid_lvs = "# Empty LVS"
+
+        def mock_open_file(filepath, mode="r"):
+            return unittest.mock.mock_open(read_data=invalid_lvs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_netgen_lvs_config())
 
 
 if __name__ == "__main__":
