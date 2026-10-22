@@ -34,6 +34,14 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 │  Phase 4: Ongoing Maintenance & Health Checks          │
 │  - Continuous drift detection & rule maintenance       │
 │  - Precheck artifact & toolchain sign-off verification │
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│  Phase 5: Automated Verification & PDK Alignment       │
+│  - Roadmap integrity static verification (`py/`)       │
+│  - Automated DRC rule set & violation reporting        │
+│  - Netgen LVS extraction & schematic alignment         │
 └────────────────────────────────────────────────────────┘
 ```
 
@@ -296,3 +304,24 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **4.2.3.1** Verify `docs/info.md` contains required `## How it works` and `## How to test` sections.
     - [x] **4.2.3.2** Validate required metadata fields (`author`, `description`, `pinout`, `top_module`, `tiles`, `analog_pins`) in `info.yaml` via `check_docs_build_and_asset_config`.
     - [x] **4.2.3.3** Maintain documentation rendering compatibility when adding new schema parameters to `info.yaml`.
+
+---
+
+## Phase 5: Automated Physical Verification (DRC/LVS) & Upstream PDK Alignment Pipeline Integration
+
+> **Objective:** Integrate automated physical verification checks (DRC and LVS) and roadmap integrity assertions into the CI/CD static verification pipeline for IHP SG13G2.
+
+- [x] **5.1 Roadmap Integrity Static Verification Integration**
+  - [x] **5.1.1** Implement `check_cicd_fix_roadmap_config` in `py/verify_cicd_config.py` to assert `CICD_FIX_ROADMAP.md` contains all Phases 1–5 and required structural section headers.
+  - [x] **5.1.2** Register `check_cicd_fix_roadmap_config` in `main()` of `py/verify_cicd_config.py`.
+  - [x] **5.1.3** Add unit tests for `check_cicd_fix_roadmap_config` in `py/test_verify_cicd_config.py`.
+
+- [ ] **5.2 Automated DRC Rule Set & Violation Reporting Verification**
+  - [ ] **5.2.1** Verify Magic DRC and KLayout DRC configuration consistency across `tcl/magic_drc.tcl` and `tech/ihp-sg13g2/`.
+  - [ ] **5.2.2** Maintain automated detection and categorization of physical DRC violations against official SG13G2 PDK rule definitions.
+  - [ ] **5.2.3** Validate layer remapping post-processing (`py/fix_gds.py`) before running physical DRC verification steps.
+
+- [ ] **5.3 Netgen LVS Extraction & Schematic Alignment Integration**
+  - [ ] **5.3.1** Verify Netgen LVS configuration in `tcl/lvs.tcl` and PDK setup `sg13g2_setup.tcl`.
+  - [ ] **5.3.2** Validate extracted layout SPICE netlist against Xschem schematic netlist (`xschem/mosbius.sch`).
+  - [ ] **5.3.3** Ensure 1.2V digital core and 3.3V analog power domain isolation rules pass clean in Netgen LVS.

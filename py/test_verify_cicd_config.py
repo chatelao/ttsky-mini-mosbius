@@ -7,6 +7,7 @@ from unittest.mock import patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from py.verify_cicd_config import (
+    check_cicd_fix_roadmap_config,
     check_def_template_config,
     check_docs_build_and_asset_config,
     check_docs_workflow,
@@ -1092,6 +1093,30 @@ pinout:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
         ):
             self.assertFalse(check_info_yaml_extended_schema())
+
+    def test_check_cicd_fix_roadmap_config_valid(self):
+        valid_roadmap = """
+## Phase 1: Repository Settings Configuration (GitHub Pages)
+## Phase 2: Workflow Definition Updates
+## Phase 3: Local Verification & CI Execution
+## Phase 4: Ongoing CI/CD Pipeline Maintenance & Health Checks
+## Phase 5: Automated Physical Verification (DRC/LVS) & Upstream PDK Alignment Pipeline Integration
+
+Target: ihp-sg13g2
+Action tag: @ttihp26b
+Assertion: check_cicd_fix_roadmap_config
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_roadmap)
+        ):
+            self.assertTrue(check_cicd_fix_roadmap_config())
+
+    def test_check_cicd_fix_roadmap_config_invalid(self):
+        invalid_roadmap = "## Phase 1: Only Phase 1"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_roadmap)
+        ):
+            self.assertFalse(check_cicd_fix_roadmap_config())
 
 
 if __name__ == "__main__":

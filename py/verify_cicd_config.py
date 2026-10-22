@@ -1015,6 +1015,48 @@ def check_stdcell_declarations(repo_root="."):
     return True
 
 
+def check_cicd_fix_roadmap_config(repo_root="."):
+    roadmap_path = os.path.join(repo_root, "CICD_FIX_ROADMAP.md")
+    errors = []
+
+    if not os.path.exists(roadmap_path):
+        errors.append(f"Missing file: {roadmap_path}")
+    else:
+        with open(roadmap_path, "r") as f:
+            content = f.read()
+
+        required_sections = [
+            "## Phase 1:",
+            "## Phase 2:",
+            "## Phase 3:",
+            "## Phase 4:",
+            "## Phase 5:",
+        ]
+
+        for sec in required_sections:
+            if sec not in content:
+                errors.append(f"Missing section header '{sec}' in CICD_FIX_ROADMAP.md")
+
+        required_terms = [
+            "ihp-sg13g2",
+            "@ttihp26b",
+            "check_cicd_fix_roadmap_config",
+        ]
+
+        for term in required_terms:
+            if term not in content:
+                errors.append(f"Missing expected roadmap term '{term}' in CICD_FIX_ROADMAP.md")
+
+    if errors:
+        print("FAILED CICD fix roadmap config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED CICD fix roadmap config check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -1046,6 +1088,7 @@ def main():
     precheck_reports_ok = check_precheck_reports_and_logs(repo_root)
     pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
     info_extended_ok = check_info_yaml_extended_schema(repo_root)
+    cicd_roadmap_ok = check_cicd_fix_roadmap_config(repo_root)
 
     if (
         gds_ok
@@ -1073,6 +1116,7 @@ def main():
         and precheck_reports_ok
         and pdk_tech_drc_ok
         and info_extended_ok
+        and cicd_roadmap_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
