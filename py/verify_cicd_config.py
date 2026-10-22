@@ -976,6 +976,46 @@ def check_info_yaml_extended_schema(repo_root="."):
     return True
 
 
+def check_makefile_and_build_system_config(repo_root="."):
+    root_makefile = os.path.join(repo_root, "Makefile")
+    src_makefile = os.path.join(repo_root, "src/Makefile")
+
+    errors = []
+
+    if not os.path.exists(root_makefile):
+        errors.append(f"Missing root Makefile: {root_makefile}")
+    else:
+        with open(root_makefile, "r") as f:
+            content = f.read()
+        for target in ["check:", "lint:", "all:", "clean:"]:
+            if target not in content:
+                errors.append(f"Missing target '{target}' in root Makefile")
+        if "$(MAKE) -C src" not in content:
+            errors.append("Root Makefile missing delegation to 'src' directory")
+
+    if not os.path.exists(src_makefile):
+        errors.append(f"Missing src Makefile: {src_makefile}")
+    else:
+        with open(src_makefile, "r") as f:
+            content = f.read()
+        for target in ["check:", "lint:", "all:", "clean:"]:
+            if target not in content:
+                errors.append(f"Missing target '{target}' in src/Makefile")
+        if "python3 ../py/verify_cicd_config.py" not in content:
+            errors.append("src/Makefile missing invocation of verify_cicd_config.py")
+        if "unittest discover" not in content:
+            errors.append("src/Makefile missing python unittest discovery command")
+
+    if errors:
+        print("FAILED Makefile and build system config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED Makefile and build system config check")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -1046,6 +1086,7 @@ def main():
     precheck_reports_ok = check_precheck_reports_and_logs(repo_root)
     pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
     info_extended_ok = check_info_yaml_extended_schema(repo_root)
+    makefile_build_ok = check_makefile_and_build_system_config(repo_root)
 
     if (
         gds_ok
@@ -1073,6 +1114,7 @@ def main():
         and precheck_reports_ok
         and pdk_tech_drc_ok
         and info_extended_ok
+        and makefile_build_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)

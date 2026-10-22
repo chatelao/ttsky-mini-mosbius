@@ -7,6 +7,7 @@ from unittest.mock import patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from py.verify_cicd_config import (
+    check_makefile_and_build_system_config,
     check_def_template_config,
     check_docs_build_and_asset_config,
     check_docs_workflow,
@@ -1092,6 +1093,36 @@ pinout:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
         ):
             self.assertFalse(check_info_yaml_extended_schema())
+
+    def test_check_makefile_and_build_system_config_valid(self):
+        valid_root_makefile = "all:\n\t$(MAKE) -C src all\ncheck:\n\t$(MAKE) -C src check\nlint:\n\t$(MAKE) -C src lint\nclean:\n\t$(MAKE) -C src clean\n"
+        valid_src_makefile = "all: synth\ncheck:\n\tpython3 ../py/verify_cicd_config.py\n\tPYTHONPATH=.. python3 -m unittest discover -s ../py\nlint:\n\tpython3 -m py_compile ../py/*.py\nclean:\n\trm -f *.synth\n"
+
+        def mock_open_file(filepath, mode="r"):
+            if filepath.endswith("src/Makefile"):
+                return unittest.mock.mock_open(read_data=valid_src_makefile)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_root_makefile)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_makefile_and_build_system_config())
+
+    def test_check_makefile_and_build_system_config_invalid(self):
+        invalid_root_makefile = "all:\n"
+        invalid_src_makefile = "check:\n"
+
+        def mock_open_file(filepath, mode="r"):
+            if filepath.endswith("src/Makefile"):
+                return unittest.mock.mock_open(read_data=invalid_src_makefile)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_root_makefile)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_makefile_and_build_system_config())
 
 
 if __name__ == "__main__":
