@@ -14,15 +14,11 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Pre-stage Typst in tool cache
-        run: |
-          mkdir -p /tmp/typst
-          curl -sL "https://github.com/typst/typst/releases/download/v0.13.1/typst-x86_64-unknown-linux-musl.tar.xz" | tar -xJ -C /tmp/typst --strip-components=1
-          TOOL_DIR="${RUNNER_TOOL_CACHE:-/opt/hostedtoolcache}/typst/0.13.1/x64"
-          mkdir -p "$TOOL_DIR"
-          cp /tmp/typst/typst "$TOOL_DIR/typst"
-          chmod +x "$TOOL_DIR/typst"
-          touch "${RUNNER_TOOL_CACHE:-/opt/hostedtoolcache}/typst/0.13.1/x64.complete"
+      - name: Setup Typst
+        uses: typst-community/setup-typst@v5
+        with:
+          typst-version: "0.13.1"
+          allow-prereleases: true
 
       - name: Build docs
         uses: TinyTapeout/tt-gds-action/docs@ttihp26b
