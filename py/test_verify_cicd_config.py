@@ -33,6 +33,12 @@ from py.verify_cicd_config import (
     check_precheck_reports_and_logs,
     check_pdk_tech_and_drc_rules,
     check_info_yaml_extended_schema,
+    check_drc_config_consistency,
+    check_drc_violation_reporting_config,
+    check_layer_remapping_config,
+    check_netgen_lvs_config,
+    check_schematic_alignment_config,
+    check_power_domain_isolation_lvs_config,
 )
 
 
@@ -1117,6 +1123,117 @@ Assertion: check_cicd_fix_roadmap_config
             "builtins.open", unittest.mock.mock_open(read_data=invalid_roadmap)
         ):
             self.assertFalse(check_cicd_fix_roadmap_config())
+
+    def test_check_drc_config_consistency_valid(self):
+        valid_drc = 'drc euclidean on\ndrc style "drc(full)"\n'
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_drc)
+        ):
+            self.assertTrue(check_drc_config_consistency())
+
+    def test_check_drc_config_consistency_invalid(self):
+        invalid_drc = "# missing drc euclidean on\n"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_drc)
+        ):
+            self.assertFalse(check_drc_config_consistency())
+
+    def test_check_drc_violation_reporting_config_valid(self):
+        valid_drc = "drc listall why\n"
+        valid_doc = "# KLayout DRC violations report\n"
+        def mock_open_file(filepath, mode="r"):
+            if "magic_drc.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=valid_drc)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_doc)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_drc_violation_reporting_config())
+
+    def test_check_drc_violation_reporting_config_invalid(self):
+        invalid_drc = "# missing drc listall why\n"
+        invalid_doc = "# empty doc\n"
+        def mock_open_file(filepath, mode="r"):
+            if "magic_drc.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_drc)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_doc)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_drc_violation_reporting_config())
+
+    def test_check_layer_remapping_config_valid(self):
+        valid_fix = "def remap_gds_stream(): pass\n(235, 4): (189, 4)\n(68, 20): (30, 0)\n"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_fix)
+        ):
+            self.assertTrue(check_layer_remapping_config())
+
+    def test_check_layer_remapping_config_invalid(self):
+        invalid_fix = "def wrong_func(): pass\n"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_fix)
+        ):
+            self.assertFalse(check_layer_remapping_config())
+
+    def test_check_netgen_lvs_config_valid(self):
+        valid_lvs = "readnet spice net.spice\nreadnet verilog net.v\nsg13g2_setup.tcl\nlvs layout schem\n"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_lvs)
+        ):
+            self.assertTrue(check_netgen_lvs_config())
+
+    def test_check_netgen_lvs_config_invalid(self):
+        invalid_lvs = "readnet spice net.spice\n"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_lvs)
+        ):
+            self.assertFalse(check_netgen_lvs_config())
+
+    def test_check_schematic_alignment_config_valid(self):
+        valid_lvs = "mosbius.spice\nctrl_top.synth.v\nproject.v\n"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_lvs)
+        ):
+            self.assertTrue(check_schematic_alignment_config())
+
+    def test_check_schematic_alignment_config_invalid(self):
+        invalid_lvs = "missing_references\n"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_lvs)
+        ):
+            self.assertFalse(check_schematic_alignment_config())
+
+    def test_check_power_domain_isolation_lvs_config_valid(self):
+        valid_info = "uses_vapwr: true\n"
+        valid_project_v = "VDPWR VAPWR\n"
+        valid_common_py = "VDPWR\n"
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_info)()
+            elif "project.v" in filepath:
+                return unittest.mock.mock_open(read_data=valid_project_v)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_common_py)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_power_domain_isolation_lvs_config())
+
+    def test_check_power_domain_isolation_lvs_config_invalid(self):
+        invalid_info = "uses_vapwr: false\n"
+        def mock_open_file(filepath, mode="r"):
+            return unittest.mock.mock_open(read_data=invalid_info)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_power_domain_isolation_lvs_config())
 
 
 if __name__ == "__main__":
