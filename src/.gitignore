@@ -1,2 +1,3 @@
 *.synth.v
 *.decap.v
+*.vcd
