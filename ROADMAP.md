@@ -36,8 +36,21 @@ The top priority is establishing and maintaining a functioning **CI/CD pipeline 
 > **Objective:** Transition circuit schematics and simulation testbenches from SkyWater 130nm primitives to IHP SG13G2 models.
 
 - [ ] **2.1 Re-bind Primitive Devices in Xschem (`xschem/`)**
-  - Replace `sky130_fd_pr__nfet_g5v0d10v5` and `pfet_g5v0d10v5` with `sg13g2_pr__nfet33` and `pfet33` in all sub-block schematics (`diff_n.sch`, `diff_p.sch`, `mirror_n.sch`, `mirror_p.sch`, `ota_n.sch`, `nmos_prog.sch`, `pmos_prog.sch`).
-  - Scale device W/L dimensions to achieve parity in $R_{on}$, transconductance, and drive current.
+  - [ ] **2.1.1 Re-bind Differential Pair Schematics**
+    - [ ] **2.1.1.1** Replace legacy `sky130_fd_pr` primitives with `sg13g2_pr__nfet33` and `sg13g2_pr__pfet33` in `xschem/diff_n.sch`.
+    - [ ] **2.1.1.2** Replace legacy `sky130_fd_pr` primitives with `sg13g2_pr__nfet33` and `sg13g2_pr__pfet33` in `xschem/diff_p.sch`.
+    - [ ] **2.1.1.3** Scale device W/L dimensions in `diff_n.sch` and `diff_p.sch` to maintain transconductance ($g_m$) and matching parity.
+  - [ ] **2.1.2 Re-bind Current Mirror Schematics**
+    - [ ] **2.1.2.1** Replace legacy `sky130_fd_pr` primitives with `sg13g2_pr__nfet33` in `xschem/mirror_n.sch`.
+    - [ ] **2.1.2.2** Replace legacy `sky130_fd_pr` primitives with `sg13g2_pr__pfet33` in `xschem/mirror_p.sch`.
+    - [ ] **2.1.2.3** Scale device W/L dimensions in `mirror_n.sch` and `mirror_p.sch` to maintain current mirror ratios and saturation margins.
+  - [ ] **2.1.3 Re-bind Operational Transconductance Amplifier (OTA) Schematics**
+    - [ ] **2.1.3.1** Replace legacy `sky130_fd_pr` primitives with `sg13g2_pr` primitives (`nfet33`, `pfet33`) in `xschem/ota_n.sch`.
+    - [ ] **2.1.3.2** Adjust bias current sizing and compensation capacitors in `ota_n.sch` for SG13G2 process parameters.
+  - [ ] **2.1.4 Re-bind Programmable Array Schematics**
+    - [ ] **2.1.4.1** Replace legacy `sky130_fd_pr` primitives with `sg13g2_pr__nfet33` in `xschem/nmos_prog.sch`.
+    - [ ] **2.1.4.2** Replace legacy `sky130_fd_pr` primitives with `sg13g2_pr__pfet33` in `xschem/pmos_prog.sch`.
+    - [ ] **2.1.4.3** Verify programmable array switch device dimensions and $R_{on}$ performance under 3.3V $V_{APWR}$.
 - [ ] **2.2 Analog Switch & Level Shifter Adaptation**
   - Update 3.3V transmission gate switches (`tt_asw_3v3.sch`) for `nfet33`/`pfet33`.
   - Re-design/re-bind level shifters (`tt_lvl_shift`) for 1.2V (digital) to 3.3V (analog) signal translation.
