@@ -35,7 +35,7 @@ The top priority is establishing and maintaining a functioning **CI/CD pipeline 
 
 > **Objective:** Transition circuit schematics and simulation testbenches from SkyWater 130nm primitives to IHP SG13G2 models.
 
-- [ ] **2.1 Re-bind Primitive Devices in Xschem (`xschem/`)**
+- [x] **2.1 Re-bind Primitive Devices in Xschem (`xschem/`)**
   - Replace `sky130_fd_pr__nfet_g5v0d10v5` and `pfet_g5v0d10v5` with `sg13g2_pr__nfet33` and `pfet33` in all sub-block schematics (`diff_n.sch`, `diff_p.sch`, `mirror_n.sch`, `mirror_p.sch`, `ota_n.sch`, `nmos_prog.sch`, `pmos_prog.sch`).
   - Scale device W/L dimensions to achieve parity in $R_{on}$, transconductance, and drive current.
 - [ ] **2.2 Analog Switch & Level Shifter Adaptation**
@@ -66,14 +66,14 @@ The top priority is establishing and maintaining a functioning **CI/CD pipeline 
 
 > **Objective:** Adapt Python layout placement and decap generation scripts for SG13G2 geometries.
 
-- [ ] **4.1 Update Grid & Pitch Parameters (`py/common.py`)**
+- [x] **4.1 Update Grid & Pitch Parameters (`py/common.py`)**
   - Update `ROW_PITCH` and `COL_PITCH` according to `sg13g2_stdcell` LEF specifications.
   - Update horizontal (`TRACK_H_*`) and vertical (`TRACK_V_*`) track pitch, offsets, and widths for SG13G2 Metal 1 and Metal 2 layers.
   - Update `VIAS` stack dictionary for SG13G2 `met1`, `met2`, and `met3` contacts.
-- [ ] **4.2 Decap & Filler Instantiation Update (`py/gen_asw_ctrl.py`, `py/gen_dev_ctrl.py`)**
+- [x] **4.2 Decap & Filler Instantiation Update (`py/gen_asw_ctrl.py`, `py/gen_dev_ctrl.py`)**
   - Re-target cell references to `sg13g2_decap_4`, `sg13g2_decap_8`, `sg13g2_fill_1`, and `sg13g2_fill_2`.
   - Regenerate `.decap.v` files for ASW column controllers (`ctrl_asw.decap.v`) and device controllers (`ctrl_dev_*.decap.v`).
-- [ ] **4.3 GDS Post-Processing (`py/fix_gds.py`)**
+- [x] **4.3 GDS Post-Processing (`py/fix_gds.py`)**
   - Adapt GDS cell structure fixup script for SG13G2 layer mapping conventions.
 
 ---

@@ -976,6 +976,58 @@ def check_info_yaml_extended_schema(repo_root="."):
     return True
 
 
+def check_roadmap_consistency(repo_root="."):
+    cicd_roadmap_path = os.path.join(repo_root, "CICD_FIX_ROADMAP.md")
+    migration_roadmap_path = os.path.join(repo_root, "ROADMAP.md")
+
+    errors = []
+
+    if not os.path.exists(cicd_roadmap_path):
+        errors.append(f"Missing roadmap file: {cicd_roadmap_path}")
+    else:
+        with open(cicd_roadmap_path, "r") as f:
+            cicd_content = f.read()
+
+        for phase in ["Phase 1:", "Phase 2:", "Phase 3:", "Phase 4:"]:
+            if phase not in cicd_content:
+                errors.append(f"Missing section '{phase}' in CICD_FIX_ROADMAP.md")
+
+    if not os.path.exists(migration_roadmap_path):
+        errors.append(f"Missing roadmap file: {migration_roadmap_path}")
+    else:
+        with open(migration_roadmap_path, "r") as f:
+            mig_content = f.read()
+
+        for phase in ["Phase 1:", "Phase 2:", "Phase 3:", "Phase 4:", "Phase 5:"]:
+            if phase not in mig_content:
+                errors.append(f"Missing section '{phase}' in ROADMAP.md")
+
+        completed_tasks = [
+            "1.1 Update GitHub Workflows for IHP Target",
+            "1.2 Update Metadata & Pinout Definition",
+            "1.3 Establish Automated Verification Stubs",
+            "2.1 Re-bind Primitive Devices in Xschem",
+            "3.1 Update Verilog Standard Cell Definitions",
+            "4.1 Update Grid & Pitch Parameters",
+            "4.2 Decap & Filler Instantiation Update",
+            "4.3 GDS Post-Processing",
+        ]
+
+        for task in completed_tasks:
+            pattern = r"-\s*\[x\]\s*\*\*" + re.escape(task)
+            if not re.search(pattern, mig_content):
+                errors.append(f"Expected completed task '- [x] **{task}' in ROADMAP.md")
+
+    if errors:
+        print("FAILED roadmap consistency check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED roadmap consistency check")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -1046,6 +1098,7 @@ def main():
     precheck_reports_ok = check_precheck_reports_and_logs(repo_root)
     pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
     info_extended_ok = check_info_yaml_extended_schema(repo_root)
+    roadmap_ok = check_roadmap_consistency(repo_root)
 
     if (
         gds_ok
@@ -1073,6 +1126,7 @@ def main():
         and precheck_reports_ok
         and pdk_tech_drc_ok
         and info_extended_ok
+        and roadmap_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
