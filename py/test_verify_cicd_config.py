@@ -32,6 +32,7 @@ from py.verify_cicd_config import (
     check_precheck_reports_and_logs,
     check_pdk_tech_and_drc_rules,
     check_info_yaml_extended_schema,
+    check_synthesis_and_bitstream_config,
 )
 
 
@@ -1092,6 +1093,36 @@ pinout:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
         ):
             self.assertFalse(check_info_yaml_extended_schema())
+
+    def test_check_synthesis_and_bitstream_config_valid(self):
+        valid_makefile = "yosys -p 'read_verilog ctrl_top.v'\nctrl_top:"
+        valid_ctrl_top = "module ctrl_top (output wire [191:0] ctrl_out); sg13g2_buf_16 b(); endmodule"
+
+        def mock_open_file(filepath, mode="r"):
+            if "Makefile" in filepath:
+                return unittest.mock.mock_open(read_data=valid_makefile)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_ctrl_top)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_synthesis_and_bitstream_config())
+
+    def test_check_synthesis_and_bitstream_config_invalid(self):
+        invalid_makefile = "# empty"
+        invalid_ctrl_top = "module ctrl_top;"
+
+        def mock_open_file(filepath, mode="r"):
+            if "Makefile" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_makefile)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_ctrl_top)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_synthesis_and_bitstream_config())
 
 
 if __name__ == "__main__":

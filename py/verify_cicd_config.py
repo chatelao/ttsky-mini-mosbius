@@ -976,6 +976,42 @@ def check_info_yaml_extended_schema(repo_root="."):
     return True
 
 
+def check_synthesis_and_bitstream_config(repo_root="."):
+    makefile_path = os.path.join(repo_root, "src/Makefile")
+    ctrl_top_path = os.path.join(repo_root, "src/ctrl_top.v")
+
+    errors = []
+
+    if not os.path.exists(makefile_path):
+        errors.append(f"Missing file: {makefile_path}")
+    else:
+        with open(makefile_path, "r") as f:
+            makefile_content = f.read()
+        if "yosys" not in makefile_content:
+            errors.append("Missing yosys synthesis execution command in src/Makefile")
+        if "ctrl_top" not in makefile_content:
+            errors.append("Missing ctrl_top synthesis target in src/Makefile")
+
+    if not os.path.exists(ctrl_top_path):
+        errors.append(f"Missing file: {ctrl_top_path}")
+    else:
+        with open(ctrl_top_path, "r") as f:
+            ctrl_top_content = f.read()
+        if "[191:0]" not in ctrl_top_content or "ctrl_out" not in ctrl_top_content:
+            errors.append("Missing 192-bit ctrl_out bus declaration in src/ctrl_top.v")
+        if "sg13g2_" not in ctrl_top_content:
+            errors.append("Missing sg13g2_ cell instantiations in src/ctrl_top.v")
+
+    if errors:
+        print("FAILED synthesis and bitstream config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED synthesis and bitstream config check")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -1046,6 +1082,7 @@ def main():
     precheck_reports_ok = check_precheck_reports_and_logs(repo_root)
     pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
     info_extended_ok = check_info_yaml_extended_schema(repo_root)
+    synthesis_bitstream_ok = check_synthesis_and_bitstream_config(repo_root)
 
     if (
         gds_ok
@@ -1073,6 +1110,7 @@ def main():
         and precheck_reports_ok
         and pdk_tech_drc_ok
         and info_extended_ok
+        and synthesis_bitstream_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
