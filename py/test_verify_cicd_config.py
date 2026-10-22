@@ -28,6 +28,10 @@ from py.verify_cicd_config import (
     check_viewer_and_docs_deployment_config,
     check_workflow_execution_summary_config,
     check_workflow_trigger_events_config,
+    check_upstream_pdk_tag_consistency,
+    check_precheck_reports_and_logs,
+    check_pdk_tech_and_drc_rules,
+    check_info_yaml_extended_schema,
 )
 
 
@@ -1020,6 +1024,74 @@ steps:
             "os.listdir", side_effect=mock_listdir
         ), patch("builtins.open", side_effect=mock_open_file):
             self.assertFalse(check_xschem_config())
+
+    def test_check_upstream_pdk_tag_consistency_valid(self):
+        valid_wf = "uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_wf)
+        ):
+            self.assertTrue(check_upstream_pdk_tag_consistency())
+
+    def test_check_upstream_pdk_tag_consistency_invalid(self):
+        invalid_wf = "uses: TinyTapeout/tt-gds-action/custom_gds@ttsky26c"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_wf)
+        ):
+            self.assertFalse(check_upstream_pdk_tag_consistency())
+
+    def test_check_precheck_reports_and_logs_valid(self):
+        valid_gds = "precheck:\n  continue-on-error: true\n  steps:\n    - run: cp -r tech/* ../tech/"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_gds)
+        ):
+            self.assertTrue(check_precheck_reports_and_logs())
+
+    def test_check_precheck_reports_and_logs_invalid(self):
+        invalid_gds = "precheck:\n  steps: []"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_gds)
+        ):
+            self.assertFalse(check_precheck_reports_and_logs())
+
+    def test_check_pdk_tech_and_drc_rules_valid(self):
+        valid_drc = "drc euclidean on"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_drc)
+        ):
+            self.assertTrue(check_pdk_tech_and_drc_rules())
+
+    def test_check_pdk_tech_and_drc_rules_missing_script(self):
+        with patch("os.path.exists", return_value=False):
+            self.assertFalse(check_pdk_tech_and_drc_rules())
+
+    def test_check_info_yaml_extended_schema_valid(self):
+        valid_info = """
+yaml_version: 6
+title: "tnt's variant"
+author: "Sylvain"
+discord: "246tnt"
+description: "mini-MOSbius"
+language: "Analog"
+clock_hz: 0
+tiles: "3x2"
+analog_pins: 6
+uses_vapwr: true
+top_module: "tt_um_tnt_mosbius"
+source_files: ["project.v"]
+pinout:
+  ui[0]: "data_in"
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_info)
+        ):
+            self.assertTrue(check_info_yaml_extended_schema())
+
+    def test_check_info_yaml_extended_schema_invalid(self):
+        invalid_info = "title: test"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
+        ):
+            self.assertFalse(check_info_yaml_extended_schema())
 
 
 if __name__ == "__main__":
