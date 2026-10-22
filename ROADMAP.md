@@ -55,9 +55,9 @@ The top priority is establishing and maintaining a functioning **CI/CD pipeline 
 
 - [x] **3.1 Update Verilog Standard Cell Definitions**
   - Update `src/stdcells.v` to declare `sg13g2_stdcell_*` primitives (`sg13g2_and2_1`, `sg13g2_inv_1`, `sg13g2_buf_2`, `sg13g2_dfrpc_1`, `sg13g2_tiel_1`, etc.).
-- [ ] **3.2 Synthesis Toolchain Adaptation (`src/Makefile`)**
+- [x] **3.2 Synthesis Toolchain Adaptation (`src/Makefile`)**
   - Update Yosys synthesis scripts in `src/Makefile` to target `sg13g2_stdcell.v` target library.
-- [ ] **3.3 Functional RTL Simulation**
+- [x] **3.3 Functional RTL Simulation**
   - Run Verilog simulation of 192-bit control bitstream shift register chain under 1.2V timing/lib parameters.
 
 ---
@@ -66,14 +66,14 @@ The top priority is establishing and maintaining a functioning **CI/CD pipeline 
 
 > **Objective:** Adapt Python layout placement and decap generation scripts for SG13G2 geometries.
 
-- [ ] **4.1 Update Grid & Pitch Parameters (`py/common.py`)**
+- [x] **4.1 Update Grid & Pitch Parameters (`py/common.py`)**
   - Update `ROW_PITCH` and `COL_PITCH` according to `sg13g2_stdcell` LEF specifications.
   - Update horizontal (`TRACK_H_*`) and vertical (`TRACK_V_*`) track pitch, offsets, and widths for SG13G2 Metal 1 and Metal 2 layers.
   - Update `VIAS` stack dictionary for SG13G2 `met1`, `met2`, and `met3` contacts.
-- [ ] **4.2 Decap & Filler Instantiation Update (`py/gen_asw_ctrl.py`, `py/gen_dev_ctrl.py`)**
+- [x] **4.2 Decap & Filler Instantiation Update (`py/gen_asw_ctrl.py`, `py/gen_dev_ctrl.py`)**
   - Re-target cell references to `sg13g2_decap_4`, `sg13g2_decap_8`, `sg13g2_fill_1`, and `sg13g2_fill_2`.
   - Regenerate `.decap.v` files for ASW column controllers (`ctrl_asw.decap.v`) and device controllers (`ctrl_dev_*.decap.v`).
-- [ ] **4.3 GDS Post-Processing (`py/fix_gds.py`)**
+- [x] **4.3 GDS Post-Processing (`py/fix_gds.py`)**
   - Adapt GDS cell structure fixup script for SG13G2 layer mapping conventions.
 
 ---
