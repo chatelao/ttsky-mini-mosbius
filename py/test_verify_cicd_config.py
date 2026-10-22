@@ -32,6 +32,7 @@ from py.verify_cicd_config import (
     check_precheck_reports_and_logs,
     check_pdk_tech_and_drc_rules,
     check_info_yaml_extended_schema,
+    check_cicd_fix_roadmap_config,
 )
 
 
@@ -1092,6 +1093,39 @@ pinout:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
         ):
             self.assertFalse(check_info_yaml_extended_schema())
+
+    def test_check_cicd_fix_roadmap_config_valid(self):
+        valid_roadmap = """
+## Phase 1: Repository Settings Configuration
+## Phase 2: Workflow Definition Updates
+## Phase 3: Local Verification & CI Execution
+## Phase 4: Ongoing CI/CD Pipeline Maintenance & Health Checks
+
+- [x] **1.1 Navigate**
+- [x] **1.2 Configure**
+- [x] **1.3 Save**
+- [x] **2.1 Update**
+- [x] **2.2 Update**
+- [x] **3.1 Run**
+- [x] **3.2 Commit**
+- [x] **3.3 Remote**
+- [x] **4.1 Continuous**
+- [x] **4.2 Precheck**
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_roadmap)
+        ):
+            self.assertTrue(check_cicd_fix_roadmap_config())
+
+    def test_check_cicd_fix_roadmap_config_invalid(self):
+        invalid_roadmap = """
+## Phase 1: Repository Settings Configuration
+- [ ] **1.1 Navigate**
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_roadmap)
+        ):
+            self.assertFalse(check_cicd_fix_roadmap_config())
 
 
 if __name__ == "__main__":
