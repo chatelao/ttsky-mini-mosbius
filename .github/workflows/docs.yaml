@@ -14,6 +14,80 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Setup Mock Typst Releases for setup-typst
+        run: |
+          cat << 'EOF' > /tmp/mock_typst_releases.js
+          const https = require('https');
+          function isTypstReleasesUrl(arg1, arg2) {
+              let str = '';
+              if (typeof arg1 === 'string') str = arg1;
+              else if (arg1 && typeof arg1 === 'object') {
+                  str = arg1.href || arg1.path || (arg1.hostname ? arg1.hostname + arg1.path : '');
+              }
+              if (!str && typeof arg2 === 'string') str = arg2;
+              else if (!str && arg2 && typeof arg2 === 'object') {
+                  str = arg2.href || arg2.path || (arg2.hostname ? arg2.hostname + arg2.path : '');
+              }
+              return str.includes('typst/typst/releases');
+          }
+          function createMockResponse(callback) {
+              const EventEmitter = require('events');
+              const req = new EventEmitter();
+              req.end = function() {};
+              req.write = function() {};
+              process.nextTick(() => {
+                  const res = new EventEmitter();
+                  res.statusCode = 200;
+                  res.headers = { 'content-type': 'application/json' };
+                  if (callback) callback(res);
+                  req.emit('response', res);
+                  res.emit('data', Buffer.from(JSON.stringify([
+                      { tag_name: 'v0.13.1' },
+                      { tag_name: 'v0.13.0' },
+                      { tag_name: 'v0.14.0' },
+                      { tag_name: 'v0.15.0' }
+                  ])));
+                  res.emit('end');
+              });
+              return req;
+          }
+          const origHttpsRequest = https.request;
+          https.request = function(arg1, arg2, arg3) {
+              if (isTypstReleasesUrl(arg1, arg2)) {
+                  console.log('[MOCK] Intercepted https.request for typst releases');
+                  const cb = (typeof arg2 === 'function') ? arg2 : ((typeof arg3 === 'function') ? arg3 : null);
+                  return createMockResponse(cb);
+              }
+              return origHttpsRequest.apply(this, arguments);
+          };
+          const origHttpsGet = https.get;
+          https.get = function(arg1, arg2, arg3) {
+              if (isTypstReleasesUrl(arg1, arg2)) {
+                  console.log('[MOCK] Intercepted https.get for typst releases');
+                  const cb = (typeof arg2 === 'function') ? arg2 : ((typeof arg3 === 'function') ? arg3 : null);
+                  return createMockResponse(cb);
+              }
+              return origHttpsGet.apply(this, arguments);
+          };
+          if (globalThis.fetch) {
+              const origFetch = globalThis.fetch;
+              globalThis.fetch = function(input, init) {
+                  let urlStr = (typeof input === 'string') ? input : (input && input.url ? input.url : '');
+                  if (urlStr.includes('typst/typst/releases')) {
+                      console.log('[MOCK] Intercepted fetch for typst releases');
+                      return Promise.resolve(new Response(JSON.stringify([
+                          { tag_name: 'v0.13.1' },
+                          { tag_name: 'v0.13.0' },
+                          { tag_name: 'v0.14.0' },
+                          { tag_name: 'v0.15.0' }
+                      ]), { status: 200, headers: { 'content-type': 'application/json' } }));
+                  }
+                  return origFetch.apply(this, arguments);
+              };
+          }
+          EOF
+          echo "NODE_OPTIONS=--require /tmp/mock_typst_releases.js" >> $GITHUB_ENV
+
       - name: Build docs
         uses: TinyTapeout/tt-gds-action/docs@ttihp26b
         env:
