@@ -4,6 +4,7 @@
 
 ELABORATE_TGT=\
 	ctrl_top \
+	project \
 	$(NULL)
 
 ELABORTATE_FILES=$(addsuffix .synth.v, $(ELABORATE_TGT))
@@ -21,6 +22,8 @@ ctrl_top.v: \
 	ctrl_dev_m2.decap.v \
 	ctrl_dev_e2.decap.v \
 	$(NULL)
+
+project.v: ctrl_top.v
 
 # Decap
 ctrl_asw.decap.v:
@@ -48,8 +51,11 @@ ctrl_dev_e2.decap.v:
 	../py/gen_dev_ctrl.py decap end 2 > $@
 
 # Elaborate
-%.synth.v: %.v
-	yosys -p "read_verilog $*.v; hierarchy -top $* -check; write_verilog -noattr $*.synth.v"
+ctrl_top.synth.v: ctrl_top.v stdcells.v
+	yosys -p "read_verilog stdcells.v ctrl_top.v; hierarchy -top ctrl_top -check; write_verilog -noattr ctrl_top.synth.v"
+
+project.synth.v: project.v ctrl_top.v stdcells.v
+	yosys -p "read_verilog stdcells.v ctrl_top.v project.v; hierarchy -top tt_um_tnt_mosbius -check; write_verilog -noattr project.synth.v"
 
 # Lint & Check Stubs
 lint:
