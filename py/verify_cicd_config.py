@@ -1057,6 +1057,103 @@ def check_cicd_fix_roadmap_config(repo_root="."):
     return True
 
 
+def check_drc_config_consistency(repo_root="."):
+    drc_tcl_path = os.path.join(repo_root, "tcl/magic_drc.tcl")
+    def_path = os.path.join(repo_root, "tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def")
+    errors = []
+
+    if not os.path.exists(drc_tcl_path):
+        errors.append(f"Missing file: {drc_tcl_path}")
+    else:
+        with open(drc_tcl_path, "r") as f:
+            content = f.read()
+        if "drc euclidean on" not in content:
+            errors.append("Missing 'drc euclidean on' in tcl/magic_drc.tcl")
+        if "drc check" not in content:
+            errors.append("Missing 'drc check' in tcl/magic_drc.tcl")
+
+    if not os.path.exists(def_path):
+        errors.append(f"Missing file: {def_path}")
+    else:
+        with open(def_path, "r") as f:
+            def_content = f.read()
+        if "tt_analog_3x2_3v3" not in def_content and "DESIGN" not in def_content:
+            errors.append("Invalid DEF template file content in tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def")
+
+    if errors:
+        print("FAILED DRC config consistency check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED DRC config consistency check")
+    return True
+
+
+def check_layer_remapping_config(repo_root="."):
+    fix_gds_path = os.path.join(repo_root, "py/fix_gds.py")
+    errors = []
+
+    if not os.path.exists(fix_gds_path):
+        errors.append(f"Missing file: {fix_gds_path}")
+    else:
+        with open(fix_gds_path, "r") as f:
+            content = f.read()
+
+        required_mappings = [
+            "(235, 4): (189, 4)",
+            "(68, 20): (30, 0)",
+            "(69, 20): (50, 0)",
+            "(70, 20): (67, 0)",
+            "(71, 20): (125, 0)",
+            "remap_gds_stream",
+        ]
+
+        for mapping in required_mappings:
+            if mapping not in content:
+                errors.append(f"Missing expected mapping or function '{mapping}' in py/fix_gds.py")
+
+    if errors:
+        print("FAILED layer remapping config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED layer remapping config check")
+    return True
+
+
+def check_netgen_lvs_config(repo_root="."):
+    lvs_tcl_path = os.path.join(repo_root, "tcl/lvs.tcl")
+    errors = []
+
+    if not os.path.exists(lvs_tcl_path):
+        errors.append(f"Missing file: {lvs_tcl_path}")
+    else:
+        with open(lvs_tcl_path, "r") as f:
+            content = f.read()
+
+        required_elements = [
+            "sg13g2_setup.tcl",
+            "sg13g2_stdcell.spice",
+            "mosbius.spice",
+            "lvs",
+        ]
+
+        for elem in required_elements:
+            if elem not in content:
+                errors.append(f"Missing expected element '{elem}' in tcl/lvs.tcl")
+
+    if errors:
+        print("FAILED Netgen LVS config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED Netgen LVS config check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -1089,6 +1186,9 @@ def main():
     pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
     info_extended_ok = check_info_yaml_extended_schema(repo_root)
     cicd_roadmap_ok = check_cicd_fix_roadmap_config(repo_root)
+    drc_config_ok = check_drc_config_consistency(repo_root)
+    layer_remap_ok = check_layer_remapping_config(repo_root)
+    netgen_lvs_ok = check_netgen_lvs_config(repo_root)
 
     if (
         gds_ok
@@ -1117,6 +1217,9 @@ def main():
         and pdk_tech_drc_ok
         and info_extended_ok
         and cicd_roadmap_ok
+        and drc_config_ok
+        and layer_remap_ok
+        and netgen_lvs_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
