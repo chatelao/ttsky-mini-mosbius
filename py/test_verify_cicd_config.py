@@ -11,17 +11,23 @@ from py.verify_cicd_config import (
     check_def_template_config,
     check_docs_build_and_asset_config,
     check_docs_workflow,
+    check_drc_config_consistency,
+    check_drc_violation_reporting_config,
     check_eda_toolchain_and_container_config,
     check_gds_lef_artifacts,
     check_gds_workflow,
     check_git_submodule_and_checkout_config,
     check_info_yaml,
     check_klayout_drc_and_geometry_config,
+    check_layer_remapping_config,
     check_lef_pin_and_boundary_config,
+    check_netgen_lvs_config,
     check_pages_api_config,
     check_pages_deployment_and_oidc_config,
+    check_power_domain_isolation_lvs_config,
     check_precheck_def_and_pin_config,
     check_precheck_execution_and_reporting_config,
+    check_schematic_alignment_config,
     check_stdcell_declarations,
     check_top_module_step_config,
     check_xschem_config,
@@ -1117,6 +1123,116 @@ Assertion: check_cicd_fix_roadmap_config
             "builtins.open", unittest.mock.mock_open(read_data=invalid_roadmap)
         ):
             self.assertFalse(check_cicd_fix_roadmap_config())
+
+    def test_check_drc_config_consistency_valid(self):
+        valid_drc = "load $project\ndrc euclidean on\ndrc style \"drc(full)\"\ndrc check\n"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_drc)
+        ):
+            self.assertTrue(check_drc_config_consistency())
+
+    def test_check_drc_config_consistency_invalid(self):
+        invalid_drc = "load $project\n"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_drc)
+        ):
+            self.assertFalse(check_drc_config_consistency())
+
+    def test_check_drc_violation_reporting_config_valid(self):
+        valid_report = "tt_um_tnt_mosbius ihp-sg13g2 20,059 DRC-M1-W DRC-M1-S py/fix_gds.py"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_report)
+        ):
+            self.assertTrue(check_drc_violation_reporting_config())
+
+    def test_check_drc_violation_reporting_config_invalid(self):
+        invalid_report = "tt_um_tnt_mosbius missing info"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_report)
+        ):
+            self.assertFalse(check_drc_violation_reporting_config())
+
+    def test_check_layer_remapping_config_valid(self):
+        valid_script = """
+LAYER_MAP = {
+    (235, 4): (189, 4),
+    (68, 20): (30, 0),
+    (69, 20): (50, 0),
+    (70, 20): (67, 0),
+    (71, 20): (125, 0),
+}
+def remap_gds_stream():
+    pass
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_script)
+        ):
+            self.assertTrue(check_layer_remapping_config())
+
+    def test_check_layer_remapping_config_invalid(self):
+        invalid_script = "LAYER_MAP = {}"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_script)
+        ):
+            self.assertFalse(check_layer_remapping_config())
+
+    def test_check_netgen_lvs_config_valid(self):
+        valid_lvs = "sg13g2_stdcell.spice mosbius.spice ctrl_top.synth.v project.v sg13g2_setup.tcl lvs"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_lvs)
+        ):
+            self.assertTrue(check_netgen_lvs_config())
+
+    def test_check_netgen_lvs_config_invalid(self):
+        invalid_lvs = "lvs"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_lvs)
+        ):
+            self.assertFalse(check_netgen_lvs_config())
+
+    def test_check_schematic_alignment_config_valid(self):
+        valid_sch = "ota_n.sym mirror_n.sym mirror_p.sym diff_n.sym diff_p.sym tt_asw_3v3.sym VAPWR VDPWR VGND"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_sch)
+        ):
+            self.assertTrue(check_schematic_alignment_config())
+
+    def test_check_schematic_alignment_config_invalid_legacy(self):
+        invalid_sch = "ota_n.sym mirror_n.sym mirror_p.sym diff_n.sym diff_p.sym tt_asw_3v3.sym VAPWR VDPWR VGND sky130_fd_pr"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_sch)
+        ):
+            self.assertFalse(check_schematic_alignment_config())
+
+    def test_check_power_domain_isolation_lvs_config_valid(self):
+        valid_verilog = "module project(inout VDPWR, inout VAPWR, inout VGND); endmodule"
+        valid_info = "uses_vapwr: true"
+
+        def mock_open_file(filepath, mode="r"):
+            if "project.v" in filepath:
+                return unittest.mock.mock_open(read_data=valid_verilog)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_info)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_power_domain_isolation_lvs_config())
+
+    def test_check_power_domain_isolation_lvs_config_invalid(self):
+        invalid_verilog = "module project; endmodule"
+        invalid_info = "uses_vapwr: false"
+
+        def mock_open_file(filepath, mode="r"):
+            if "project.v" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_verilog)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_info)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_power_domain_isolation_lvs_config())
 
 
 if __name__ == "__main__":

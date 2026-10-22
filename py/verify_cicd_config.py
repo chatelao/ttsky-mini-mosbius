@@ -1057,6 +1057,218 @@ def check_cicd_fix_roadmap_config(repo_root="."):
     return True
 
 
+def check_drc_config_consistency(repo_root="."):
+    drc_tcl_path = os.path.join(repo_root, "tcl/magic_drc.tcl")
+    tech_dir = os.path.join(repo_root, "tech/ihp-sg13g2")
+
+    errors = []
+
+    if not os.path.exists(drc_tcl_path):
+        errors.append(f"Missing file: {drc_tcl_path}")
+    else:
+        with open(drc_tcl_path, "r") as f:
+            content = f.read()
+
+        required_cmds = [
+            "load $project",
+            "drc euclidean on",
+            "drc style \"drc(full)\"",
+            "drc check",
+        ]
+
+        for cmd in required_cmds:
+            if cmd not in content and cmd.replace('"', '') not in content:
+                errors.append(f"Missing command '{cmd}' in tcl/magic_drc.tcl")
+
+    if not os.path.exists(tech_dir):
+        errors.append(f"Missing PDK technology directory: {tech_dir}")
+
+    if errors:
+        print("FAILED DRC config consistency check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED DRC config consistency check")
+    return True
+
+
+def check_drc_violation_reporting_config(repo_root="."):
+    report_path = os.path.join(repo_root, "klayout_violations_2.md")
+    errors = []
+
+    if not os.path.exists(report_path):
+        errors.append(f"Missing file: {report_path}")
+    else:
+        with open(report_path, "r") as f:
+            content = f.read()
+
+        required_terms = [
+            "tt_um_tnt_mosbius",
+            "ihp-sg13g2",
+            "20,059",
+            "DRC-M1-W",
+            "DRC-M1-S",
+            "py/fix_gds.py",
+        ]
+
+        for term in required_terms:
+            if term not in content:
+                errors.append(f"Missing required term '{term}' in klayout_violations_2.md")
+
+    if errors:
+        print("FAILED DRC violation reporting config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED DRC violation reporting config check")
+    return True
+
+
+def check_layer_remapping_config(repo_root="."):
+    script_path = os.path.join(repo_root, "py/fix_gds.py")
+    errors = []
+
+    if not os.path.exists(script_path):
+        errors.append(f"Missing file: {script_path}")
+    else:
+        with open(script_path, "r") as f:
+            content = f.read()
+
+        required_tokens = [
+            "LAYER_MAP",
+            "(235, 4): (189, 4)",
+            "(68, 20): (30, 0)",
+            "(69, 20): (50, 0)",
+            "(70, 20): (67, 0)",
+            "(71, 20): (125, 0)",
+            "remap_gds_stream",
+        ]
+
+        for tok in required_tokens:
+            if tok not in content:
+                errors.append(f"Missing required token '{tok}' in py/fix_gds.py")
+
+    if errors:
+        print("FAILED layer remapping config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED layer remapping config check")
+    return True
+
+
+def check_netgen_lvs_config(repo_root="."):
+    lvs_script_path = os.path.join(repo_root, "tcl/lvs.tcl")
+    errors = []
+
+    if not os.path.exists(lvs_script_path):
+        errors.append(f"Missing file: {lvs_script_path}")
+    else:
+        with open(lvs_script_path, "r") as f:
+            content = f.read()
+
+        required_refs = [
+            "sg13g2_stdcell.spice",
+            "mosbius.spice",
+            "ctrl_top.synth.v",
+            "project.v",
+            "sg13g2_setup.tcl",
+            "lvs",
+        ]
+
+        for ref in required_refs:
+            if ref not in content:
+                errors.append(f"Missing required LVS file/cmd reference '{ref}' in tcl/lvs.tcl")
+
+    if errors:
+        print("FAILED Netgen LVS config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED Netgen LVS config check")
+    return True
+
+
+def check_schematic_alignment_config(repo_root="."):
+    sch_path = os.path.join(repo_root, "xschem/mosbius.sch")
+    errors = []
+
+    if not os.path.exists(sch_path):
+        errors.append(f"Missing file: {sch_path}")
+    else:
+        with open(sch_path, "r") as f:
+            content = f.read()
+
+        if "sky130" in content:
+            errors.append("Found legacy Sky130 reference in xschem/mosbius.sch")
+
+        required_symbols = [
+            "ota_n.sym",
+            "mirror_n.sym",
+            "mirror_p.sym",
+            "diff_n.sym",
+            "diff_p.sym",
+            "tt_asw_3v3.sym",
+            "VAPWR",
+            "VDPWR",
+            "VGND",
+        ]
+
+        for sym in required_symbols:
+            if sym not in content:
+                errors.append(f"Missing symbol reference '{sym}' in xschem/mosbius.sch")
+
+    if errors:
+        print("FAILED schematic alignment config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED schematic alignment config check")
+    return True
+
+
+def check_power_domain_isolation_lvs_config(repo_root="."):
+    project_verilog = os.path.join(repo_root, "src/project.v")
+    info_path = os.path.join(repo_root, "info.yaml")
+    errors = []
+
+    if not os.path.exists(project_verilog):
+        errors.append(f"Missing file: {project_verilog}")
+    else:
+        with open(project_verilog, "r") as f:
+            content = f.read()
+
+        if "VDPWR" not in content:
+            errors.append("Missing 1.2V digital power domain signal 'VDPWR' in src/project.v")
+        if "VAPWR" not in content:
+            errors.append("Missing 3.3V analog power domain signal 'VAPWR' in src/project.v")
+        if "VGND" not in content:
+            errors.append("Missing ground signal 'VGND' in src/project.v")
+
+    if not os.path.exists(info_path):
+        errors.append(f"Missing file: {info_path}")
+    else:
+        with open(info_path, "r") as f:
+            content = f.read()
+
+        if not re.search(r"uses_vapwr:\s*true", content):
+            errors.append("Missing 'uses_vapwr: true' power domain setting in info.yaml")
+
+    if errors:
+        print("FAILED power domain isolation LVS config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED power domain isolation LVS config check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -1089,6 +1301,12 @@ def main():
     pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
     info_extended_ok = check_info_yaml_extended_schema(repo_root)
     cicd_roadmap_ok = check_cicd_fix_roadmap_config(repo_root)
+    drc_consistency_ok = check_drc_config_consistency(repo_root)
+    drc_reporting_ok = check_drc_violation_reporting_config(repo_root)
+    layer_remap_ok = check_layer_remapping_config(repo_root)
+    netgen_lvs_ok = check_netgen_lvs_config(repo_root)
+    sch_align_ok = check_schematic_alignment_config(repo_root)
+    pwr_domain_ok = check_power_domain_isolation_lvs_config(repo_root)
 
     if (
         gds_ok
@@ -1117,6 +1335,12 @@ def main():
         and pdk_tech_drc_ok
         and info_extended_ok
         and cicd_roadmap_ok
+        and drc_consistency_ok
+        and drc_reporting_ok
+        and layer_remap_ok
+        and netgen_lvs_ok
+        and sch_align_ok
+        and pwr_domain_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
