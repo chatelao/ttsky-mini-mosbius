@@ -1015,6 +1015,35 @@ def check_stdcell_declarations(repo_root="."):
     return True
 
 
+def check_synthesized_verilog_cells(repo_root="."):
+    synth_path = os.path.join(repo_root, "src/ctrl_top.synth.v")
+    errors = []
+
+    if not os.path.exists(synth_path):
+        errors.append(f"Missing synthesized file: {synth_path}")
+    else:
+        with open(synth_path, "r") as f:
+            content = f.read()
+
+        if "sky130" in content:
+            errors.append(f"Found legacy sky130 reference in synthesized Verilog file {synth_path}")
+
+        if "module ctrl_top" not in content:
+            errors.append(f"Missing 'module ctrl_top' declaration in synthesized Verilog file {synth_path}")
+
+        if "sg13g2_" not in content:
+            errors.append(f"Missing 'sg13g2_' standard cell instantiations in synthesized Verilog file {synth_path}")
+
+    if errors:
+        print("FAILED synthesized Verilog cells check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print(f"PASSED synthesized Verilog cells check for {synth_path}")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -1046,6 +1075,7 @@ def main():
     precheck_reports_ok = check_precheck_reports_and_logs(repo_root)
     pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
     info_extended_ok = check_info_yaml_extended_schema(repo_root)
+    synth_verilog_ok = check_synthesized_verilog_cells(repo_root)
 
     if (
         gds_ok
@@ -1073,6 +1103,7 @@ def main():
         and precheck_reports_ok
         and pdk_tech_drc_ok
         and info_extended_ok
+        and synth_verilog_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)

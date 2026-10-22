@@ -32,6 +32,7 @@ from py.verify_cicd_config import (
     check_precheck_reports_and_logs,
     check_pdk_tech_and_drc_rules,
     check_info_yaml_extended_schema,
+    check_synthesized_verilog_cells,
 )
 
 
@@ -1092,6 +1093,20 @@ pinout:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
         ):
             self.assertFalse(check_info_yaml_extended_schema())
+
+    def test_check_synthesized_verilog_cells_valid(self):
+        valid_synth = "module ctrl_top;\n sg13g2_buf_16 buf1();\nendmodule"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_synth)
+        ):
+            self.assertTrue(check_synthesized_verilog_cells())
+
+    def test_check_synthesized_verilog_cells_invalid(self):
+        invalid_synth = "module ctrl_top;\n sky130_fd_sc_hd__buf1();\nendmodule"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_synth)
+        ):
+            self.assertFalse(check_synthesized_verilog_cells())
 
 
 if __name__ == "__main__":
