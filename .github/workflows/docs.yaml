@@ -8,17 +8,15 @@ on:
 jobs:
   docs:
     runs-on: ubuntu-24.04
+    env:
+      INPUT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
           submodules: recursive
-
-      - name: Install Typst
-        uses: typst-community/setup-typst@v5
-        with:
-          typst-version: "0.13.1"
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build docs
         uses: TinyTapeout/tt-gds-action/docs@ttihp26b
