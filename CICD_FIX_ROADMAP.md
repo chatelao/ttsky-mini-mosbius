@@ -34,6 +34,13 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 │  Phase 4: Ongoing Maintenance & Health Checks          │
 │  - Continuous drift detection & rule maintenance       │
 │  - Precheck artifact & toolchain sign-off verification │
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│  Phase 5: Automated Physical Verification & PDK Line   │
+│  - Batch Magic & KLayout DRC pipeline integration       │
+│  - Netgen LVS comparison & PEX post-layout sign-off    │
 └────────────────────────────────────────────────────────┘
 ```
 
@@ -296,3 +303,51 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **4.2.3.1** Verify `docs/info.md` contains required `## How it works` and `## How to test` sections.
     - [x] **4.2.3.2** Validate required metadata fields (`author`, `description`, `pinout`, `top_module`, `tiles`, `analog_pins`) in `info.yaml` via `check_docs_build_and_asset_config`.
     - [x] **4.2.3.3** Maintain documentation rendering compatibility when adding new schema parameters to `info.yaml`.
+
+---
+
+## Phase 5: Automated Physical Verification & Upstream PDK Alignment Pipeline Integration
+
+> **Objective:** Establish automated batch Magic and KLayout DRC physical verification, Netgen LVS netlist comparison, parasitic extraction (PEX) sign-off, and static PDK configuration drift prevention without altering physical layout or source RTL files.
+
+- [ ] **5.1 Automated Batch Physical Verification Pipeline Integration (Magic & KLayout DRC)**
+  - [ ] **5.1.1 Configure Batch Magic DRC Pipeline Execution**
+    - [ ] **5.1.1.1** Verify `tcl/magic_drc.tcl` sets `drc euclidean on` and `drc style "drc(full)"` for batch execution.
+    - [ ] **5.1.1.2** Configure headless Magic DRC execution script against top-level layout `gds/tt_um_tnt_mosbius.gds`.
+    - [ ] **5.1.1.3** Parse generated Magic DRC log file (`magic_drc.log`) to assert zero DRC rule violations.
+  - [ ] **5.1.2 Configure KLayout SG13G2 Sign-Off DRC Execution**
+    - [ ] **5.1.2.1** Integrate KLayout batch DRC runner utilizing official IHP SG13G2 rule deck (`sg13g2.lydrc`).
+    - [ ] **5.1.2.2** Ensure antenna check, density check, and zero-area polygon rules execute cleanly without exceptions.
+    - [ ] **5.1.2.3** Generate and archive KLayout DRC XML output database (`klayout_drc.lyrdb`) as CI build artifact.
+  - [ ] **5.1.3 DRC Violation Remediation & Summary Assertion**
+    - [ ] **5.1.3.1** Validate cell-level DRC error distribution report against known PDK layer boundary tolerances.
+    - [ ] **5.1.3.2** Confirm DRC step summary output displays clean status (0 errors) in workflow summary report.
+
+- [ ] **5.2 Automated Netlist Extraction & Netgen LVS Pipeline Integration**
+  - [ ] **5.2.1 Extract Top-Level Layout Netlist**
+    - [ ] **5.2.1.1** Configure Magic batch netlist extraction script (`tcl/lvs.tcl`) for `gds/tt_um_tnt_mosbius.gds`.
+    - [ ] **5.2.1.2** Generate extracted layout SPICE netlist (`tt_um_tnt_mosbius.ext.spice`) preserving 1.2V and 3.3V port definitions.
+  - [ ] **5.2.2 Extract Top-Level Schematic Netlist**
+    - [ ] **5.2.2.1** Execute Xschem headless netlisting command on `xschem/mosbius.sch` using `xschemrc` path configuration.
+    - [ ] **5.2.2.2** Produce reference schematic SPICE netlist (`mosbius.sch.spice`) mapped to IHP `sg13g2_pr` device primitives.
+  - [ ] **5.2.3 Netgen LVS Comparison Execution**
+    - [ ] **5.2.3.1** Execute Netgen LVS comparing layout netlist against schematic netlist using `sg13g2_setup.tcl`.
+    - [ ] **5.2.3.2** Confirm Netgen setup rules correctly handle 1.2V $V_{DPWR}$ digital core and 3.3V $V_{APWR}$ analog switch domains.
+    - [ ] **5.2.3.3** Verify Netgen comparison output report (`lvs.out`) asserts zero unmatched nets, devices, or pin count discrepancies.
+
+- [ ] **5.3 Parasitic Extraction (PEX) & CI Simulation Verification**
+  - [ ] **5.3.1 Headless PEX Netlist Generation**
+    - [ ] **5.3.1.1** Configure Magic PEX script (`tcl/magic_extract_pex.tcl`) to extract parasitic capacitance and resistance networks.
+    - [ ] **5.3.1.2** Output parasitic-extracted SPICE netlist (`tt_um_tnt_mosbius.pex.spice`) for post-layout analog verification.
+  - [ ] **5.3.2 Automated Ngspice Post-Layout Sanity Simulation**
+    - [ ] **5.3.2.1** Configure Ngspice headless testbench (`xschem/tb_mosbius_postlay.sch` / `.spice`) referencing PEX netlist and IHP corner models (`corner.spice`).
+    - [ ] **5.3.2.2** Execute DC operating point and transient simulation in CI runner environment.
+    - [ ] **5.3.2.3** Verify analog switch $R_{on}$ dynamic resistance and signal attenuation meet performance specifications across process corners.
+
+- [ ] **5.4 Static Verification & Compliance Assertions**
+  - [ ] **5.4.1 Extend Static CI Configuration Verification Script**
+    - [ ] **5.4.1.1** Add `check_physical_verification_config` function to `py/verify_cicd_config.py` to validate physical verification TCL script paths.
+    - [ ] **5.4.1.2** Ensure `check_physical_verification_config` verifies Magic DRC style, Netgen setup file reference, and Xschem netlisting setup.
+  - [ ] **5.4.2 Unit Test Coverage Integration**
+    - [ ] **5.4.2.1** Add unit test cases in `py/test_verify_cicd_config.py` testing positive and negative validation scenarios for `check_physical_verification_config`.
+    - [ ] **5.4.2.2** Execute `python3 -m unittest discover -s py` via `make check` to ensure zero regressions in CI static check suite.
