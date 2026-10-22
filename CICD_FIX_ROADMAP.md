@@ -34,6 +34,14 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 │  Phase 4: Ongoing Maintenance & Health Checks          │
 │  - Continuous drift detection & rule maintenance       │
 │  - Precheck artifact & toolchain sign-off verification │
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│  Phase 5: Automated Physical Verification & PDK Align   │
+│  - Automated KLayout Batch DRC & Geometry Checks in CI │
+│  - Netgen & Magic Automated LVS Physical Sign-off      │
+│  - Upstream PDK Alignment & Toolchain Version Tracking │
 └────────────────────────────────────────────────────────┘
 ```
 
@@ -296,3 +304,36 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **4.2.3.1** Verify `docs/info.md` contains required `## How it works` and `## How to test` sections.
     - [x] **4.2.3.2** Validate required metadata fields (`author`, `description`, `pinout`, `top_module`, `tiles`, `analog_pins`) in `info.yaml` via `check_docs_build_and_asset_config`.
     - [x] **4.2.3.3** Maintain documentation rendering compatibility when adding new schema parameters to `info.yaml`.
+
+---
+
+## Phase 5: Automated Physical Verification & Upstream PDK Alignment Pipeline Integration
+
+> **Objective:** Integrate automated batch KLayout DRC, Netgen LVS, and upstream IHP SG13G2 PDK version tracking directly into CI/CD workflows for full physical verification sign-off.
+
+- [ ] **5.1 Automated KLayout Batch DRC & Physical Geometry Verification in CI**
+  - [ ] **5.1.1 Batch DRC Scripting & KLayout Rule Execution**
+    - [ ] **5.1.1.1** Configure KLayout batch mode DRC execution script using IHP SG13G2 rule file (`sg13g2.lydrc`).
+    - [ ] **5.1.1.2** Add automated DRC violation parser to convert KLayout XML/LYRDB report outputs into structured CI test summaries.
+    - [ ] **5.1.1.3** Implement DRC waiver list mechanism to filter known layout exception rules for legacy macro blocks.
+  - [ ] **5.1.2 Antenna, Density, & Boundary Rule Enforcement**
+    - [ ] **5.1.2.1** Integrate metal ratio and layer density checks into CI build steps.
+    - [ ] **5.1.2.2** Enforce zero-area polygon and off-grid vertex checks in batch verification steps.
+    - [ ] **5.1.2.3** Validate `prBoundary` boundary compliance across 3x2 tile dimensions (`tt_analog_3x2_3v3.def`).
+
+- [ ] **5.2 Netgen & Magic Automated Layout Versus Schematic (LVS) Verification**
+  - [ ] **5.2.1 Netlist Extraction & LVS Batch Automation**
+    - [ ] **5.2.1.1** Configure Magic VLSI batch netlist extraction script (`tcl/lvs.tcl`) for top-level module `tt_um_tnt_mosbius`.
+    - [ ] **5.2.1.2** Set up Netgen LVS comparing extracted layout SPICE netlist against schematic SPICE netlist (`xschem/mosbius.sch`).
+    - [ ] **5.2.1.3** Enforce strict netlist matching rules (`sg13g2_setup.tcl`) across 1.2V digital core and 3.3V analog switch matrix domains.
+  - [ ] **5.2.2 LVS Output Analysis & Failure Reporting in CI**
+    - [ ] **5.2.2.1** Add automatic parsing of Netgen LVS output logs (`comp.out`) to extract device and pin mismatch counts.
+    - [ ] **5.2.2.2** Trigger job failure step in CI whenever netgen device count or connectivity discrepancies are detected.
+
+- [ ] **5.3 Upstream PDK Alignment & Automated Toolchain Version Tracking**
+  - [ ] **5.3.1 PDK Version Drift Detection & Alignment**
+    - [ ] **5.3.1.1** Implement automated checker in `py/verify_cicd_config.py` tracking upstream `tt-gds-action` release tags beyond `@ttihp26b`.
+    - [ ] **5.3.1.2** Verify GDS post-processing layer remapping script (`py/fix_gds.py`) compatibility against updated IHP PDK layer definitions.
+  - [ ] **5.3.2 CI Verification Rule Set Expansion**
+    - [ ] **5.3.2.1** Add unit test cases in `py/test_verify_cicd_config.py` covering Phase 5 LVS and DRC verification assertions.
+    - [ ] **5.3.2.2** Update `make check` target to execute physical verification verification checks automatically.
