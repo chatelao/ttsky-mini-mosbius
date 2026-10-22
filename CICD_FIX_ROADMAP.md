@@ -34,6 +34,14 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 │  Phase 4: Ongoing Maintenance & Health Checks          │
 │  - Continuous drift detection & rule maintenance       │
 │  - Precheck artifact & toolchain sign-off verification │
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│  Phase 5: Automated DRC, LVS & Technology Alignment    │
+│  - Automated KLayout & Magic DRC CI pipeline steps     │
+│  - Netgen LVS automated comparison against netlist     │
+│  - Upstream PDK tag & toolchain drift assertion        │
 └────────────────────────────────────────────────────────┘
 ```
 
@@ -296,3 +304,23 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **4.2.3.1** Verify `docs/info.md` contains required `## How it works` and `## How to test` sections.
     - [x] **4.2.3.2** Validate required metadata fields (`author`, `description`, `pinout`, `top_module`, `tiles`, `analog_pins`) in `info.yaml` via `check_docs_build_and_asset_config`.
     - [x] **4.2.3.3** Maintain documentation rendering compatibility when adding new schema parameters to `info.yaml`.
+
+---
+
+## Phase 5: Automated Physical Verification (DRC/LVS) & PDK Alignment Pipeline
+
+> **Objective:** Establish automated end-to-end physical verification (batch DRC and LVS) and upstream PDK alignment checks within CI/CD workflows to prevent layout regressions and rule drift.
+
+- [ ] **5.1 Automated KLayout & Magic Batch DRC Pipeline Integration**
+  - [ ] **5.1.1** Configure headless KLayout SG13G2 batch DRC execution step in GitHub Actions `gds.yaml` workflow using `sg13g2.lydrc`.
+  - [ ] **5.1.2** Implement XML violation report parsing in `py/verify_cicd_config.py` to categorize and track DRC rule failures by layer and severity.
+  - [ ] **5.1.3** Establish zero-critical-violation assertion threshold for precheck layout sign-off in CI verification.
+
+- [ ] **5.2 Automated Netgen LVS Netlist Comparison Pipeline**
+  - [ ] **5.2.1** Integrate Magic SPICE layout extraction script (`tcl/magic_extract_lvs.tcl`) into the automated CI build pipeline.
+  - [ ] **5.2.2** Configure Netgen LVS comparison script (`tcl/lvs.tcl`) against gate-level Verilog and Xschem netlists in batch mode.
+  - [ ] **5.2.3** Add automated LVS comparison report validation and mismatch assertions in `py/verify_cicd_config.py`.
+
+- [ ] **5.3 Upstream PDK Tag & Toolchain Drift Detection**
+  - [ ] **5.3.1** Add automated static verification assertion for `ttihp26b` action tag alignment across all workflow definitions in `.github/workflows/`.
+  - [ ] **5.3.2** Implement automated GDS layer remapping verification in `py/test_fix_gds.py` to catch legacy SkyWater 130 datatypes and prevent illegal layer insertion.
