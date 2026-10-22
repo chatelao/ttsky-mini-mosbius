@@ -210,6 +210,11 @@ def check_gds_lef_artifacts(repo_root="."):
             for leg in legacy_layers:
                 if leg in layers:
                     errors.append(f"GDS file {gds_file} contains unmapped legacy layer {leg}")
+
+            invalid_precheck_layers = [(125, 2), (125, 25), (1, 25)]
+            for inv in invalid_precheck_layers:
+                if inv in layers:
+                    errors.append(f"GDS file {gds_file} contains invalid precheck layer {inv}")
         except Exception as e:
             errors.append(f"Failed to parse GDS file {gds_file}: {e}")
 
