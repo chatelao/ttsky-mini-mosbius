@@ -23,6 +23,7 @@ from py.verify_cicd_config import (
     check_precheck_execution_and_reporting_config,
     check_stdcell_declarations,
     check_top_module_step_config,
+    check_upstream_pdk_tag_consistency,
     check_xschem_config,
     check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
@@ -1020,6 +1021,58 @@ steps:
             "os.listdir", side_effect=mock_listdir
         ), patch("builtins.open", side_effect=mock_open_file):
             self.assertFalse(check_xschem_config())
+
+    def test_check_upstream_pdk_tag_consistency_valid(self):
+        valid_gds = """
+jobs:
+  gds:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b
+        with:
+          pdk: ihp-sg13g2
+"""
+        valid_docs = """
+jobs:
+  docs:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/docs@ttihp26b
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_upstream_pdk_tag_consistency())
+
+    def test_check_upstream_pdk_tag_consistency_invalid(self):
+        invalid_gds = """
+jobs:
+  gds:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/custom_gds@ttsky26c
+        with:
+          pdk: ihp-sg13g2
+"""
+        valid_docs = """
+jobs:
+  docs:
+    steps:
+      - uses: TinyTapeout/tt-gds-action/docs@ttihp26b
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_gds)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_docs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_upstream_pdk_tag_consistency())
 
 
 if __name__ == "__main__":
