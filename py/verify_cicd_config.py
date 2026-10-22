@@ -1015,6 +1015,105 @@ def check_stdcell_declarations(repo_root="."):
     return True
 
 
+def check_netgen_lvs_config(repo_root="."):
+    lvs_tcl_path = os.path.join(repo_root, "tcl/lvs.tcl")
+    errors = []
+
+    if not os.path.exists(lvs_tcl_path):
+        errors.append(f"Missing Netgen LVS script: {lvs_tcl_path}")
+    else:
+        with open(lvs_tcl_path, "r") as f:
+            content = f.read()
+
+        required_strings = [
+            "sg13g2_stdcell.spice",
+            "mosbius.spice",
+            "ctrl_top.synth.v",
+            "project.v",
+            "sg13g2_setup.tcl",
+            "lvs",
+        ]
+
+        for s in required_strings:
+            if s not in content:
+                errors.append(f"Missing expected reference '{s}' in tcl/lvs.tcl")
+
+    if errors:
+        print("FAILED Netgen LVS config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED Netgen LVS config check")
+    return True
+
+
+def check_layer_remapping_config(repo_root="."):
+    fix_gds_path = os.path.join(repo_root, "py/fix_gds.py")
+    errors = []
+
+    if not os.path.exists(fix_gds_path):
+        errors.append(f"Missing GDS layer remapping script: {fix_gds_path}")
+    else:
+        with open(fix_gds_path, "r") as f:
+            content = f.read()
+
+        if "LAYER_MAP" not in content:
+            errors.append("Missing 'LAYER_MAP' dictionary definition in py/fix_gds.py")
+
+        if "remap_gds_stream" not in content:
+            errors.append("Missing 'remap_gds_stream' function definition in py/fix_gds.py")
+
+        if "(235, 4): (189, 4)" not in content and "(235, 4)" not in content:
+            errors.append("Missing prBoundary remapping rule (235, 4) -> (189, 4) in py/fix_gds.py")
+
+        if "(64, 20): (31, 0)" not in content and "(64, 20)" not in content:
+            errors.append("Missing nwell remapping rule (64, 20) -> (31, 0) in py/fix_gds.py")
+
+    if errors:
+        print("FAILED layer remapping config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED layer remapping config check")
+    return True
+
+
+def check_drc_config_consistency(repo_root="."):
+    drc_tcl_path = os.path.join(repo_root, "tcl/magic_drc.tcl")
+    tech_dir = os.path.join(repo_root, "tech/ihp-sg13g2")
+
+    errors = []
+
+    if not os.path.exists(drc_tcl_path):
+        errors.append(f"Missing Magic DRC TCL configuration script: {drc_tcl_path}")
+    else:
+        with open(drc_tcl_path, "r") as f:
+            drc_content = f.read()
+
+        if "drc euclidean on" not in drc_content:
+            errors.append("Missing 'drc euclidean on' setting in tcl/magic_drc.tcl")
+
+        if 'drc style "drc(full)"' not in drc_content and "drc style drc(full)" not in drc_content:
+            errors.append("Missing 'drc style \"drc(full)\"' setting in tcl/magic_drc.tcl")
+
+        if "drc check" not in drc_content:
+            errors.append("Missing 'drc check' command in tcl/magic_drc.tcl")
+
+    if not os.path.exists(tech_dir):
+        errors.append(f"Missing PDK technology directory: {tech_dir}")
+
+    if errors:
+        print("FAILED DRC config consistency check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED DRC config consistency check")
+    return True
+
+
 def check_cicd_fix_roadmap_config(repo_root="."):
     roadmap_path = os.path.join(repo_root, "CICD_FIX_ROADMAP.md")
     errors = []
@@ -1088,6 +1187,9 @@ def main():
     precheck_reports_ok = check_precheck_reports_and_logs(repo_root)
     pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
     info_extended_ok = check_info_yaml_extended_schema(repo_root)
+    drc_config_ok = check_drc_config_consistency(repo_root)
+    layer_remap_ok = check_layer_remapping_config(repo_root)
+    netgen_lvs_ok = check_netgen_lvs_config(repo_root)
     cicd_roadmap_ok = check_cicd_fix_roadmap_config(repo_root)
 
     if (
@@ -1116,6 +1218,9 @@ def main():
         and precheck_reports_ok
         and pdk_tech_drc_ok
         and info_extended_ok
+        and drc_config_ok
+        and layer_remap_ok
+        and netgen_lvs_ok
         and cicd_roadmap_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
