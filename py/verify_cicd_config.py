@@ -1057,6 +1057,125 @@ def check_cicd_fix_roadmap_config(repo_root="."):
     return True
 
 
+def check_drc_config_consistency(repo_root="."):
+    drc_script_path = os.path.join(repo_root, "tcl/magic_drc.tcl")
+    workflow_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    info_path = os.path.join(repo_root, "info.yaml")
+
+    errors = []
+
+    if not os.path.exists(drc_script_path):
+        errors.append(f"Missing DRC script file: {drc_script_path}")
+    else:
+        with open(drc_script_path, "r") as f:
+            drc_content = f.read()
+        if "drc euclidean on" not in drc_content:
+            errors.append("Missing 'drc euclidean on' in tcl/magic_drc.tcl")
+        if 'drc style "drc(full)"' not in drc_content and "drc style drc(full)" not in drc_content:
+            errors.append("Missing 'drc style \"drc(full)\"' in tcl/magic_drc.tcl")
+        if "drc check" not in drc_content:
+            errors.append("Missing 'drc check' command in tcl/magic_drc.tcl")
+
+    if not os.path.exists(workflow_path):
+        errors.append(f"Missing workflow file: {workflow_path}")
+    else:
+        with open(workflow_path, "r") as f:
+            wf_content = f.read()
+        if "precheck@ttihp26b" not in wf_content:
+            errors.append("Missing 'precheck@ttihp26b' action in gds.yaml")
+
+    if not os.path.exists(info_path):
+        errors.append(f"Missing info.yaml file: {info_path}")
+    else:
+        with open(info_path, "r") as f:
+            info_content = f.read()
+        if "tiles:" not in info_content:
+            errors.append("Missing 'tiles:' parameter in info.yaml")
+
+    if errors:
+        print("FAILED DRC config consistency check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED DRC config consistency check")
+    return True
+
+
+def check_layer_remapping_config(repo_root="."):
+    fix_gds_path = os.path.join(repo_root, "py/fix_gds.py")
+    errors = []
+
+    if not os.path.exists(fix_gds_path):
+        errors.append(f"Missing GDS layer fix script: {fix_gds_path}")
+    else:
+        with open(fix_gds_path, "r") as f:
+            content = f.read()
+
+        if "LAYER_MAP" not in content:
+            errors.append("Missing 'LAYER_MAP' dictionary in py/fix_gds.py")
+        if "remap_gds_stream" not in content:
+            errors.append("Missing 'remap_gds_stream' function in py/fix_gds.py")
+
+        required_mappings = [
+            "(235, 4)",
+            "(189, 4)",
+            "(68, 20)",
+            "(30, 0)",
+        ]
+        for item in required_mappings:
+            if item not in content:
+                errors.append(f"Missing expected layer mapping reference '{item}' in py/fix_gds.py")
+
+    if errors:
+        print("FAILED layer remapping config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED layer remapping config check")
+    return True
+
+
+def check_netgen_lvs_config(repo_root="."):
+    lvs_tcl_path = os.path.join(repo_root, "tcl/lvs.tcl")
+    extract_lvs_path = os.path.join(repo_root, "tcl/magic_extract_lvs.tcl")
+    errors = []
+
+    if not os.path.exists(lvs_tcl_path):
+        errors.append(f"Missing Netgen LVS configuration script: {lvs_tcl_path}")
+    else:
+        with open(lvs_tcl_path, "r") as f:
+            content = f.read()
+
+        if "readnet spice" not in content:
+            errors.append("Missing 'readnet spice' command in tcl/lvs.tcl")
+        if "readnet verilog" not in content:
+            errors.append("Missing 'readnet verilog' command in tcl/lvs.tcl")
+        if "sg13g2_setup.tcl" not in content:
+            errors.append("Missing 'sg13g2_setup.tcl' setup file reference in tcl/lvs.tcl")
+        if "sg13g2_stdcell.spice" not in content:
+            errors.append("Missing 'sg13g2_stdcell.spice' reference in tcl/lvs.tcl")
+
+    if not os.path.exists(extract_lvs_path):
+        errors.append(f"Missing Magic LVS extraction script: {extract_lvs_path}")
+    else:
+        with open(extract_lvs_path, "r") as f:
+            content = f.read()
+
+        if "ext2spice" not in content:
+            errors.append("Missing 'ext2spice' command in tcl/magic_extract_lvs.tcl")
+
+    if errors:
+        print("FAILED Netgen LVS config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED Netgen LVS config check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -1089,6 +1208,9 @@ def main():
     pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
     info_extended_ok = check_info_yaml_extended_schema(repo_root)
     cicd_roadmap_ok = check_cicd_fix_roadmap_config(repo_root)
+    drc_config_consistency_ok = check_drc_config_consistency(repo_root)
+    layer_remapping_ok = check_layer_remapping_config(repo_root)
+    netgen_lvs_ok = check_netgen_lvs_config(repo_root)
 
     if (
         gds_ok
@@ -1117,6 +1239,9 @@ def main():
         and pdk_tech_drc_ok
         and info_extended_ok
         and cicd_roadmap_ok
+        and drc_config_consistency_ok
+        and layer_remapping_ok
+        and netgen_lvs_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)

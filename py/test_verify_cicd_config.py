@@ -33,6 +33,9 @@ from py.verify_cicd_config import (
     check_precheck_reports_and_logs,
     check_pdk_tech_and_drc_rules,
     check_info_yaml_extended_schema,
+    check_drc_config_consistency,
+    check_layer_remapping_config,
+    check_netgen_lvs_config,
 )
 
 
@@ -1117,6 +1120,70 @@ Assertion: check_cicd_fix_roadmap_config
             "builtins.open", unittest.mock.mock_open(read_data=invalid_roadmap)
         ):
             self.assertFalse(check_cicd_fix_roadmap_config())
+
+    def test_check_drc_config_consistency_valid(self):
+        drc_content = 'drc euclidean on\ndrc style "drc(full)"\ndrc check\n'
+        wf_content = "TinyTapeout/tt-gds-action/precheck@ttihp26b"
+        info_content = "tiles: 3x2"
+
+        def mock_exists(path):
+            return True
+
+        def mock_open_file(filepath, *args, **kwargs):
+            if "magic_drc.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=drc_content)()
+            elif "gds.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=wf_content)()
+            elif "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=info_content)()
+            return unittest.mock.mock_open(read_data="")()
+
+        with patch("os.path.exists", side_effect=mock_exists), patch("builtins.open", side_effect=mock_open_file):
+            self.assertTrue(check_drc_config_consistency())
+
+    def test_check_drc_config_consistency_invalid(self):
+        with patch("os.path.exists", return_value=False):
+            self.assertFalse(check_drc_config_consistency())
+
+    def test_check_layer_remapping_config_valid(self):
+        fix_gds_content = """
+LAYER_MAP = { (235, 4): (189, 4), (68, 20): (30, 0) }
+def remap_gds_stream(in_file, out_file):
+    pass
+"""
+        with patch("os.path.exists", return_value=True), patch("builtins.open", unittest.mock.mock_open(read_data=fix_gds_content)):
+            self.assertTrue(check_layer_remapping_config())
+
+    def test_check_layer_remapping_config_invalid(self):
+        invalid_content = "def invalid_func(): pass"
+        with patch("os.path.exists", return_value=True), patch("builtins.open", unittest.mock.mock_open(read_data=invalid_content)):
+            self.assertFalse(check_layer_remapping_config())
+
+    def test_check_netgen_lvs_config_valid(self):
+        lvs_content = """
+readnet spice $project.lvs.spice
+readnet verilog $schem
+readnet spice $::env(PDK_ROOT)/ihp-sg13g2/libs.ref/sg13g2_stdcell/spice/sg13g2_stdcell.spice
+lvs "$layout $project" "$schem $project" $::env(PDK_ROOT)/ihp-sg13g2/libs.tech/netgen/sg13g2_setup.tcl
+"""
+        extract_content = "ext2spice lvs"
+
+        def mock_exists(path):
+            return True
+
+        def mock_open_file(filepath, *args, **kwargs):
+            if "lvs.tcl" in filepath and "magic_extract" not in filepath:
+                return unittest.mock.mock_open(read_data=lvs_content)()
+            elif "magic_extract_lvs.tcl" in filepath:
+                return unittest.mock.mock_open(read_data=extract_content)()
+            return unittest.mock.mock_open(read_data="")()
+
+        with patch("os.path.exists", side_effect=mock_exists), patch("builtins.open", side_effect=mock_open_file):
+            self.assertTrue(check_netgen_lvs_config())
+
+    def test_check_netgen_lvs_config_invalid(self):
+        with patch("os.path.exists", return_value=False):
+            self.assertFalse(check_netgen_lvs_config())
 
 
 if __name__ == "__main__":
