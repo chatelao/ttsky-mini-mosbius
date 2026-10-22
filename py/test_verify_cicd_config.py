@@ -258,10 +258,17 @@ jobs:
     def test_check_info_yaml_valid(self):
         valid_info = """
 project:
+  title: "tnt's variant of Mini-MOSbius (IHP SG13G2)"
+  author: "Sylvain Munaut"
+  description: "Alternative layout for Andrew Kang's mini-MOSbius"
+  clock_hz: 0
   top_module: "tt_um_tnt_mosbius"
   uses_vapwr: true
   tiles: "3x2"
   analog_pins: 6
+  source_files:
+    - "project.v"
+yaml_version: 6
 """
         with patch("os.path.exists", return_value=True), patch(
             "builtins.open", unittest.mock.mock_open(read_data=valid_info)
@@ -285,6 +292,25 @@ project:
 """
         with patch("os.path.exists", return_value=True), patch(
             "builtins.open", unittest.mock.mock_open(read_data=missing_info)
+        ):
+            self.assertFalse(check_info_yaml())
+
+    def test_check_info_yaml_missing_yaml_version(self):
+        missing_version_info = """
+project:
+  title: "tnt's variant of Mini-MOSbius (IHP SG13G2)"
+  author: "Sylvain Munaut"
+  description: "Alternative layout for Andrew Kang's mini-MOSbius"
+  clock_hz: 0
+  top_module: "tt_um_tnt_mosbius"
+  uses_vapwr: true
+  tiles: "3x2"
+  analog_pins: 6
+  source_files:
+    - "project.v"
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=missing_version_info)
         ):
             self.assertFalse(check_info_yaml())
 
