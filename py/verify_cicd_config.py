@@ -838,6 +838,154 @@ def check_xschem_config(repo_root="."):
     return True
 
 
+def check_upstream_pdk_tag_consistency(repo_root="."):
+    """Verifies that all TinyTapeout actions across workflows use a consistent PDK tag (e.g. ttihp26b)."""
+    gds_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    docs_path = os.path.join(repo_root, ".github/workflows/docs.yaml")
+    errors = []
+
+    expected_tag = "ttihp26b"
+    found_tags = set()
+
+    for path in [gds_path, docs_path]:
+        filename = os.path.basename(path)
+        if not os.path.exists(path):
+            errors.append(f"Missing workflow file: {path}")
+            continue
+        with open(path, "r") as f:
+            content = f.read()
+
+        matches = re.findall(r"TinyTapeout/tt-gds-action/[a-zA-Z0-9_]+@([a-zA-Z0-9_]+)", content)
+        for tag in matches:
+            found_tags.add(tag)
+            if tag != expected_tag:
+                errors.append(f"Mismatched action tag '@{tag}' in {filename} (expected '@{expected_tag}')")
+
+        if "ttsky26c" in content:
+            errors.append(f"Found legacy tag 'ttsky26c' in {filename}")
+
+    if not found_tags:
+        errors.append("No TinyTapeout action tags found across workflow files")
+
+    if errors:
+        print("FAILED upstream PDK tag consistency check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print(f"PASSED upstream PDK tag consistency check (tag: @{expected_tag})")
+    return True
+
+
+def check_precheck_reports_and_logs(repo_root="."):
+    """Verifies precheck configuration and checks precheck reports/logs if present."""
+    gds_workflow_path = os.path.join(repo_root, ".github/workflows/gds.yaml")
+    errors = []
+
+    if not os.path.exists(gds_workflow_path):
+        errors.append(f"Missing workflow file: {gds_workflow_path}")
+    else:
+        with open(gds_workflow_path, "r") as f:
+            content = f.read()
+        if "precheck:" not in content:
+            errors.append("Missing precheck job definition in gds.yaml")
+        if "TinyTapeout/tt-gds-action/precheck@ttihp26b" not in content:
+            errors.append("Missing precheck@ttihp26b action in gds.yaml")
+
+    runs_dir = os.path.join(repo_root, "runs")
+    if os.path.exists(runs_dir):
+        for root, _, files in os.walk(runs_dir):
+            for file in files:
+                if file.endswith(".log") or file.endswith(".rpt"):
+                    filepath = os.path.join(root, file)
+                    try:
+                        with open(filepath, "r", errors="ignore") as f:
+                            log_content = f.read()
+                        if "FATAL ERROR" in log_content:
+                            errors.append(f"Fatal error found in precheck log/report artifact: {filepath}")
+                    except Exception as e:
+                        errors.append(f"Failed to read precheck log {filepath}: {e}")
+
+    if errors:
+        print("FAILED precheck reports and logs check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED precheck reports and logs check")
+    return True
+
+
+def check_pdk_tech_and_drc_rules(repo_root="."):
+    """Verifies PDK technology files and DRC configuration compatibility."""
+    def_template_path = os.path.join(repo_root, "tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def")
+    drc_script_path = os.path.join(repo_root, "tcl/magic_drc.tcl")
+    errors = []
+
+    if not os.path.exists(def_template_path):
+        errors.append(f"Missing PDK DEF template: {def_template_path}")
+    elif os.path.getsize(def_template_path) == 0:
+        errors.append(f"PDK DEF template is empty: {def_template_path}")
+
+    if not os.path.exists(drc_script_path):
+        errors.append(f"Missing Magic DRC script: {drc_script_path}")
+    else:
+        with open(drc_script_path, "r") as f:
+            drc_content = f.read()
+        if "drc euclidean on" not in drc_content:
+            errors.append("Missing 'drc euclidean on' setting in tcl/magic_drc.tcl")
+        if "drc check" not in drc_content:
+            errors.append("Missing 'drc check' command in tcl/magic_drc.tcl")
+
+    if errors:
+        print("FAILED PDK tech and DRC rules check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED PDK tech and DRC rules check")
+    return True
+
+
+def check_info_yaml_extended_schema(repo_root="."):
+    """Verifies extended schema fields and compatibility in info.yaml."""
+    info_path = os.path.join(repo_root, "info.yaml")
+    if not os.path.exists(info_path):
+        print(f"ERROR: {info_path} does not exist.")
+        return False
+
+    with open(info_path, "r") as f:
+        content = f.read()
+
+    errors = []
+
+    if not re.search(r"yaml_version:\s*6", content):
+        errors.append("Missing or invalid 'yaml_version: 6' in info.yaml")
+
+    required_fields = ["title:", "author:", "discord:", "description:", "language:", "clock_hz:", "tiles:", "analog_pins:", "uses_vapwr:", "top_module:"]
+    for field in required_fields:
+        if field not in content:
+            errors.append(f"Missing field '{field}' in info.yaml")
+
+    for port_type in ["ui", "uo", "uio"]:
+        matches = re.findall(rf"{port_type}\[(\d+)\]:", content)
+        if len(matches) != 8:
+            errors.append(f"Expected 8 '{port_type}[...]' pin definitions in info.yaml, found {len(matches)}")
+
+    ua_matches = re.findall(r"ua\[(\d+)\]:", content)
+    if len(ua_matches) != 6:
+        errors.append(f"Expected 6 'ua[...]' pin definitions in info.yaml, found {len(ua_matches)}")
+
+    if errors:
+        print(f"FAILED info.yaml extended schema check in {info_path}:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print(f"PASSED info.yaml extended schema check in {info_path}")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -904,6 +1052,10 @@ def main():
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
     xschem_config_ok = check_xschem_config(repo_root)
+    tag_consistency_ok = check_upstream_pdk_tag_consistency(repo_root)
+    precheck_reports_ok = check_precheck_reports_and_logs(repo_root)
+    pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
+    extended_schema_ok = check_info_yaml_extended_schema(repo_root)
 
     if (
         gds_ok
@@ -927,6 +1079,10 @@ def main():
         and checkout_submodule_ok
         and stdcell_decl_ok
         and xschem_config_ok
+        and tag_consistency_ok
+        and precheck_reports_ok
+        and pdk_tech_drc_ok
+        and extended_schema_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
