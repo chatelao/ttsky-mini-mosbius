@@ -21,6 +21,7 @@ from py.verify_cicd_config import (
     check_pages_deployment_and_oidc_config,
     check_precheck_def_and_pin_config,
     check_precheck_execution_and_reporting_config,
+    check_precheck_reports_and_logs,
     check_stdcell_declarations,
     check_top_module_step_config,
     check_xschem_config,
@@ -1000,6 +1001,23 @@ steps:
             "os.listdir", side_effect=mock_listdir
         ), patch("builtins.open", side_effect=mock_open_file):
             self.assertTrue(check_xschem_config())
+
+    def test_check_precheck_reports_and_logs_clean_or_absent(self):
+        with patch("os.path.exists", return_value=False):
+            self.assertTrue(check_precheck_reports_and_logs())
+
+        clean_log_content = "INFO: Precheck completed successfully with 0 DRC violations."
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=clean_log_content)
+        ):
+            self.assertTrue(check_precheck_reports_and_logs())
+
+    def test_check_precheck_reports_and_logs_fatal_error(self):
+        fatal_log_content = "ERROR: Precheck Failed due to FATAL DRC rule violations!"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=fatal_log_content)
+        ):
+            self.assertFalse(check_precheck_reports_and_logs())
 
     def test_check_xschem_config_legacy_sky130(self):
         valid_xschemrc = "XSCHEM_LIBRARY_PATH ihp-sg13g2 libs.tech/xschem"
