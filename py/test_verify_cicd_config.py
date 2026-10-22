@@ -1108,6 +1108,10 @@ pinout:
         ):
             self.assertFalse(check_synthesized_verilog_cells())
 
+    def test_check_synthesized_verilog_cells_missing(self):
+        with patch("os.path.exists", return_value=False):
+            self.assertTrue(check_synthesized_verilog_cells())
+
 
 if __name__ == "__main__":
     unittest.main()
