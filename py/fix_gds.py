@@ -64,21 +64,41 @@ LAYER_MAP = {
 
 def remap_gds_stream(fn_gds_in, fn_gds_out, layer_map=LAYER_MAP):
     """Pure-Python binary GDSII stream parser and layer remapper."""
+    if not os.path.exists(fn_gds_in):
+        raise FileNotFoundError(f"GDS input file does not exist: {fn_gds_in}")
+
+    file_size = os.path.getsize(fn_gds_in)
+    if file_size == 0:
+        raise ValueError(f"GDS input file is empty: {fn_gds_in}")
+
     with open(fn_gds_in, "rb") as f_in:
         data = f_in.read()
 
+    length_data = len(data)
+    if length_data < 6:
+        raise ValueError(f"Invalid GDS header length ({length_data} bytes): {fn_gds_in}")
+
+    # Validate GDS HEADER record (rec_len >= 6, rec_type 0x0002)
+    header_len, header_type = struct.unpack(">HH", data[:4])
+    if header_type != 0x0002 or header_len < 6:
+        raise ValueError(f"Invalid GDSII magic record header in file {fn_gds_in}: len={header_len}, type=0x{header_type:04x}")
+
     out = bytearray()
     idx = 0
-    length_data = len(data)
     curr_element_type = None
+    record_count = 0
 
     while idx < length_data:
         if idx + 4 > length_data:
-            break
+            raise ValueError(f"Truncated GDS record header at byte offset {idx} in {fn_gds_in}")
         rec_len, rec_type = struct.unpack(">HH", data[idx : idx + 4])
         if rec_len < 4:
-            break
+            raise ValueError(f"Invalid GDS record length {rec_len} at byte offset {idx} in {fn_gds_in}")
+        if idx + rec_len > length_data:
+            raise ValueError(f"GDS record exceeds file length ({idx + rec_len} > {length_data}) in {fn_gds_in}")
+
         rec_data = data[idx + 4 : idx + rec_len]
+        record_count += 1
 
         rec_id = rec_type >> 8
 
@@ -107,8 +127,14 @@ def remap_gds_stream(fn_gds_in, fn_gds_out, layer_map=LAYER_MAP):
         out.extend(new_rec_data)
         idx += rec_len
 
+    if record_count == 0 or len(out) == 0:
+        raise ValueError(f"Failed to extract valid GDS records from {fn_gds_in}")
+
     with open(fn_gds_out, "wb") as f_out:
         f_out.write(out)
+
+    if not os.path.exists(fn_gds_out) or os.path.getsize(fn_gds_out) == 0:
+        raise RuntimeError(f"GDS remapped output file was not properly written or is empty: {fn_gds_out}")
 
 
 def main(argv0, fn_gds_in, fn_gds_out):

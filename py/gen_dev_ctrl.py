@@ -81,14 +81,20 @@ def main(argv0, op_mode, ctrl_type, ctrl_cnt):
 	# Outputs
 	if op_mode == 'magic':
 		# Generate main output
-		print('\n'.join(grid.gen_script()))
-
-		# Create power rails
-		print('\n'.join(grid.gen_rail(   100, 1200, True)))
-		print('\n'.join(grid.gen_rail(  1700, 1200, False)))
+		script_lines = grid.gen_script()
+		rail_lines1 = grid.gen_rail(100, 1200, True)
+		rail_lines2 = grid.gen_rail(1700, 1200, False)
+		if not script_lines:
+			raise RuntimeError('gen_dev_ctrl grid script output is empty')
+		print('\n'.join(script_lines))
+		print('\n'.join(rail_lines1))
+		print('\n'.join(rail_lines2))
 
 	elif op_mode == 'decap':
-		print('\n'.join(grid.gen_decap()))
+		decap_lines = grid.gen_decap()
+		if not decap_lines:
+			raise RuntimeError('gen_dev_ctrl decap output is empty')
+		print('\n'.join(decap_lines))
 
 	# Pass through has no routing
 	if ctrl_type == 'pass':
@@ -120,7 +126,10 @@ def main(argv0, op_mode, ctrl_type, ctrl_cnt):
 			r.end()
 
 			# Generate script
-			print('\n'.join(r.gen_script()))
+			first_script = r.gen_script()
+			if not first_script:
+				raise RuntimeError('gen_dev_ctrl first router script is empty')
+			print('\n'.join(first_script))
 
 			return
 
@@ -259,7 +268,10 @@ def main(argv0, op_mode, ctrl_type, ctrl_cnt):
 			r.end()
 
 		# Generate script
-		print('\n'.join(r.gen_script()))
+		final_script = r.gen_script()
+		if not final_script:
+			raise RuntimeError('gen_dev_ctrl router script is empty')
+		print('\n'.join(final_script))
 
 
 if __name__ == '__main__':
