@@ -7,6 +7,9 @@ from unittest.mock import patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from py.verify_cicd_config import (
+    check_drc_config_consistency,
+    check_layer_remapping_config,
+    check_netgen_lvs_config,
     check_cicd_fix_roadmap_config,
     check_def_template_config,
     check_docs_build_and_asset_config,
@@ -1093,6 +1096,48 @@ pinout:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
         ):
             self.assertFalse(check_info_yaml_extended_schema())
+
+    def test_check_drc_config_consistency_valid(self):
+        valid_drc = "drc euclidean on\ndrc style \"drc(full)\"\ndrc check"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_drc)
+        ):
+            self.assertTrue(check_drc_config_consistency())
+
+    def test_check_drc_config_consistency_invalid(self):
+        invalid_drc = "# missing DRC settings"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_drc)
+        ):
+            self.assertFalse(check_drc_config_consistency())
+
+    def test_check_layer_remapping_config_valid(self):
+        valid_fix_gds = "LAYER_MAP = {(235, 4): (189, 4), (64, 20): (31, 0)}\ndef remap_gds_stream(): pass"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_fix_gds)
+        ):
+            self.assertTrue(check_layer_remapping_config())
+
+    def test_check_layer_remapping_config_invalid(self):
+        invalid_fix_gds = "# Missing LAYER_MAP and remap_gds_stream"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_fix_gds)
+        ):
+            self.assertFalse(check_layer_remapping_config())
+
+    def test_check_netgen_lvs_config_valid(self):
+        valid_lvs = "sg13g2_stdcell.spice mosbius.spice ctrl_top.synth.v project.v sg13g2_setup.tcl lvs"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_lvs)
+        ):
+            self.assertTrue(check_netgen_lvs_config())
+
+    def test_check_netgen_lvs_config_invalid(self):
+        invalid_lvs = "# Missing required files"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_lvs)
+        ):
+            self.assertFalse(check_netgen_lvs_config())
 
     def test_check_cicd_fix_roadmap_config_valid(self):
         valid_roadmap = """
