@@ -17,7 +17,8 @@ jobs:
       - name: Install Typst
         uses: typst-community/setup-typst@v5
         with:
-          typst-version: "v0.13.1"
+          typst-version: "0.13.1"
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build docs
         uses: TinyTapeout/tt-gds-action/docs@ttihp26b
