@@ -976,6 +976,39 @@ def check_info_yaml_extended_schema(repo_root="."):
     return True
 
 
+def check_image_rendering_and_asset_config(repo_root="."):
+    render_script_path = os.path.join(repo_root, "py/render_project_files.py")
+    img_dir_path = os.path.join(repo_root, "img")
+
+    errors = []
+
+    if not os.path.exists(render_script_path):
+        errors.append(f"Missing image rendering script: {render_script_path}")
+    else:
+        with open(render_script_path, "r") as f:
+            content = f.read()
+        if "render_klayout_file" not in content:
+            errors.append("Missing 'render_klayout_file' function in py/render_project_files.py")
+        if "render_xschem_files" not in content:
+            errors.append("Missing 'render_xschem_files' function in py/render_project_files.py")
+
+    if not os.path.exists(img_dir_path):
+        errors.append(f"Missing image assets directory: {img_dir_path}")
+    else:
+        png_files = [f for f in os.listdir(img_dir_path) if f.endswith(".png")]
+        if not png_files:
+            errors.append("No PNG image assets found in img/ directory")
+
+    if errors:
+        print("FAILED image rendering and asset config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED image rendering and asset config check")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -1046,6 +1079,7 @@ def main():
     precheck_reports_ok = check_precheck_reports_and_logs(repo_root)
     pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
     info_extended_ok = check_info_yaml_extended_schema(repo_root)
+    image_rendering_ok = check_image_rendering_and_asset_config(repo_root)
 
     if (
         gds_ok
@@ -1073,6 +1107,7 @@ def main():
         and precheck_reports_ok
         and pdk_tech_drc_ok
         and info_extended_ok
+        and image_rendering_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
