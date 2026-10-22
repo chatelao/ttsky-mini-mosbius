@@ -17,6 +17,7 @@ from py.verify_cicd_config import (
     check_info_yaml,
     check_klayout_drc_and_geometry_config,
     check_lef_pin_and_boundary_config,
+    check_makefile_targets_config,
     check_pages_api_config,
     check_pages_deployment_and_oidc_config,
     check_precheck_def_and_pin_config,
@@ -1092,6 +1093,30 @@ pinout:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
         ):
             self.assertFalse(check_info_yaml_extended_schema())
+
+    def test_check_makefile_targets_config_valid(self):
+        valid_makefile = """
+lint:
+	python3 -m py_compile ../py/*.py
+
+check: lint
+	python3 ../py/verify_cicd_config.py
+	PYTHONPATH=.. python3 -m unittest discover -s ../py
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_makefile)
+        ):
+            self.assertTrue(check_makefile_targets_config())
+
+    def test_check_makefile_targets_config_invalid(self):
+        invalid_makefile = """
+check:
+	echo "No tests"
+"""
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_makefile)
+        ):
+            self.assertFalse(check_makefile_targets_config())
 
 
 if __name__ == "__main__":

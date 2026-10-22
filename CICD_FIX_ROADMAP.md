@@ -282,6 +282,9 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **4.1.3.1** Include `python3 -m unittest discover -s py` in `make check` rule within `src/Makefile`.
     - [x] **4.1.3.2** Verify `check` job in `.github/workflows/gds.yaml` runs `make check` on `push`, `pull_request`, and `workflow_dispatch` events.
     - [x] **4.1.3.3** Confirm all unit tests pass successfully in local and remote test execution environments.
+  - [x] **4.1.4 Validate Makefile CI/CD Execution Targets Statically**
+    - [x] **4.1.4.1** Implement `check_makefile_targets_config` in `py/verify_cicd_config.py` to statically verify `src/Makefile` defines `check` and `lint` targets invoking verification and unit test discovery.
+    - [x] **4.1.4.2** Add corresponding unit test suite assertions in `py/test_verify_cicd_config.py` for `check_makefile_targets_config`.
 
 - [x] **4.2 Precheck Artifact & Toolchain Verification Sign-Off**
   - [x] **4.2.1 Precheck Artifact & Template Validation**
