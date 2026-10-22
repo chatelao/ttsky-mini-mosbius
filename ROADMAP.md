@@ -73,7 +73,7 @@ The top priority is establishing and maintaining a functioning **CI/CD pipeline 
 - [ ] **4.2 Decap & Filler Instantiation Update (`py/gen_asw_ctrl.py`, `py/gen_dev_ctrl.py`)**
   - Re-target cell references to `sg13g2_decap_4`, `sg13g2_decap_8`, `sg13g2_fill_1`, and `sg13g2_fill_2`.
   - Regenerate `.decap.v` files for ASW column controllers (`ctrl_asw.decap.v`) and device controllers (`ctrl_dev_*.decap.v`).
-- [ ] **4.3 GDS Post-Processing (`py/fix_gds.py`)**
+- [x] **4.3 GDS Post-Processing (`py/fix_gds.py`)**
   - Adapt GDS cell structure fixup script for SG13G2 layer mapping conventions.
 
 ---
