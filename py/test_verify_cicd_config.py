@@ -32,6 +32,7 @@ from py.verify_cicd_config import (
     check_precheck_reports_and_logs,
     check_pdk_tech_and_drc_rules,
     check_info_yaml_extended_schema,
+    check_roadmap_consistency,
 )
 
 
@@ -1092,6 +1093,49 @@ pinout:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
         ):
             self.assertFalse(check_info_yaml_extended_schema())
+
+    def test_check_roadmap_consistency_valid(self):
+        valid_cicd_roadmap = "Phase 1:\nPhase 2:\nPhase 3:\nPhase 4:\n"
+        valid_migration_roadmap = """
+Phase 1:
+- [x] **1.1 Update GitHub Workflows for IHP Target
+- [x] **1.2 Update Metadata & Pinout Definition
+- [x] **1.3 Establish Automated Verification Stubs
+Phase 2:
+- [x] **2.1 Re-bind Primitive Devices in Xschem
+Phase 3:
+- [x] **3.1 Update Verilog Standard Cell Definitions
+Phase 4:
+- [x] **4.1 Update Grid & Pitch Parameters
+- [x] **4.2 Decap & Filler Instantiation Update
+- [x] **4.3 GDS Post-Processing
+Phase 5:
+"""
+        def mock_open_file(filepath, mode="r"):
+            if "CICD_FIX_ROADMAP.md" in filepath:
+                return unittest.mock.mock_open(read_data=valid_cicd_roadmap)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_migration_roadmap)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_roadmap_consistency())
+
+    def test_check_roadmap_consistency_invalid(self):
+        invalid_cicd_roadmap = "Phase 1:\n"
+        invalid_migration_roadmap = "Phase 1:\n- [ ] **2.1 Re-bind Primitive Devices in Xschem\n"
+
+        def mock_open_file(filepath, mode="r"):
+            if "CICD_FIX_ROADMAP.md" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_cicd_roadmap)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_migration_roadmap)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_roadmap_consistency())
 
 
 if __name__ == "__main__":
