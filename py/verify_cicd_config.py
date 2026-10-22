@@ -976,6 +976,43 @@ def check_info_yaml_extended_schema(repo_root="."):
     return True
 
 
+def check_cicd_fix_roadmap_config(repo_root="."):
+    roadmap_path = os.path.join(repo_root, "CICD_FIX_ROADMAP.md")
+    if not os.path.exists(roadmap_path):
+        print(f"ERROR: {roadmap_path} does not exist.")
+        return False
+
+    with open(roadmap_path, "r") as f:
+        content = f.read()
+
+    errors = []
+
+    required_sections = [
+        "## Phase 1: Repository Settings Configuration",
+        "## Phase 2: Workflow Definition Updates",
+        "## Phase 3: Local Verification & CI Execution",
+        "## Phase 4: Ongoing CI/CD Pipeline Maintenance & Health Checks",
+    ]
+
+    for sec in required_sections:
+        if sec not in content:
+            errors.append(f"Missing section '{sec}' in CICD_FIX_ROADMAP.md")
+
+    key_items = ["1.1", "1.2", "1.3", "2.1", "2.2", "3.1", "3.2", "3.3", "4.1", "4.2"]
+    for item in key_items:
+        if not re.search(r"- \[x\] \*\*" + re.escape(item), content):
+            errors.append(f"CI/CD roadmap step {item} is not marked as completed '[x]' in CICD_FIX_ROADMAP.md")
+
+    if errors:
+        print(f"FAILED CI/CD fix roadmap config check in {roadmap_path}:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print(f"PASSED CI/CD fix roadmap config check in {roadmap_path}")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -1046,6 +1083,7 @@ def main():
     precheck_reports_ok = check_precheck_reports_and_logs(repo_root)
     pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
     info_extended_ok = check_info_yaml_extended_schema(repo_root)
+    cicd_roadmap_ok = check_cicd_fix_roadmap_config(repo_root)
 
     if (
         gds_ok
@@ -1073,6 +1111,7 @@ def main():
         and precheck_reports_ok
         and pdk_tech_drc_ok
         and info_extended_ok
+        and cicd_roadmap_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
