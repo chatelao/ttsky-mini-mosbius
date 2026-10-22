@@ -86,9 +86,8 @@ jobs:
               };
           }
           EOF
-          echo "NODE_OPTIONS=--require /tmp/mock_typst_releases.js" >> $GITHUB_ENV
-
       - name: Build docs
         uses: TinyTapeout/tt-gds-action/docs@ttihp26b
         env:
+          NODE_OPTIONS: --require /tmp/mock_typst_releases.js
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
