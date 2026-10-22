@@ -1057,6 +1057,104 @@ def check_cicd_fix_roadmap_config(repo_root="."):
     return True
 
 
+def check_drc_config_consistency(repo_root="."):
+    drc_tcl = os.path.join(repo_root, "tcl/magic_drc.tcl")
+    def_template = os.path.join(repo_root, "tech/ihp-sg13g2/def/analog/tt_analog_3x2_3v3.def")
+    gds_workflow = os.path.join(repo_root, ".github/workflows/gds.yaml")
+
+    errors = []
+
+    if not os.path.exists(drc_tcl):
+        errors.append(f"Missing Magic DRC TCL script: {drc_tcl}")
+    else:
+        with open(drc_tcl, "r") as f:
+            content = f.read()
+        if "drc euclidean on" not in content:
+            errors.append("Missing 'drc euclidean on' in tcl/magic_drc.tcl")
+        if 'drc style "drc(full)"' not in content and "drc style drc(full)" not in content:
+            errors.append("Missing 'drc style \"drc(full)\"' in tcl/magic_drc.tcl")
+
+    if not os.path.exists(def_template):
+        errors.append(f"Missing template DEF: {def_template}")
+
+    if not os.path.exists(gds_workflow):
+        errors.append(f"Missing workflow file: {gds_workflow}")
+    else:
+        with open(gds_workflow, "r") as f:
+            content = f.read()
+        if "precheck@ttihp26b" not in content:
+            errors.append("Missing precheck@ttihp26b action step in gds.yaml")
+
+    if errors:
+        print("FAILED DRC config consistency check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED DRC config consistency check")
+    return True
+
+
+def check_layer_remapping_config(repo_root="."):
+    fix_gds_path = os.path.join(repo_root, "py/fix_gds.py")
+    errors = []
+
+    if not os.path.exists(fix_gds_path):
+        errors.append(f"Missing layer remapping script: {fix_gds_path}")
+    else:
+        with open(fix_gds_path, "r") as f:
+            content = f.read()
+        if "LAYER_MAP" not in content:
+            errors.append("Missing LAYER_MAP mapping table in py/fix_gds.py")
+        if "(235, 4): (189, 4)" not in content:
+            errors.append("Missing Sky130 -> SG13G2 prBoundary (189, 4) remapping rule in py/fix_gds.py")
+
+    if errors:
+        print("FAILED layer remapping config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED layer remapping config check")
+    return True
+
+
+def check_netgen_lvs_config(repo_root="."):
+    lvs_tcl = os.path.join(repo_root, "tcl/lvs.tcl")
+    extract_lvs_tcl = os.path.join(repo_root, "tcl/magic_extract_lvs.tcl")
+
+    errors = []
+
+    if not os.path.exists(lvs_tcl):
+        errors.append(f"Missing Netgen LVS TCL script: {lvs_tcl}")
+    else:
+        with open(lvs_tcl, "r") as f:
+            content = f.read()
+        if "sg13g2_stdcell.spice" not in content:
+            errors.append("Missing sg13g2_stdcell.spice reference in tcl/lvs.tcl")
+        if "sg13g2_setup.tcl" not in content:
+            errors.append("Missing sg13g2_setup.tcl reference in tcl/lvs.tcl")
+        if "mosbius.spice" not in content:
+            errors.append("Missing mosbius.spice reference in tcl/lvs.tcl")
+
+    if not os.path.exists(extract_lvs_tcl):
+        errors.append(f"Missing Magic extraction script: {extract_lvs_tcl}")
+    else:
+        with open(extract_lvs_tcl, "r") as f:
+            content = f.read()
+        if "ext2spice lvs" not in content:
+            errors.append("Missing 'ext2spice lvs' command in tcl/magic_extract_lvs.tcl")
+
+    if errors:
+        print("FAILED Netgen LVS config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED Netgen LVS config check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -1089,6 +1187,9 @@ def main():
     pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
     info_extended_ok = check_info_yaml_extended_schema(repo_root)
     cicd_roadmap_ok = check_cicd_fix_roadmap_config(repo_root)
+    drc_consistency_ok = check_drc_config_consistency(repo_root)
+    layer_remapping_ok = check_layer_remapping_config(repo_root)
+    netgen_lvs_ok = check_netgen_lvs_config(repo_root)
 
     if (
         gds_ok
@@ -1117,6 +1218,9 @@ def main():
         and pdk_tech_drc_ok
         and info_extended_ok
         and cicd_roadmap_ok
+        and drc_consistency_ok
+        and layer_remapping_ok
+        and netgen_lvs_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)

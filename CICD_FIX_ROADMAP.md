@@ -317,11 +317,11 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
   - [x] **5.1.3** Add unit tests for `check_cicd_fix_roadmap_config` in `py/test_verify_cicd_config.py`.
 
 - [ ] **5.2 Automated DRC Rule Set & Violation Reporting Verification**
-  - [ ] **5.2.1** Verify Magic DRC and KLayout DRC configuration consistency across `tcl/magic_drc.tcl` and `tech/ihp-sg13g2/`.
+  - [x] **5.2.1** Verify Magic DRC and KLayout DRC configuration consistency across `tcl/magic_drc.tcl` and `tech/ihp-sg13g2/`.
   - [ ] **5.2.2** Maintain automated detection and categorization of physical DRC violations against official SG13G2 PDK rule definitions.
-  - [ ] **5.2.3** Validate layer remapping post-processing (`py/fix_gds.py`) before running physical DRC verification steps.
+  - [x] **5.2.3** Validate layer remapping post-processing (`py/fix_gds.py`) before running physical DRC verification steps.
 
 - [ ] **5.3 Netgen LVS Extraction & Schematic Alignment Integration**
-  - [ ] **5.3.1** Verify Netgen LVS configuration in `tcl/lvs.tcl` and PDK setup `sg13g2_setup.tcl`.
+  - [x] **5.3.1** Verify Netgen LVS configuration in `tcl/lvs.tcl` and PDK setup `sg13g2_setup.tcl`.
   - [ ] **5.3.2** Validate extracted layout SPICE netlist against Xschem schematic netlist (`xschem/mosbius.sch`).
   - [ ] **5.3.3** Ensure 1.2V digital core and 3.3V analog power domain isolation rules pass clean in Netgen LVS.
