@@ -1015,6 +1015,37 @@ def check_stdcell_declarations(repo_root="."):
     return True
 
 
+def check_makefile_targets_config(repo_root="."):
+    makefile_path = os.path.join(repo_root, "src/Makefile")
+    errors = []
+
+    if not os.path.exists(makefile_path):
+        errors.append(f"Missing Makefile file: {makefile_path}")
+    else:
+        with open(makefile_path, "r") as f:
+            content = f.read()
+
+        if "check:" not in content:
+            errors.append("Missing 'check:' target in src/Makefile")
+        if "lint:" not in content:
+            errors.append("Missing 'lint:' target in src/Makefile")
+        if "verify_cicd_config.py" not in content:
+            errors.append("Missing 'verify_cicd_config.py' execution in src/Makefile")
+        if "unittest discover" not in content:
+            errors.append("Missing 'unittest discover' unit test execution in src/Makefile")
+        if "py_compile" not in content:
+            errors.append("Missing 'py_compile' lint execution in src/Makefile")
+
+    if errors:
+        print("FAILED Makefile targets config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED Makefile targets config check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -1046,6 +1077,7 @@ def main():
     precheck_reports_ok = check_precheck_reports_and_logs(repo_root)
     pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
     info_extended_ok = check_info_yaml_extended_schema(repo_root)
+    makefile_targets_ok = check_makefile_targets_config(repo_root)
 
     if (
         gds_ok
@@ -1073,6 +1105,7 @@ def main():
         and precheck_reports_ok
         and pdk_tech_drc_ok
         and info_extended_ok
+        and makefile_targets_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
