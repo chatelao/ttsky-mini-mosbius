@@ -146,6 +146,24 @@ def check_info_yaml(repo_root="."):
     if not re.search(r"tiles:\s*[\"']?\d+x\d+[\"']?", content):
         errors.append("Missing or invalid 'tiles' parameter in info.yaml")
 
+    if not re.search(r"yaml_version:\s*\d+", content):
+        errors.append("Missing or invalid 'yaml_version' parameter in info.yaml")
+
+    if not re.search(r"clock_hz:\s*\d+", content):
+        errors.append("Missing or invalid 'clock_hz' parameter in info.yaml")
+
+    if not re.search(r"source_files:\s*[\s\S]*?-\s*[\"']?[a-zA-Z0-9_\.]+\.v[\"']?", content):
+        errors.append("Missing or invalid 'source_files' specification in info.yaml")
+
+    if not re.search(r"title:\s*[\"']?[^\"'\n]+[\"']?", content):
+        errors.append("Missing or invalid 'title' parameter in info.yaml")
+
+    if not re.search(r"author:\s*[\"']?[^\"'\n]+[\"']?", content):
+        errors.append("Missing or invalid 'author' parameter in info.yaml")
+
+    if not re.search(r"description:\s*[\"']?[^\"'\n]+[\"']?", content):
+        errors.append("Missing or invalid 'description' parameter in info.yaml")
+
     if errors:
         print(f"FAILED {filepath}:")
         for err in errors:
