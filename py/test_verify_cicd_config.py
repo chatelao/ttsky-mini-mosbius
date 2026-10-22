@@ -11,17 +11,23 @@ from py.verify_cicd_config import (
     check_def_template_config,
     check_docs_build_and_asset_config,
     check_docs_workflow,
+    check_drc_config_consistency,
+    check_drc_violation_reporting_config,
     check_eda_toolchain_and_container_config,
     check_gds_lef_artifacts,
     check_gds_workflow,
     check_git_submodule_and_checkout_config,
     check_info_yaml,
     check_klayout_drc_and_geometry_config,
+    check_layer_remapping_config,
     check_lef_pin_and_boundary_config,
+    check_netgen_lvs_config,
     check_pages_api_config,
     check_pages_deployment_and_oidc_config,
+    check_power_domain_isolation_lvs_config,
     check_precheck_def_and_pin_config,
     check_precheck_execution_and_reporting_config,
+    check_schematic_alignment_config,
     check_stdcell_declarations,
     check_top_module_step_config,
     check_xschem_config,
@@ -1117,6 +1123,106 @@ Assertion: check_cicd_fix_roadmap_config
             "builtins.open", unittest.mock.mock_open(read_data=invalid_roadmap)
         ):
             self.assertFalse(check_cicd_fix_roadmap_config())
+
+    def test_check_drc_config_consistency_valid(self):
+        valid_drc = "drc euclidean on\ndrc check\nload $project"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_drc)
+        ):
+            self.assertTrue(check_drc_config_consistency())
+
+    def test_check_drc_config_consistency_invalid(self):
+        invalid_drc = "# Empty DRC script"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_drc)
+        ):
+            self.assertFalse(check_drc_config_consistency())
+
+    def test_check_drc_violation_reporting_config_valid(self):
+        valid_drc = 'drc listall why\nputs "$drcresult"'
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_drc)
+        ):
+            self.assertTrue(check_drc_violation_reporting_config())
+
+    def test_check_drc_violation_reporting_config_invalid(self):
+        invalid_drc = "# Missing drc listall why"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_drc)
+        ):
+            self.assertFalse(check_drc_violation_reporting_config())
+
+    def test_check_layer_remapping_config_valid(self):
+        valid_fix_gds = "LAYER_MAP = {(235, 4): (189, 4)}\ndef remap_gds_stream(): pass"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_fix_gds)
+        ):
+            self.assertTrue(check_layer_remapping_config())
+
+    def test_check_layer_remapping_config_invalid(self):
+        invalid_fix_gds = "# Missing LAYER_MAP"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_fix_gds)
+        ):
+            self.assertFalse(check_layer_remapping_config())
+
+    def test_check_netgen_lvs_config_valid(self):
+        valid_lvs = "sg13g2_stdcell.spice\nsg13g2_setup.tcl\nlvs.report"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_lvs)
+        ):
+            self.assertTrue(check_netgen_lvs_config())
+
+    def test_check_netgen_lvs_config_invalid(self):
+        invalid_lvs = "# Missing LVS configuration"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_lvs)
+        ):
+            self.assertFalse(check_netgen_lvs_config())
+
+    def test_check_schematic_alignment_config_valid(self):
+        valid_xschemrc = "XSCHEM_LIBRARY_PATH ihp-sg13g2 libs.tech/xschem"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_xschemrc)
+        ):
+            self.assertTrue(check_schematic_alignment_config())
+
+    def test_check_schematic_alignment_config_invalid(self):
+        invalid_xschemrc = "# Missing PDK path"
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_xschemrc)
+        ):
+            self.assertFalse(check_schematic_alignment_config())
+
+    def test_check_power_domain_isolation_lvs_config_valid(self):
+        valid_info = "uses_vapwr: true"
+        valid_project_v = "wire VDPWR;"
+
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=valid_info)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_project_v)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_power_domain_isolation_lvs_config())
+
+    def test_check_power_domain_isolation_lvs_config_invalid(self):
+        invalid_info = "uses_vapwr: false"
+        invalid_project_v = "module project;"
+
+        def mock_open_file(filepath, mode="r"):
+            if "info.yaml" in filepath:
+                return unittest.mock.mock_open(read_data=invalid_info)()
+            else:
+                return unittest.mock.mock_open(read_data=invalid_project_v)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_power_domain_isolation_lvs_config())
 
 
 if __name__ == "__main__":
