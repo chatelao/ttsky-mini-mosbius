@@ -32,6 +32,7 @@ from py.verify_cicd_config import (
     check_precheck_reports_and_logs,
     check_pdk_tech_and_drc_rules,
     check_info_yaml_extended_schema,
+    check_physical_verification_tcl_config,
 )
 
 
@@ -1092,6 +1093,39 @@ pinout:
             "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
         ):
             self.assertFalse(check_info_yaml_extended_schema())
+
+    def test_check_physical_verification_tcl_config_valid(self):
+        valid_lvs = "sg13g2_setup.tcl sg13g2_stdcell.spice"
+        valid_ext_lvs = "ext2spice lvs"
+        valid_ext_pex = "ext2spice lvs extresist on"
+        valid_export = "gds write lef write"
+
+        def mock_open_file(filepath, mode="r"):
+            fname = os.path.basename(filepath)
+            if fname == "lvs.tcl":
+                return unittest.mock.mock_open(read_data=valid_lvs)()
+            elif fname == "magic_extract_lvs.tcl":
+                return unittest.mock.mock_open(read_data=valid_ext_lvs)()
+            elif fname == "magic_extract_pex.tcl":
+                return unittest.mock.mock_open(read_data=valid_ext_pex)()
+            else:
+                return unittest.mock.mock_open(read_data=valid_export)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertTrue(check_physical_verification_tcl_config())
+
+    def test_check_physical_verification_tcl_config_invalid(self):
+        invalid_lvs = "invalid_content"
+
+        def mock_open_file(filepath, mode="r"):
+            return unittest.mock.mock_open(read_data=invalid_lvs)()
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", side_effect=mock_open_file
+        ):
+            self.assertFalse(check_physical_verification_tcl_config())
 
 
 if __name__ == "__main__":

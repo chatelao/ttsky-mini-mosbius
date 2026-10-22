@@ -1015,6 +1015,58 @@ def check_stdcell_declarations(repo_root="."):
     return True
 
 
+def check_physical_verification_tcl_config(repo_root="."):
+    lvs_path = os.path.join(repo_root, "tcl/lvs.tcl")
+    magic_ext_lvs_path = os.path.join(repo_root, "tcl/magic_extract_lvs.tcl")
+    magic_ext_pex_path = os.path.join(repo_root, "tcl/magic_extract_pex.tcl")
+    update_gds_lef_path = os.path.join(repo_root, "tcl/update_gds_lef.tcl")
+
+    errors = []
+
+    if not os.path.exists(lvs_path):
+        errors.append(f"Missing LVS configuration file: {lvs_path}")
+    else:
+        with open(lvs_path, "r") as f:
+            lvs_content = f.read()
+        if "sg13g2_setup.tcl" not in lvs_content:
+            errors.append("Missing Netgen setup script 'sg13g2_setup.tcl' reference in tcl/lvs.tcl")
+        if "sg13g2_stdcell.spice" not in lvs_content:
+            errors.append("Missing SG13G2 stdcell SPICE model reference in tcl/lvs.tcl")
+
+    if not os.path.exists(magic_ext_lvs_path):
+        errors.append(f"Missing Magic LVS extraction script: {magic_ext_lvs_path}")
+    else:
+        with open(magic_ext_lvs_path, "r") as f:
+            ext_lvs_content = f.read()
+        if "ext2spice lvs" not in ext_lvs_content:
+            errors.append("Missing 'ext2spice lvs' command in tcl/magic_extract_lvs.tcl")
+
+    if not os.path.exists(magic_ext_pex_path):
+        errors.append(f"Missing Magic PEX extraction script: {magic_ext_pex_path}")
+    else:
+        with open(magic_ext_pex_path, "r") as f:
+            ext_pex_content = f.read()
+        if "ext2spice lvs" not in ext_pex_content or "extresist on" not in ext_pex_content:
+            errors.append("Missing PEX extraction parameters in tcl/magic_extract_pex.tcl")
+
+    if not os.path.exists(update_gds_lef_path):
+        errors.append(f"Missing GDS/LEF export script: {update_gds_lef_path}")
+    else:
+        with open(update_gds_lef_path, "r") as f:
+            export_content = f.read()
+        if "gds write" not in export_content or "lef write" not in export_content:
+            errors.append("Missing GDS or LEF export command in tcl/update_gds_lef.tcl")
+
+    if errors:
+        print("FAILED physical verification TCL config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED physical verification TCL config check")
+    return True
+
+
 def main():
     print("=== Running CI/CD Configuration Verification ===")
     # Locate repo root (assuming py/ directory resides directly under repo root)
@@ -1046,6 +1098,7 @@ def main():
     precheck_reports_ok = check_precheck_reports_and_logs(repo_root)
     pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
     info_extended_ok = check_info_yaml_extended_schema(repo_root)
+    phys_verif_ok = check_physical_verification_tcl_config(repo_root)
 
     if (
         gds_ok
@@ -1073,6 +1126,7 @@ def main():
         and precheck_reports_ok
         and pdk_tech_drc_ok
         and info_extended_ok
+        and phys_verif_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)

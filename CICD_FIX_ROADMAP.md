@@ -34,6 +34,13 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
 │  Phase 4: Ongoing Maintenance & Health Checks          │
 │  - Continuous drift detection & rule maintenance       │
 │  - Precheck artifact & toolchain sign-off verification │
+└───────────────────────────┬────────────────────────────┘
+                            │
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│  Phase 5: Automated Physical Verification Integration   │
+│  - DRC/LVS/PEX script verification & PDK alignment     │
+│  - Automated static checks & comprehensive unit tests  │
 └────────────────────────────────────────────────────────┘
 ```
 
@@ -296,3 +303,23 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **4.2.3.1** Verify `docs/info.md` contains required `## How it works` and `## How to test` sections.
     - [x] **4.2.3.2** Validate required metadata fields (`author`, `description`, `pinout`, `top_module`, `tiles`, `analog_pins`) in `info.yaml` via `check_docs_build_and_asset_config`.
     - [x] **4.2.3.3** Maintain documentation rendering compatibility when adding new schema parameters to `info.yaml`.
+
+---
+
+## Phase 5: Automated Physical Verification & Upstream PDK Alignment Pipeline Integration
+
+> **Objective:** Integrate automated physical verification (DRC, LVS, PEX) checks and upstream PDK alignment verification into the CI/CD pipeline and static check suite.
+
+- [x] **5.1 Automated Physical Verification TCL Script Verification**
+  - [x] **5.1.1** Implement `check_physical_verification_tcl_config` in `py/verify_cicd_config.py` to validate LVS configuration script (`tcl/lvs.tcl`), Magic LVS extraction (`tcl/magic_extract_lvs.tcl`), Magic PEX extraction (`tcl/magic_extract_pex.tcl`), and GDS/LEF export script (`tcl/update_gds_lef.tcl`).
+  - [x] **5.1.2** Verify `tcl/lvs.tcl` references official SG13G2 setup script (`sg13g2_setup.tcl`) and standard cell SPICE model library (`sg13g2_stdcell.spice`).
+  - [x] **5.1.3** Verify `tcl/magic_extract_lvs.tcl` and `tcl/magic_extract_pex.tcl` use correct extraction options (`ext2spice lvs`, `cthresh infinite`, `short resistor`).
+  - [x] **5.1.4** Verify `tcl/update_gds_lef.tcl` issues `gds write` and `lef write -pinonly -hide` output commands.
+
+- [x] **5.2 Comprehensive Unit Testing for Physical Verification Configurations**
+  - [x] **5.2.1** Add unit test cases in `py/test_verify_cicd_config.py` for `check_physical_verification_tcl_config` validating both passing and failing script contents.
+  - [x] **5.2.2** Include `check_physical_verification_tcl_config` in `main()` execution of `py/verify_cicd_config.py`.
+
+- [x] **5.3 Continuous Verification & Health Assertion**
+  - [x] **5.3.1** Run `make check` to verify all static physical verification assertions and unit tests pass locally.
+  - [x] **5.3.2** Run `make lint` to confirm zero syntax/lint regressions across Python scripts.
