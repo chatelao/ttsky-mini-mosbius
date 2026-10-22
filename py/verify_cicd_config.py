@@ -976,6 +976,33 @@ def check_info_yaml_extended_schema(repo_root="."):
     return True
 
 
+def check_image_rendering_and_asset_config(repo_root="."):
+    filepath = os.path.join(repo_root, "py/render_project_files.py")
+    errors = []
+
+    if not os.path.exists(filepath):
+        errors.append(f"Missing image rendering script: {filepath}")
+    else:
+        with open(filepath, "r") as f:
+            content = f.read()
+
+        if "pya" not in content:
+            errors.append("Missing KLayout pya module reference in py/render_project_files.py")
+        if "async_playwright" not in content:
+            errors.append("Missing Playwright reference in py/render_project_files.py")
+        if 'img_dir = "img"' not in content and "img_dir = 'img'" not in content:
+            errors.append("Missing target image directory 'img' setting in py/render_project_files.py")
+
+    if errors:
+        print("FAILED image rendering and asset config check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    print("PASSED image rendering and asset config check")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -1046,6 +1073,7 @@ def main():
     precheck_reports_ok = check_precheck_reports_and_logs(repo_root)
     pdk_tech_drc_ok = check_pdk_tech_and_drc_rules(repo_root)
     info_extended_ok = check_info_yaml_extended_schema(repo_root)
+    img_render_ok = check_image_rendering_and_asset_config(repo_root)
 
     if (
         gds_ok
@@ -1073,6 +1101,7 @@ def main():
         and precheck_reports_ok
         and pdk_tech_drc_ok
         and info_extended_ok
+        and img_render_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
