@@ -15,14 +15,18 @@ from py.verify_cicd_config import (
     check_gds_workflow,
     check_git_submodule_and_checkout_config,
     check_info_yaml,
+    check_info_yaml_extended_schema,
     check_klayout_drc_and_geometry_config,
     check_lef_pin_and_boundary_config,
     check_pages_api_config,
     check_pages_deployment_and_oidc_config,
+    check_pdk_tech_and_drc_rules,
     check_precheck_def_and_pin_config,
     check_precheck_execution_and_reporting_config,
+    check_precheck_reports_and_logs,
     check_stdcell_declarations,
     check_top_module_step_config,
+    check_upstream_pdk_tag_consistency,
     check_xschem_config,
     check_viewer_artifact_and_staging_config,
     check_viewer_and_docs_deployment_config,
@@ -1020,6 +1024,88 @@ steps:
             "os.listdir", side_effect=mock_listdir
         ), patch("builtins.open", side_effect=mock_open_file):
             self.assertFalse(check_xschem_config())
+
+    def test_check_upstream_pdk_tag_consistency_valid(self):
+        valid_wf = "uses: TinyTapeout/tt-gds-action/custom_gds@ttihp26b"
+
+        def mock_listdir(path):
+            return ["gds.yaml"]
+
+        with patch("os.path.exists", return_value=True), patch(
+            "os.listdir", side_effect=mock_listdir
+        ), patch("builtins.open", unittest.mock.mock_open(read_data=valid_wf)):
+            self.assertTrue(check_upstream_pdk_tag_consistency())
+
+    def test_check_upstream_pdk_tag_consistency_invalid(self):
+        invalid_wf = "uses: TinyTapeout/tt-gds-action/custom_gds@ttsky26c"
+
+        def mock_listdir(path):
+            return ["gds.yaml"]
+
+        with patch("os.path.exists", return_value=True), patch(
+            "os.listdir", side_effect=mock_listdir
+        ), patch("builtins.open", unittest.mock.mock_open(read_data=invalid_wf)):
+            self.assertFalse(check_upstream_pdk_tag_consistency())
+
+    def test_check_precheck_reports_and_logs_valid(self):
+        valid_wf = "cp -r tech/* ../tech/"
+
+        def mock_exists(path):
+            return True
+
+        with patch("os.path.exists", side_effect=mock_exists), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_wf)
+        ):
+            self.assertTrue(check_precheck_reports_and_logs())
+
+    def test_check_precheck_reports_and_logs_missing_def(self):
+        def mock_exists(path):
+            if "tt_analog_3x2_3v3.def" in path:
+                return False
+            return True
+
+        with patch("os.path.exists", side_effect=mock_exists), patch(
+            "builtins.open", unittest.mock.mock_open(read_data="cp -r tech/* ../tech/")
+        ):
+            self.assertFalse(check_precheck_reports_and_logs())
+
+    def test_check_pdk_tech_and_drc_rules_valid(self):
+        valid_drc = "drc euclidean on\ndrc check"
+
+        def mock_exists(path):
+            return True
+
+        with patch("os.path.exists", side_effect=mock_exists), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_drc)
+        ):
+            self.assertTrue(check_pdk_tech_and_drc_rules())
+
+    def test_check_pdk_tech_and_drc_rules_invalid(self):
+        invalid_drc = "# No drc rules"
+
+        def mock_exists(path):
+            return True
+
+        with patch("os.path.exists", side_effect=mock_exists), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_drc)
+        ):
+            self.assertFalse(check_pdk_tech_and_drc_rules())
+
+    def test_check_info_yaml_extended_schema_valid(self):
+        valid_info = "yaml_version: 6\nproject:\n  title: test\npinout:\n  ui[0]: in\nanalog_pins: 6"
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=valid_info)
+        ):
+            self.assertTrue(check_info_yaml_extended_schema())
+
+    def test_check_info_yaml_extended_schema_invalid(self):
+        invalid_info = "yaml_version: 6\nproject:\n  title: test"
+
+        with patch("os.path.exists", return_value=True), patch(
+            "builtins.open", unittest.mock.mock_open(read_data=invalid_info)
+        ):
+            self.assertFalse(check_info_yaml_extended_schema())
 
 
 if __name__ == "__main__":
