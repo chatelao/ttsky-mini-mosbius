@@ -838,6 +838,40 @@ def check_xschem_config(repo_root="."):
     return True
 
 
+def check_precheck_reports_and_logs(repo_root="."):
+    """Inspects precheck reports or log files if present to verify no critical failures or exceptions."""
+    log_candidates = [
+        os.path.join(repo_root, "precheck.log"),
+        os.path.join(repo_root, "runs/precheck.log"),
+        os.path.join(repo_root, "precheck_results.log"),
+    ]
+
+    errors = []
+    found_log = False
+
+    for log_file in log_candidates:
+        if os.path.exists(log_file):
+            found_log = True
+            with open(log_file, "r", errors="ignore") as f:
+                content = f.read()
+            fatal_keywords = ["FATAL", "CRITICAL ERROR", "Segmentation fault", "Precheck Failed"]
+            for kw in fatal_keywords:
+                if kw in content:
+                    errors.append(f"Precheck log '{log_file}' contains critical error keyword: '{kw}'")
+
+    if errors:
+        print("FAILED precheck reports and logs check:")
+        for err in errors:
+            print(f"  - {err}")
+        return False
+
+    if found_log:
+        print("PASSED precheck reports and logs check (found and verified precheck log files)")
+    else:
+        print("PASSED precheck reports and logs check (no local precheck log files present)")
+    return True
+
+
 def check_stdcell_declarations(repo_root="."):
     stdcells_path = os.path.join(repo_root, "src/stdcells.v")
     ctrl_block_path = os.path.join(repo_root, "src/ctrl_block.v")
@@ -904,6 +938,7 @@ def main():
     checkout_submodule_ok = check_git_submodule_and_checkout_config(repo_root)
     stdcell_decl_ok = check_stdcell_declarations(repo_root)
     xschem_config_ok = check_xschem_config(repo_root)
+    precheck_logs_ok = check_precheck_reports_and_logs(repo_root)
 
     if (
         gds_ok
@@ -927,6 +962,7 @@ def main():
         and checkout_submodule_ok
         and stdcell_decl_ok
         and xschem_config_ok
+        and precheck_logs_ok
     ):
         print("All CI/CD configuration checks passed successfully!")
         sys.exit(0)
