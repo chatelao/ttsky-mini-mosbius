@@ -296,3 +296,15 @@ This document provides the step-by-step roadmap for resolving all GitHub Actions
     - [x] **4.2.3.1** Verify `docs/info.md` contains required `## How it works` and `## How to test` sections.
     - [x] **4.2.3.2** Validate required metadata fields (`author`, `description`, `pinout`, `top_module`, `tiles`, `analog_pins`) in `info.yaml` via `check_docs_build_and_asset_config`.
     - [x] **4.2.3.3** Maintain documentation rendering compatibility when adding new schema parameters to `info.yaml`.
+
+- [x] **4.3 Automated Health Verification Suite Decomposition**
+  - [x] **4.3.1 Decompose Continuous CI Verification Tasks**
+    - [x] **4.3.1.1** Verify `py/verify_cicd_config.py` runs and passes all 25 static configuration checks covering workflow triggers, action tags, Pages/OIDC permissions, and `info.yaml` schemas.
+    - [x] **4.3.1.2** Verify `py/test_verify_cicd_config.py` unit test suite passes all assertions via `python3 -m unittest discover -s py`.
+    - [x] **4.3.1.3** Verify `make check` and `make lint` execute standard cell Verilog checks, Python compilation, and CI/CD config verification without errors.
+
+- [x] **4.4 Automated Image Rendering & Asset Build Verification**
+  - [x] **4.4.1 Static Verification of Image & Asset Renderer Script (`py/render_project_files.py`)**
+    - [x] **4.4.1.1** Implement `check_image_rendering_and_asset_config` in `py/verify_cicd_config.py` to verify `py/render_project_files.py` exists, references KLayout `pya` and Playwright, and targets `img/` asset directory.
+    - [x] **4.4.1.2** Add unit test coverage in `py/test_verify_cicd_config.py` for `check_image_rendering_and_asset_config`.
+    - [x] **4.4.1.3** Integrate `check_image_rendering_and_asset_config` into `py/verify_cicd_config.py` main execution flow verified by `make check`.
